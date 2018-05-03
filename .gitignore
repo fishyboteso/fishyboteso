@@ -1,0 +1,7 @@
+.idea/
+.git/
+__pycache__/
+log/
+temp/
+template_folder/
+checkpoint
