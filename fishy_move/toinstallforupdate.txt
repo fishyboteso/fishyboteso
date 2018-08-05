@@ -1,0 +1,7 @@
+tesseract windows
+pytesseract
+
+eso addon
+custom mapcoords
+pchats
+increase chat size
