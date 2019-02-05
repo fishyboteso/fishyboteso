@@ -5,3 +5,4 @@ log/
 temp/
 template_folder/
 checkpoint
+venv/
