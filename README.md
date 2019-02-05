@@ -14,29 +14,39 @@ Auto fishing bot for Elder Scrolls Online. The Bot automatically fishes till the
 - pyautogui
 
 ### How to configure
-- **IMPORTANT**: Make sure windows scale is set to 100% in your display settings.
+Installing Project Requirements:
 - Install [Provision's Chalutier : Fishing Mod](https://www.esoui.com/downloads/info2203-ProvisionsChalutierFishing.html) for ESO.
 - Download/Clone the project.
 - Install [Python](https://www.python.org/downloads/release/python-350/) (Recomended Python version 3.5.0 x64).
 - Open the project folder then, `SHIFT + RIGHT CLICK` on the folder and press `Open Power Shell window here`.
-- Type command `pip install -r requirements.txt` and press enter.
+- Type command `pip install -r requirements.txt` and press enter.  
+
+Executing the Bot:
 - Start the game.
-- Type command `python fishy.py -c`.
-- (For phone notification configuration, follow the instructions below instead) Type command `python fishy.py -f`.
-- Go to a fishing hole and start fishing.
+- (For phone notification configuration, follow the instructions below instead) Type command `python fishy.py`.  
+
+Configuring Pixel Location: (You only need to do this configuration once)
+- Go to a fishing hole and look at the hole.
+- Press '.' to go into mouse mode then press `f8` to start pixel config mode.
+- Locate the brown color bar on the middle top part of the game, above the emojie.
+- Hover the mouse over that brown color, and confirm the color is correct in the window.
+- Press `f8` again to save the configuration.  
+
+Starting fishing:
+- Now start fishing manually on a fishing whole
+- And then press `f9` to start the bot.
 - **IMPORTANT**: Keep the window focus on the game.
-- Press `f9` to start the bot.
 
 Tip:  
 If its taking alot of load on your cpu, try using these options to start the bot  
-`python fishy.py -f 0 --check-frequency 1`  
+`python fishy.py --hook-threshold 0 --check-frequency 1`  
 
 ### For Phone Notification (Only Android)
 - Install `notificationApp.apk` from the project files in your phone.
 - Go to the app settings of the fishy app and allow all the notification permsions if you want floating notification with sound.
 - Make sure your PC and your phone are on the same network.
 - Open the app and press start service butoon.
-- Type command `python fishy.py -f --ip <local-ip>` where local-ip is the ip you see in the App.
+- Type command `python fishy.py --ip <local-ip>` where local-ip is the ip you see in the App.
 - You can minimize the app but don't close it as the service will stop.
 
 ### Contact

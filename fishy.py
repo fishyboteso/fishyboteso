@@ -3,17 +3,14 @@
 Usage:  
   fishy.py -h | --help
   fishy.py -v | --version
-  fishy.py -c | --configwin
-  fishy.py -f | --fish [--ip=IPADDRESS] [HOOK_THRESHOLD] [--check-frequency=<hz>]
+  fishy.py [--ip=<ipv4>] [--hook-threshold=<int>] [--check-frequency=<hz>]
 
 Options:
   -h, --help                Show this screen.
   -v, --version             Show version.
-  -c, --configwin           Configure the game window.
-  -f, --fish                Start fishing.
+  --ip=<ipv4>               Local Ip Address of the android phone.
+  --hook-threshold=<int>    Threshold amount for classifier after which label changes [default: 3].
   --check-frequency=<hz>    Sleep after loop in s [default: 10].
-
-
 """
 
 VERSION = "0.1.0"
@@ -37,22 +34,29 @@ try:
     from fishy_config import config_win
     from pynput.keyboard import Key, Listener
     from decimal import Decimal
+    from win32api import GetSystemMetrics
+    import pickle
 except Exception:
     raise
 
-controls = {"stop": [Key.f11, "f11"], "debug": [Key.f10, "f10"], "pause": [Key.f9, "f9"]}
+controls = {"stop": [Key.f11, "f11"], "debug": [Key.f10, "f10"], "pause": [Key.f9, "f9"], "configPL": [Key.f8, "f8"]}
 
 stop = False
 pause = False
 debug = False
+configPL = False
 
 IMG_SIZE = 100
 LR = 1e-3
 STICK_TIMEOUT = 30.0
 NONE_TIMEOUT = 5.0
 IP_ADDRESS = arguments["--ip"]
-bbox = (0, 31, 800, 600)
-pixelLoc = [[240, 0], [241, 1]]
+bbox = (0, 0, GetSystemMetrics(0), GetSystemMetrics(1))
+
+try:
+    pixelLoc = pickle.load(open("pixelLoc.pickle", "rb"))
+except (OSError, IOError) as e:
+    pixelLoc = [[240, 31], [241, 32]]
 
 
 def process_img(original_img):
@@ -95,7 +99,8 @@ def pullStick(fishCaught, timeToHook):
     :param timeToHook: time took to hook the fish
     :return: void
     """
-    print("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(fishCaught) + " caught " + " in " + str(round_float(timeToHook)) + " secs")
+    print("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(fishCaught) + " caught " + " in " + str(
+        round_float(timeToHook)) + " secs")
     pyautogui.press('e')
     # Timer(0.5, pressE).start()
     time.sleep(0.5)
@@ -108,7 +113,7 @@ def on_release(key):
     :param key: key released
     :return: void
     """
-    global stop, pause, debug
+    global stop, pause, debug, configPL
 
     if controls["pause"][0] == key:
         pause = not pause
@@ -122,6 +127,15 @@ def on_release(key):
 
     elif controls["stop"][0] == key:
         stop = True
+
+    elif controls["configPL"][0] == key:
+        configPL = not configPL
+
+
+def updatePixelLoc():
+    global pixelLoc
+    x, y = pyautogui.position()
+    pixelLoc = [[x, y], [x + 1, y + 1]]
 
 
 def startFishing():
@@ -139,6 +153,7 @@ def startFishing():
     timerStarted = False
     use_net = False
     hooked = False
+    configPixelSave = True
 
     fishCaught = 0
     prevLabel = 0
@@ -147,16 +162,17 @@ def startFishing():
     current_thresh = 0
     stickInitTime = time.time()
 
-    ctrl_help = controls["pause"][1] + ": start or p" \
-                                       "ause\n" + controls["debug"][1] + ": start deb" \
-                                                                         "ug\n" + controls["stop"][1] + ": quit\n"
+    config_win()
+
+    ctrl_help = controls["configPL"][1] + ": config pixel value\n" + controls["pause"][1] + ": start or pause\n" + \
+                controls["debug"][1] + ": start debug\n" + controls["stop"][1] + ": quit\n"
     print(ctrl_help)
 
     if IP_ADDRESS is not None:
         use_net = True
         net.initialize(IP_ADDRESS)
 
-    threshold = 3 if arguments["HOOK_THRESHOLD"] is None else int(arguments["HOOK_THRESHOLD"])
+    threshold = int(arguments["--hook-threshold"])
     sleepFor = (1 / float(arguments["--check-frequency"]))
 
     with Listener(on_release=on_release):
@@ -222,7 +238,7 @@ def startFishing():
                 else:
                     holeDepleteSent = False
 
-            if debug:
+            if debug or configPL:
                 print(str(labelNum) + ":" + str(hueValue))
                 cv2.imshow('image', process_show(screen))
                 showedControls = False
@@ -231,11 +247,14 @@ def startFishing():
                     showedControls = True
                     print(ctrl_help)
                     cv2.destroyAllWindows()
+
+            if configPL:
+                updatePixelLoc()
+                configPixelSave = False
+            elif not configPixelSave:
+                pickle.dump(pixelLoc, open("pixelLoc.pickle", "wb"))
             cv2.waitKey(25)
 
 
-if arguments["--configwin"]:
-    config_win()
-
-elif arguments["--fish"]:
+if __name__ == "__main__":
     startFishing()
