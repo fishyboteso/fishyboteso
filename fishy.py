@@ -3,7 +3,7 @@
 Usage:  
   fishy.py -h | --help
   fishy.py -v | --version
-  fishy.py [--ip=<ipv4>] [--hook-threshold=<int>] [--check-frequency=<hz>]
+  fishy.py [--ip=<ipv4>] [--hook-threshold=<int>] [--check-frequency=<hz>] [--no-resize]
 
 Options:
   -h, --help                Show this screen.
@@ -103,8 +103,6 @@ def pullStick(fishCaught, timeToHook):
         round_float(timeToHook)) + " secs")
     pyautogui.press('e')
     # Timer(0.5, pressE).start()
-    time.sleep(0.5)
-    pyautogui.press('e')
 
 
 def on_release(key):
@@ -154,6 +152,7 @@ def startFishing():
     use_net = False
     hooked = False
     configPixelSave = True
+    threwStick = False
 
     fishCaught = 0
     prevLabel = 0
@@ -162,7 +161,8 @@ def startFishing():
     current_thresh = 0
     stickInitTime = time.time()
 
-    config_win()
+    if not arguments["--no-resize"]:
+        config_win()
 
     ctrl_help = controls["configPL"][1] + ": config pixel value\n" + controls["pause"][1] + ": start or pause\n" + \
                 controls["debug"][1] + ": start debug\n" + controls["stop"][1] + ": quit\n"
@@ -224,7 +224,11 @@ def startFishing():
 
                 # looking on hole
                 if labelNum == 2:
-                    pass
+                    if not threwStick:
+                        pyautogui.press('e')
+                        threwStick = True
+                else:
+                    threwStick = False
 
                 # not looking on hole
                 if labelNum == 3:
