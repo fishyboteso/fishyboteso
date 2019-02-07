@@ -8,9 +8,11 @@ MESSAGE = "yo"
 RETRY_LIMIT = 5
 IP = 0
 
+
 def initialize(ip):
     global s, IP
     IP = ip
+
 
 def send_message(message, count=1):
     try:
@@ -33,5 +35,6 @@ def sendHoleDeplete(count):
     send_message(jsonString)
 
 
-##initialize("192.168.0.192")
-##sendHoleDeplete(2)
+if __name__ == "__main__":
+    initialize("192.168.0.192")
+    sendHoleDeplete(2)
