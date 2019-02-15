@@ -3,14 +3,15 @@
 Usage:
   fishy.py -h | --help
   fishy.py -v | --version
-  fishy.py [--ip=<ipv4>] [--hook-threshold=<int>] [--check-frequency=<hz>] [--no-resize]
+  fishy.py [--debug] [--ip=<ipv4>] [--hook-threshold=<int>] [--check-frequency=<hz>] [--no-resize]
 
 Options:
   -h, --help                Show this screen.
   -v, --version             Show version.
   --ip=<ipv4>               Local Ip Address of the android phone.
-  --hook-threshold=<int>    Threshold amount for classifier after which label changes [default: 3].
-  --check-frequency=<hz>    Sleep after loop in s [default: 10].
+  --hook-threshold=<int>    Threshold amount for classifier after which label changes [default: 1].
+  --check-frequency=<hz>    Sleep after loop in s [default: 1].
+  --debug                   Start program in debug controls.
 """
 
 VERSION = "0.1.0"
@@ -37,46 +38,36 @@ try:
     from win32api import GetSystemMetrics
     import pickle
     import win32gui
+    import pywintypes
     from abc import ABC, abstractmethod
+    from enum import Enum
+    import sys
+    import numpy as np
+    import math
 except Exception:
     raise
+
+'''
+import stack
+
+fishy
+pixel_loc
+fishing_event
+fishing_mode
+window
+log
+controls
+init
+'''
 
 
 class G:
     fishCaught = 0
     stickInitTime = 0
-    controls = {"stop": [Key.f11, "f11"], "debug": [Key.f10, "f10"], "pause": [Key.f9, "f9"],
-                "configPL": [Key.f8, "f8"]}
     stop = False
     pause = True
     debug = False
     configPL = False
-
-
-class Log:
-    ouUsed = False
-    prevOuUsed = False
-    ctrl_help = G.controls["configPL"][1] + ": config pixel value\n" + G.controls["pause"][1] + ": start or pause\n" + \
-                G.controls["debug"][1] + ": start debug\n" + G.controls["stop"][1] + ": quit\n"
-
-    @staticmethod
-    def Loop():
-        Log.ouUsed = False
-
-    @staticmethod
-    def LoopEnd():
-        if Log.prevOuUsed and not Log.ouUsed:
-            print(Log.ctrl_help)
-        Log.prevOuUsed = Log.ouUsed
-
-    @staticmethod
-    def ctrl():
-        print(Log.ctrl_help)
-
-    @staticmethod
-    def ou(s):
-        Log.ouUsed = True
-        print(s)
 
 
 def round_float(v, ndigits=2, rt_str=False):
@@ -85,3 +76,43 @@ def round_float(v, ndigits=2, rt_str=False):
     if rt_str:
         return v_str
     return Decimal(v_str)
+
+
+def draw_keypoints(vis, keypoints, color=(0, 0, 255)):
+    for kp in keypoints:
+            x, y = kp.pt
+            cv2.circle(vis, (int(x), int(y)), 5, color, -1)
+
+
+def image_resize(image, width=None, height=None, inter = cv2.INTER_AREA):
+    # initialize the dimensions of the image to be resized and
+    # grab the image size
+    dim = None
+    (h, w) = image.shape[:2]
+
+    # if both the width and height are None, then return the
+    # original image
+    if width is None and height is None:
+        return image
+
+    # check to see if the width is None
+    if width is None:
+        # calculate the ratio of the height and construct the
+        # dimensions
+        r = height / float(h)
+        dim = (int(w * r), height)
+
+    # otherwise, the height is None
+    else:
+        # calculate the ratio of the width and construct the
+        # dimensions
+        r = width / float(w)
+        dim = (width, int(h * r))
+
+    # resize the image
+    resized = cv2.resize(image, dim, interpolation = inter)
+
+    # return the resized image
+    return resized
+
+# np.set_printoptions(threshold=sys.maxsize)
