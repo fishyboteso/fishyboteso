@@ -9,6 +9,7 @@ class FishingMode:
     PrevLabel = -1
     CurrentMode = None
     PrevMode = None
+    FishingStarted = False
 
     Modes = []
 
@@ -24,6 +25,7 @@ class FishingMode:
         for m in FishingMode.Modes:
             if m.label == label:
                 return m
+
 
     @staticmethod
     def Loop(hueValue, pause):

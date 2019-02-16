@@ -1,20 +1,51 @@
 from fishing_event import *
 
 
-class PixelLoc:
-    configPixelSaved = True
+def GetKeypointFromImage(img):
+    # Setup SimpleBlobDetector parameters.
+    hsvImg = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+    lower = (99, 254, 100)
+    upper = (100, 255, 101)
+    mask = cv2.inRange(hsvImg, lower, upper)
 
-    try:
-        val = pickle.load(open("pixelLoc.pickle", "rb"))
-    except (OSError, IOError) as e:
-        val = (240, 31)
+    # Setup SimpleBlobDetector parameters.
+    params = cv2.SimpleBlobDetector_Params()
+
+    # Change thresholds
+    params.minThreshold = 10
+    params.maxThreshold = 255
+
+    params.filterByColor = True
+    params.blobColor = 255
+
+    params.filterByCircularity = False
+    params.filterByConvexity = False
+    params.filterByInertia = False
+
+    params.filterByArea = True
+    params.minArea = 10.0
+
+    detector = cv2.SimpleBlobDetector_create(params)
+
+    # Detect blobs.
+    keypoints = detector.detect(mask)
+
+    if len(keypoints) <= 0:
+        return None
+
+    return int(keypoints[0].pt[0]), int(keypoints[0].pt[1])
+
+
+class PixelLoc:
+    val = None
 
     @staticmethod
-    def Loop():
-        if G.configPL:
-            x, y = pyautogui.position()
-            PixelLoc.val = (x, y)
-            PixelLoc.configPixelSaved = False
-        elif not PixelLoc.configPixelSaved:
-            pickle.dump(PixelLoc.val, open("pixelLoc.pickle", "wb"))
-            PixelLoc.configPixelSaved = True
+    def config():
+        win = Window()
+        t = GetKeypointFromImage(win.getCapture())
+
+        if t is None:
+            return False
+
+        PixelLoc.val = (t[0], t[1], t[0] + 1, t[1] + 1)
+        return True

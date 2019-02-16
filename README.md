@@ -23,23 +23,17 @@ Installing Project Requirements:
 
 Executing the Bot:
 - Start the game.
-- (For phone notification configuration, follow the instructions below instead) Type command `python fishy.py`.  
-
-Configuring Pixel Location: (You only need to do this configuration once)
-- Go to a fishing hole and look at the hole.
-- Press '.' to go into mouse mode then press `f8` to start pixel config mode.
-- Locate the brown color bar on the middle top part of the game, above the emojie.
-- Hover the mouse over that brown color, and confirm the color is correct in the window.
-- Press `f8` again to save the configuration.  
+-  Type command `python fishy.py` (For phone notification configuration, follow the instructions below instead). 
 
 Starting fishing:
-- Now start fishing manually on a fishing whole
+- Now look at a fishing hole (don't start fishing)
 - And then press `f9` to start the bot.
+- After the fishing is done, just move to next hole and look at it, fishing will start automatically.
 - **IMPORTANT**: Keep the window focus on the game.
 
 Tip:  
-If its taking alot of load on your cpu, try using these options to start the bot  
-`python fishy.py --hook-threshold 0 --check-frequency 1`  
+To increase the check rate of the bot, try changing `--check-frequency` option to less than 1, like
+`python fishy.py --check-frequency 0.5`  
 
 ### For Phone Notification (Only Android)
 - Install `notificationApp.apk` from the project files in your phone.

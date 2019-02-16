@@ -2,8 +2,6 @@ from init import *
 
 
 class Control:
-
-#todo change to 0
     current = 1 if arguments["--debug"] else 0
 
     class Keywords(Enum):
@@ -11,7 +9,6 @@ class Control:
         StartPause = "start/pause"
         Debug = "debug"
         Stop = "stop"
-        ConfigPixLoc = "config pixel location"
         ClearPrintOnce = "clear print once"
 
     controls = [
@@ -20,7 +17,6 @@ class Control:
             "controls": [
                 [Keywords.SwitchMode, Key.f8],
                 [Keywords.StartPause, Key.f9],
-                [Keywords.ConfigPixLoc, Key.f10],
                 [Keywords.Stop, Key.f11]
             ]
         },
