@@ -19,6 +19,11 @@ class HookEvent(FishEvent):
             round_float(timeToHook)) + " secs")
         pyautogui.press('e')
 
+        if arguments["--collect-r"]:
+            time.sleep(0.1)
+            pyautogui.press('r')
+            time.sleep(0.1)
+
     def onExitCallback(self, currentMode):
         pass
 

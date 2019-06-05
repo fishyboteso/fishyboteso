@@ -3,7 +3,7 @@
 Usage:
   fishy.py -h | --help
   fishy.py -v | --version
-  fishy.py [--debug] [--ip=<ipv4>] [--hook-threshold=<int>] [--check-frequency=<hz>]
+  fishy.py [--debug] [--ip=<ipv4>] [--hook-threshold=<int>] [--check-frequency=<hz>] [--collect-r]
 
 Options:
   -h, --help                Show this screen.
