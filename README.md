@@ -88,4 +88,4 @@ If you have any problems or you want to contact me for future ideas or want to c
 If you would like this project to continue its development, please consider supporting me on [Patreon](https://www.patreon.com/AdamSaudagar).  You can make a one time donation on [PayPal](https://www.paypal.me/AdamSaudagar).
 
 ### License
-This project is licenced on the MIT License, check out the full license over [here](https://github.com/adsau59/fishyboteso/blob/master/LICENSE).
+This project is licenced on the MIT License. Check out the full license over [here](https://github.com/adsau59/fishyboteso/blob/master/LICENSE).
