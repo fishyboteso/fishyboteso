@@ -17,7 +17,7 @@ Don't forget to star this repository if you really liked it :)
 
 ### How to configure
 Project Requirements:
-- Install [Provision's Chalutier : Fishing Mod](https://www.esoui.com/downloads/info2203-ProvisionsChalutierFishing.html) for ESO.
+- Install [Provision's Chalutier : Fishing Mod](https://www.esoui.com/downloads/info2203-ProvisionsChalutierFishing.html) addon for ESO.
 - Download/Clone the project.
 - Install [Python v3.7.3](https://www.python.org/downloads/release/python-373/).
 - Open the project folder then, `SHIFT + RIGHT CLICK` on the folder and press `Open Power Shell window here`.
