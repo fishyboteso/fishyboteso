@@ -15,8 +15,8 @@ class HookEvent(FishEvent):
     def onEnterCallback(self, previousMode):
         G.fishCaught += 1
         timeToHook = time.time() - G.stickInitTime
-        print("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(G.fishCaught) + " caught " + " in " + str(
-            round_float(timeToHook)) + " secs")
+        print("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(G.fishCaught) + " caught " + "in " + str(
+            round_float(timeToHook)) + " secs.  " + "Total: " + str(G.totalFishCaught))
         pyautogui.press('e')
 
         if arguments["--collect-r"]:
