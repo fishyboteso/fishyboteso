@@ -61,7 +61,7 @@ The bot says `look on a fishing hole before starting` but I am looking on a fish
 > - Something is overlapping or bot can't find it (move the emojie, press `.` key then drag it in the center),
 > - Post processing effects (turn it off),
 > 
-> If it is still not working, try disabling all the addons.
+> If it is still not working, try disabling all addons.
 
 The bot says `STARTED` but nothing is happening
 
@@ -70,6 +70,12 @@ The bot says `STARTED` but nothing is happening
 The bot catches the fish but doesn't press R to collect it
 
 > run the bot with option --collect-r for starting the bot, like `python fishy.py --collect-r`
+
+I'm hitting the `F9` key but nothing is happening
+> Certain keyboards have the F9 key assigned to another function.  Try remapping your F9 key to it's intended function
+> For example:
+> - The Razer BlackWidow Chroma keyboard has the F9 key set to be a macro recording key.
+>  - Simply go into Razer Synapse and reassign the F9 key from `Macro` to `Default`
 
 
 ### Contact
