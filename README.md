@@ -72,10 +72,10 @@ The bot catches the fish but doesn't press R to collect it
 > run the bot with option --collect-r for starting the bot, like `python fishy.py --collect-r`
 
 I'm hitting the `F9` key but nothing is happening
-> Certain keyboards have the F9 key assigned to another function.  Try remapping your F9 key to it's intended function
+> Certain keyboards have the F9 key assigned to another function.  Try remapping your F9 key to it's intended function.  
 > For example:
 > - The Razer BlackWidow Chroma keyboard has the F9 key set to be a macro recording key.
->  - Simply go into Razer Synapse and reassign the F9 key from `Macro` to `Default`
+>   - Simply go into Razer Synapse and reassign the F9 key from `Macro` to `Default`
 
 
 ### Contact
