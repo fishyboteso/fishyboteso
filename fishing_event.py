@@ -1,5 +1,9 @@
 from fishing_mode import *
 
+"""
+Defines different fishing modes (states) which acts as state for state machine
+also implements callbacks which is called when states are changed
+"""
 
 class FishEvent(ABC):
     @abstractmethod
@@ -11,8 +15,14 @@ class FishEvent(ABC):
         pass
 
 class HookEvent(FishEvent):
-
     def onEnterCallback(self, previousMode):
+        """
+        called when the fish hook is detected
+        increases the `fishCaught`  and `totalFishCaught`, calculates the time it took to catch
+        presses e to catch the fish
+
+        :param previousMode: previous mode in the state machine
+        """
         G.fishCaught += 1
         G.totalFishCaught += 1
         timeToHook = time.time() - G.stickInitTime
@@ -30,8 +40,14 @@ class HookEvent(FishEvent):
 
 
 class LookEvent(FishEvent):
-
+    """
+    state when looking on a fishing hole
+    """
     def onEnterCallback(self, previousMode):
+        """
+        presses e to throw the fishing rod
+        :param previousMode: previous mode in the state machine
+        """
         pyautogui.press('e')
 
     def onExitCallback(self, currentMode):
@@ -39,11 +55,23 @@ class LookEvent(FishEvent):
 
 
 class IdleEvent(FishEvent):
+    """
+    State when the fishing hole is depleted or the bot is doing nothing
+    """
 
     def __init__(self, use_net):
+        """
+        sets the flag to send notification on phone
+        :param use_net: true if user wants to send notification on phone
+        """
         self.use_net = use_net
 
     def onEnterCallback(self, previousMode):
+        """
+        Resets the fishCaught counter and logs a message depending on the previous state
+        :param previousMode: previous mode in the state machine
+        """
+
         G.fishCaught = 0
         if self.use_net:
             net.sendHoleDeplete(G.fishCaught)
@@ -58,8 +86,15 @@ class IdleEvent(FishEvent):
 
 
 class StickEvent(FishEvent):
+    """
+    State when fishing is going on
+    """
 
     def onEnterCallback(self, previousMode):
+        """
+        resets the fishing timer
+        :param previousMode: previous mode in the state machine
+        """
         G.stickInitTime = time.time()
 
     def onExitCallback(self, currentMode):

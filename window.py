@@ -2,6 +2,9 @@ from log import *
 
 
 class Window:
+    """
+    Records the game window, and allows to create instance to process it
+    """
     Screen = None
     windowOffset = None
     titleOffset = None
@@ -9,12 +12,22 @@ class Window:
     showing = False
 
     def __init__(self, crop=None, color=None, scale=None):
+        """
+        create a window instance with these pre process
+        :param crop: [x1,y1,x2,y2] array defining the boundaries to crop
+        :param color: color to use example cv2.COLOR_RGB2HSV
+        :param scale: scaling the window
+        """
         self.color = color
         self.crop = crop
         self.scale = scale
 
     @staticmethod
     def Init():
+        """
+        Executed once before the main loop,
+        Finds the game window, and calculates the offset to remove the title bar
+        """
         try:
             Window.hwnd = win32gui.FindWindow(None, "Elder Scrolls Online")
             rect = win32gui.GetWindowRect(Window.hwnd)
@@ -27,6 +40,10 @@ class Window:
 
     @staticmethod
     def Loop():
+        """
+        Executed in the start of the main loop
+        finds the game window location and captures it
+        """
         Window.showing = False
 
         bbox = (0, 0, GetSystemMetrics(0), GetSystemMetrics(1))
@@ -47,12 +64,19 @@ class Window:
 
     @staticmethod
     def LoopEnd():
+        """
+        Executed in the end of the game loop
+        """
         cv2.waitKey(25)
 
         if not Window.showing:
             cv2.destroyAllWindows()
 
     def getCapture(self):
+        """
+        copies the recorded screen and then pre processes its
+        :return: game window image
+        """
         temp_img = Window.Screen
 
         if self.color is not None:
@@ -67,12 +91,23 @@ class Window:
         return temp_img
 
     def processedImage(self, func=None):
+        """
+        processes the image using the function provided
+        :param func: function to process image
+        :return: processed image
+        """
         if func is None:
             return self.getCapture()
         else:
             return func(self.getCapture())
 
     def show(self, name, resize=None, func=None):
+        """
+        Displays the processed image for debugging purposes
+        :param name: unique name for the image, used to create a new window
+        :param resize: scale the image to make small images more visible
+        :param func: function to process the image
+        """
         img = self.processedImage(func)
 
         if resize is not None:

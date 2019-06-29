@@ -14,12 +14,13 @@ Options:
   --debug                   Start program in debug controls.
 """
 
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 print("Fishy " + VERSION + " for Elder Scrolls Online")
 
 try:
     from docopt import docopt
 
+    # docopt checks if cli args are correct, if its not, it shows the correct syntax and quits
     arguments = docopt(__doc__)
     if arguments["--version"]:
         quit()
@@ -48,21 +49,27 @@ except Exception:
 
 '''
 import stack
+shows the sequence of execution of each python scripts (bottom to up)
+scripts which are higher on the stack depends on the scripts below them
+script which is on top is called which then imports ones below it
+each scrip creates different services which is then used inside `fishy.py script
 
-fishy
-pixel_loc
-fishing_event
-fishing_mode
-window
-log
-controls
-init
+fishy               Reads input and uses `controls.py` to execute different commands
+                    Contains the main loop of the bot, 
+                    calls different services and helps them to communicate to each other
+pixel_loc           finds the location of the pixel which is used to detect different states (called PixelLoc)
+fishing_event       implements different states along with their callbacks (idle, stick, hooked, look)
+fishing_mode        state machine for different fishing mode 
+window              recodes the game window, and gives method to process them
+log                 very simple logging functions
+controls            creates an input system for the bot
+init                initializes global variables and imports all the libraries
 '''
 
 
 class G:
     """
-    Initialize global variables
+    Initialize global variables used by different services
     """
     fishCaught = 0
     totalFishCaught = 0
@@ -76,6 +83,13 @@ class G:
 
 
 def round_float(v, ndigits=2, rt_str=False):
+    """
+    Rounds float
+    :param v: float ot round off
+    :param ndigits: round off to ndigits decimal points
+    :param rt_str: true to return string
+    :return: rounded float or strings
+    """
     d = Decimal(v)
     v_str = ("{0:.%sf}" % ndigits).format(round(d, ndigits))
     if rt_str:
@@ -84,8 +98,19 @@ def round_float(v, ndigits=2, rt_str=False):
 
 
 def draw_keypoints(vis, keypoints, color=(0, 0, 255)):
+    """
+    draws a point on cv2 image array
+    :param vis: cv2 image array to draw
+    :param keypoints: keypoints array to draw
+    :param color: color of the point
+    """
     for kp in keypoints:
         x, y = kp.pt
         cv2.circle(vis, (int(x), int(y)), 5, color, -1)
 
-# np.set_printoptions(threshold=sys.maxsize)
+def enable_full_array_printing():
+    """
+    Used to enable full array logging
+    (summarized arrays are printed by default)
+    """
+    np.set_printoptions(threshold=sys.maxsize)

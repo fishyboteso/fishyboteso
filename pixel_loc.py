@@ -2,6 +2,16 @@ from fishing_event import *
 
 
 def GetKeypointFromImage(img):
+    """
+    convert image int hsv
+    creates a mask for brown color
+    uses blob detection to find a blob in the mask
+    filter the blobs to find the correct one
+
+    :param img: rgb image
+    :return: location of the pixel which is used to detect different fishing states
+    """
+
     # Setup SimpleBlobDetector parameters.
     hsvImg = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     lower = (99, 254, 100)
@@ -37,10 +47,19 @@ def GetKeypointFromImage(img):
 
 
 class PixelLoc:
+    """
+    finds the pixel loc and store it
+    """
+
     val = None
 
     @staticmethod
     def config():
+        """
+        Uses the game window to get an image of the game screen
+        then uses `GetKeypointFromImage()` to find the ProvisionsChalutier pixel location
+        :return: false if pixel loc not found
+        """
         win = Window()
         t = GetKeypointFromImage(win.getCapture())
 
