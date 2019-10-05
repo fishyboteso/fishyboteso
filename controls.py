@@ -50,7 +50,10 @@ class Control:
         """
         s = "\n\nCurrent Mode: " + Control.get()["name"]+"\n"
         for c in Control.controls[Control.current]["controls"]:
-            s += c[0].value + ": " + c[1].name + "\n"
+            try:
+                s += c[0].value + ": " + c[1].name + "\n"
+            except AttributeError:
+                s += c[0].value + ": " + c[1] + "\n"
 
         return s
 
