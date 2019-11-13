@@ -1,4 +1,4 @@
-from pixel_loc import *
+from systems.pixel_loc import *
 """
 Start reading from `init.py`
 """
@@ -25,7 +25,7 @@ def on_release(key):
             print("STARTED")
             G.pause = False
         else:
-            print("look on a fishing hole before starting")
+            print("addon properly not installed, if it is installed try restarting the game.")
 
     elif c[0] == Control.Keywords.Debug:
         G.debug = not G.debug

@@ -1,0 +1,11 @@
+## Title: |c00C000Prov|r's Chalutier 1.0.3 (Fishing)
+## Description: Pour la pêche. (For fishing)
+## Author: |c00C000Provision|r
+## SavedVariables: ProvChaSV
+## APIVersion: 100025, 100026
+## Version: 1.0.3
+
+; Trawler
+header.lua
+
+Chalutier.lua

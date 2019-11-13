@@ -17,19 +17,19 @@ Don't forget to star this repository if you really liked it :)
 
 ### How to configure
 Project Requirements:
-- Install [Provision's Chalutier : Fishing Mod](https://www.esoui.com/downloads/info2203-ProvisionsChalutierFishing.html) addon for ESO.
 - Download/Clone the project.
-- Install [Python v3.7.3](https://www.python.org/downloads/release/python-373/).
-- Open the project folder then, `SHIFT + RIGHT CLICK` on the folder and press `Open Power Shell window here`.
-- Type command `pip install -r requirements.txt` and press enter.  
+- Copy Provision's Chalutier folder into `Documents\Elder Scrolls Online\live\AddOns`.
+- Install [Python v3.7.3](https://www.python.org/downloads/release/python-373/) (make sure you tick, `Add Python to PATH`).
+- Run `install_modules.bat` file.
 
 Executing the Bot:
 - Start the game.
-- Type the command `python fishy.py` (For phone notification configuration, follow the instructions below instead). 
+- Run `run_fishybot.bat` file.
+- Optional: To add additional parameters, you will need to run the bot using powershell, to do so open powershell then use `cd <project-dir>` command, eg. `cd C:\fishyboteso-master`. Then type `python fishy.py` followed by the parameters you wish to use.
 
 Starting fishing:
-- Look at a fishing hole (don't start fishing)
 - Press `f9` to start the bot.
+- Look at a fishing hole, bot will automatically start fishing.
 - After the fishing is done, just move to next hole and look at it, fishing will start automatically.
 - **IMPORTANT**: Keep the window focus on the game, even when controlling the bot.
 
@@ -48,38 +48,44 @@ To increase the check rate of the bot, try changing `--check-frequency` option t
 ### FAQs
 Will I get baned using this bot?
 
-> Botting does violate ESO's terms of service, so technically you could get banned. But this bot doesn't read or write memory from ESO so they won't know you are using a bot. This software doesn't come with any Liability or Warranty, I am not responsible if you do get banned.
+> Botting does violate ESO's terms of service, so technically you could get banned. But this bot doesn't read or write memory from ESO so they won't know you are using a bot. **This software doesn't come with any Liability or Warranty, I am not responsible if you do get banned.**
 
 How much automation does this bot provide?
 
 > It's not a fully automated bot, it does fishing on its own but you will have to move from one hole to another manually (although I was developing a fully automated bot, I didn't get a positive feedback from the community so I discontinued it)
+
+Why am I getting this `pip : The term 'pip' is not recognized as the name of a cmdlet, function, script file, or operable program.`?
+
+> Python and Pip are not in path variables, follow [this guide](https://www.youtube.com/watch?v=UTUlp6L2zkw) to add it.
+
+I'm hitting the `F9` key but nothing is happening
+
+> - Certain keyboards have the F9 key assigned to another function.  Try remapping your F9 key to its intended function.
+> - Windows messing up with input. Try running powershell/cmd as admin. Then use `cd <directory-of-fishybot>` to get into the fishybot project folder. eg, `cd C:\fishyboteso-master\`.
 
 The bot says `look at a fishing hole before starting` but I am looking at a fishing hole
 
 > The bot isn't able to detect the graphic/color created by `Provision's Chalutier : Fishing Mod`, this could be because,
 > - Addon is not properly configured 
 >   - Make sure you have copied the addon folder to `Elder Scrolls Online\live\AddOns` directory and turn on "Allow out of date addons" in ESO
->   - Try installing the addon from [Minion](https://minion.mmoui.com/)
 > - Something is overlapping or bot can't find it 
->   - Move the emoji by pressing the `.` key and dragging it towards the center
-> - Post processing effects (turn it off)
+>   - Make sure that the addon is aligned on top-left in the game.
+>   - Move the emoji by pressing the `.` key.
+> - Post processing effects (turn it off).
 > 
 > If it is still not working, try disabling all other addons in ESO.
 
-The bot says `STARTED` but nothing is happening
+~~The bot says `STARTED` but nothing is happenin~~
 
-> This is a known issue with the bot, try reducing the window size of the game.  Don't use it on fullscreen mode.
+> [FIXED] ~~This is a known issue with the bot, try reducing the window size of the game.  Don't use it on fullscreen mode.~~
+
+Bot doesn't work in full screen.
+
+> Run the bot with added option `--borderless` for starting the bot, like `python fishy.py --borderless`.
 
 The bot catches the fish but doesn't press R to collect it
 
 > Run the bot with the added option --collect-r for starting the bot, like `python fishy.py --collect-r`
-
-I'm hitting the `F9` key but nothing is happening
-> Certain keyboards have the F9 key assigned to another function.  Try remapping your F9 key to its intended function.  
-> For example:
-> - The Razer BlackWidow Chroma keyboard has the F9 key set to be a macro recording key.
->   - Simply go into Razer Synapse and reassign the F9 key from `Macro` to `Default`
-
 
 ### Contact
 If you have any problems or you want to contact me for future ideas or want to collaborate in development you can contact me at the [DefineX Community discord server](https://discord.gg/V6e2fpc).

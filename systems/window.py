@@ -1,4 +1,4 @@
-from log import *
+from systems.log import *
 
 
 class Window:
@@ -34,6 +34,9 @@ class Window:
             clientRect = win32gui.GetClientRect(Window.hwnd)
             Window.windowOffset = math.floor(((rect[2] - rect[0]) - clientRect[2]) / 2)
             Window.titleOffset = ((rect[3] - rect[1]) - clientRect[3]) - Window.windowOffset
+            if arguments["--borderless"]:
+                Window.titleOffset = 0
+
         except pywintypes.error:
             print("Game window not found")
             quit()
@@ -59,7 +62,7 @@ class Window:
         Window.Screen = tempScreen[crop[1]:crop[3], crop[0]:crop[2]]
 
         if Window.Screen.size == 0:
-            print("Don't drag game window outside the screen")
+            print("Don't minimize or drag game window outside the screen")
             quit(1)
 
     @staticmethod

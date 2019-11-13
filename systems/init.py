@@ -3,7 +3,7 @@
 Usage:
   fishy.py -h | --help
   fishy.py -v | --version
-  fishy.py [--debug] [--ip=<ipv4>] [--hook-threshold=<int>] [--check-frequency=<hz>] [--collect-r]
+  fishy.py [--debug] [--ip=<ipv4>] [--hook-threshold=<int>] [--check-frequency=<hz>] [--collect-r] [--borderless]
 
 Options:
   -h, --help                Show this screen.
@@ -12,9 +12,10 @@ Options:
   --hook-threshold=<int>    Threshold amount for classifier after which label changes [default: 1].
   --check-frequency=<hz>    Sleep after loop in s [default: 1].
   --debug                   Start program in debug controls.
+  --borderless              Use if the game is in fullscreen or borderless window
 """
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 print("Fishy " + VERSION + " for Elder Scrolls Online")
 
 try:
@@ -32,7 +33,7 @@ try:
     import cv2
     import pyautogui
     import time
-    import fishy_network as net
+    from systems import fishy_network as net
     from pynput.keyboard import Key, Listener
     from decimal import Decimal
     from win32api import GetSystemMetrics
@@ -44,7 +45,10 @@ try:
     import sys
     import numpy as np
     import math
+    import os
+    import re
 except Exception:
+    print("Modules not installed properly, try running `pip install -r requirements.txt`")
     raise
 
 '''

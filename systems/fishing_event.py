@@ -1,4 +1,4 @@
-from fishing_mode import *
+from systems.fishing_mode import *
 
 """
 Defines different fishing modes (states) which acts as state for state machine

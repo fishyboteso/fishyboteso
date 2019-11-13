@@ -1,4 +1,4 @@
-from window import *
+from systems.window import *
 
 
 class FishingMode:

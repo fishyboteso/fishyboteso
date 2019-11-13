@@ -1,5 +1,4 @@
-from fishing_event import *
-
+from systems.fishing_event import *
 
 def GetKeypointFromImage(img):
     """
@@ -60,11 +59,7 @@ class PixelLoc:
         then uses `GetKeypointFromImage()` to find the ProvisionsChalutier pixel location
         :return: false if pixel loc not found
         """
-        win = Window()
-        t = GetKeypointFromImage(win.getCapture())
 
-        if t is None:
-            return False
+        PixelLoc.val = (0, 0, 1, 1)
 
-        PixelLoc.val = (t[0], t[1], t[0] + 1, t[1] + 1)
         return True
