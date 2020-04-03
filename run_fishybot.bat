@@ -1,3 +1,3 @@
 @echo off
-python fishy.py
+python "%~dp0/fishy.py"
 PAUSE
