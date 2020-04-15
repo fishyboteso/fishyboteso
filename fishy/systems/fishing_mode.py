@@ -1,6 +1,3 @@
-from systems.window import *
-
-
 class FishingMode:
     """
     State machine for fishing modes
@@ -13,7 +10,7 @@ class FishingMode:
     Modes           list of states
     """
     HValues = [60, 18, 100]
-    Threshold = int(arguments["--hook-threshold"])
+    Threshold = 1
 
     CurrentCount = 0
     PrevLabel = -1

@@ -1,4 +1,5 @@
-from systems.fishing_event import *
+import cv2
+
 
 def GetKeypointFromImage(img):
     """

@@ -1,4 +1,4 @@
-from systems.controls import *
+from fishy.systems.controls import Control
 
 
 class Log:
@@ -35,24 +35,24 @@ class Log:
     @staticmethod
     def ou(s):
         """
-        Logging output which is supposed to dumps alot of data,
+        Logging output which is supposed to dumps a lot of data,
         so that after it ends, controls help is printed again
-        :param s: stirng to log
+        :param s: string to log
         """
         Log.ouUsed = True
         print(s)
 
     @staticmethod
-    def po(id, s):
+    def po(i, s):
         """
         print once
-        logs the stirng passed only once event if it is called multiple times
-        :param id: unique integer
+        logs the string passed only once event if it is called multiple times
+        :param i: unique integer
         :param s: string to log
         """
-        if id not in Log.printIds:
+        if i not in Log.printIds:
             print(s)
-            Log.printIds.append(id)
+            Log.printIds.append(i)
 
     @staticmethod
     def clearPrintIds():

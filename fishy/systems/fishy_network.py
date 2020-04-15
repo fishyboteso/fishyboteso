@@ -1,12 +1,11 @@
 import socket
 import json
-from socket import timeout
-import time
 
 PORT = 8023
 MESSAGE = "yo"
 RETRY_LIMIT = 5
 IP = 0
+s = None
 
 
 def initialize(ip):
@@ -16,10 +15,10 @@ def initialize(ip):
 
 def send_message(message, count=1):
     try:
-        s = socket.socket()
-        s.connect((IP,PORT))
-        s.send(bytes(message, "utf-8"))
-        s.close()
+        sock = socket.socket()
+        sock.connect((IP, PORT))
+        sock.send(bytes(message, "utf-8"))
+        sock.close()
     except ConnectionRefusedError:
         print("Connection Refused, please turn on service on mobile")
     except TimeoutError:
@@ -30,7 +29,7 @@ def send_message(message, count=1):
         
 
 def sendHoleDeplete(count):
-    message = {"action":"holeDeplete", "fishCount": count}
+    message = {"action": "holeDeplete", "fishCount": count}
     jsonString = json.dumps(message)
     send_message(jsonString)
 

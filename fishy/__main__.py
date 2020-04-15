@@ -1,7 +1,40 @@
-from systems.pixel_loc import *
+"""Fishy
+
+Usage:
+  fishy.py -h | --help
+  fishy.py -v | --version
+  fishy.py [--debug] [--ip=<ipv4>] [--hook-threshold=<int>] [--check-frequency=<hz>] [--collect-r] [--borderless]
+
+Options:
+  -h, --help                Show this screen.
+  -v, --version             Show version.
+  --ip=<ipv4>               Local Ip Address of the android phone.
+  --hook-threshold=<int>    Threshold amount for classifier after which label changes [default: 1].
+  --check-frequency=<hz>    Sleep after loop in s [default: 1].
+  --debug                   Start program in debug controls.
+  --borderless              Use if the game is in fullscreen or borderless window
+"""
+
+import time
+
+import cv2
+
+from docopt import docopt
+from pynput.keyboard import Listener
+
+from fishy.systems.controls import Control
+from fishy.systems.fishing_event import HookEvent, StickEvent, LookEvent, IdleEvent
+from fishy.systems.fishing_mode import FishingMode
+from fishy.systems.globals import G
+from fishy.systems.log import Log
+from fishy.systems.pixel_loc import PixelLoc
+import fishy.systems.fishy_network as net
+from fishy.systems.window import Window
+
 """
 Start reading from `init.py`
 """
+
 
 def on_release(key):
     """
@@ -51,11 +84,14 @@ def startFishing():
     code explained in comments in detail
     """
 
-    use_net = arguments["--ip"] is not None
-    if use_net:
-        net.initialize(arguments["--ip"])
+    Control.current = 1 if G.arguments["--debug"] else 0
+    FishingMode.Threshold = int(G.arguments["--hook-threshold"])
 
-    sleepFor = (1 / float(arguments["--check-frequency"]))
+    use_net = G.arguments["--ip"] is not None
+    if use_net:
+        net.initialize(G.arguments["--ip"])
+
+    sleepFor = (1 / float(G.arguments["--check-frequency"]))
 
     # initializes fishing modes and their callbacks
     FishingMode("hook", 0, HookEvent())
@@ -101,5 +137,13 @@ def startFishing():
                             "\"--check-frequency\".")
 
 
-if __name__ == "__main__":
+def main():
+    G.arguments = docopt(__doc__)
+    if G.arguments["--version"]:
+        quit()
+
     startFishing()
+
+
+if __name__ == "__main__":
+    main()

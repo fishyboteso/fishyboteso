@@ -1,9 +1,16 @@
-from systems.fishing_mode import *
-
 """
 Defines different fishing modes (states) which acts as state for state machine
 also implements callbacks which is called when states are changed
 """
+import time
+from abc import abstractmethod, ABC
+
+import pyautogui
+
+from fishy.systems.globals import G
+from fishy.systems.helper import round_float
+import fishy.systems.fishy_network as net
+
 
 class FishEvent(ABC):
     @abstractmethod
@@ -13,6 +20,7 @@ class FishEvent(ABC):
     @abstractmethod
     def onExitCallback(self, currentMode):
         pass
+
 
 class HookEvent(FishEvent):
     def onEnterCallback(self, previousMode):
@@ -30,7 +38,7 @@ class HookEvent(FishEvent):
             round_float(timeToHook)) + " secs.  " + "Total: " + str(G.totalFishCaught))
         pyautogui.press('e')
 
-        if arguments["--collect-r"]:
+        if G.arguments["--collect-r"]:
             time.sleep(0.1)
             pyautogui.press('r')
             time.sleep(0.1)

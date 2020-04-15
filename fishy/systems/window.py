@@ -1,4 +1,14 @@
-from systems.log import *
+import cv2
+import math
+import win32gui
+from win32api import GetSystemMetrics
+
+import imutils
+import numpy as np
+import pywintypes
+from PIL import ImageGrab
+
+from fishy.systems.globals import G
 
 
 class Window:
@@ -34,7 +44,7 @@ class Window:
             clientRect = win32gui.GetClientRect(Window.hwnd)
             Window.windowOffset = math.floor(((rect[2] - rect[0]) - clientRect[2]) / 2)
             Window.titleOffset = ((rect[3] - rect[1]) - clientRect[3]) - Window.windowOffset
-            if arguments["--borderless"]:
+            if G.arguments["--borderless"]:
                 Window.titleOffset = 0
 
         except pywintypes.error:
@@ -57,7 +67,7 @@ class Window:
 
         rect = win32gui.GetWindowRect(Window.hwnd)
         crop = (rect[0] + Window.windowOffset, rect[1] + Window.titleOffset, rect[2] - Window.windowOffset,
-                           rect[3] - Window.windowOffset)
+                rect[3] - Window.windowOffset)
 
         Window.Screen = tempScreen[crop[1]:crop[3], crop[0]:crop[2]]
 

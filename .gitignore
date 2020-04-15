@@ -7,3 +7,4 @@ template_folder/
 checkpoint
 venv/
 *.pickle
+fishy.egg-info/

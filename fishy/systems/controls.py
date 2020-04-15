@@ -1,5 +1,6 @@
-from systems.init import *
+from enum import Enum
 
+from pynput.keyboard import Key
 
 class Control:
     """
@@ -9,7 +10,7 @@ class Control:
     current:    current mode of the input
     controls:   Maps different key to different keyword depending on the current mode
     """
-    current = 1 if arguments["--debug"] else 0
+    current = 0
 
     class Keywords(Enum):
         """
@@ -40,7 +41,6 @@ class Control:
             ]
         }
     ]
-
 
     @staticmethod
     def getControlHelp():
