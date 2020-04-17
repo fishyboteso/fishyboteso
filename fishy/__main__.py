@@ -13,14 +13,10 @@ Options:
   --borderless              Use if the game is in fullscreen or borderless window
 """
 
-import time
-
 import cv2
 
-from docopt import docopt
-from pynput.keyboard import Listener
-
 from fishy.systems import *
+import logging
 
 """
 Start reading from `init.py`
@@ -59,10 +55,7 @@ def on_release(key):
 
     elif c[0] == Control.Keywords.SwitchMode:
         Control.nextState()
-        Log.ctrl()
-
-    elif c[0] == Control.Keywords.ClearPrintOnce:
-        Log.clearPrintIds()
+        logging.info(Control.getControlHelp())
 
 
 def hsv2rgb(img):
@@ -81,15 +74,13 @@ def startFishing():
     if use_net:
         net.initialize(G.arguments["--ip"])
 
-    sleepFor = 1
-
     # initializes fishing modes and their callbacks
     FishingMode("hook", 0, HookEvent())
     FishingMode("stick", 1, StickEvent())
     FishingMode("look", 2, LookEvent())
     FishingMode("idle", 3, IdleEvent(use_net))
 
-    Log.ctrl()
+    logging.info(Control.getControlHelp())
 
     fishPixWindow = Window(color=cv2.COLOR_RGB2HSV)
 
@@ -98,11 +89,9 @@ def startFishing():
     with Listener(on_release=on_release):
         while not G.stop:
             # record the time to calculate time taken to execute one loop
-            current_time = time.time()
 
             # Services to be ran in the start of the main loop
             Window.Loop()
-            Log.Loop()
 
             # get the PixelLoc and find the color values, to give it to `FishingMode.Loop`
             fishPixWindow.crop = PixelLoc.val
@@ -112,19 +101,10 @@ def startFishing():
             # if debug is on, show the color on the PixelLoc in a window and print the hue values of it
             if G.debug:
                 fishPixWindow.show("pixloc", resize=200, func=hsv2rgb)
-                Log.ou(str(FishingMode.CurrentMode.label) + ":" + str(fishPixWindow.getCapture()[0][0]))
+                logging.debug(str(FishingMode.CurrentMode.label) + ":" + str(fishPixWindow.getCapture()[0][0]))
 
             # Services to be ran in the end of the main loop
-            Log.LoopEnd()
             Window.LoopEnd()
-
-            # calculate the time it took to execute one loop of code, if it is more than the expected time warn user
-            frameTime = time.time() - current_time
-            if frameTime < sleepFor:
-                time.sleep(sleepFor - frameTime)
-            else:
-                Log.po(231, "Program taking more time than expected, this might slow your computer try increasing "
-                            "\"--check-frequency\".")
 
 
 def main():
