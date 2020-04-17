@@ -1,3 +1,5 @@
+import logging
+
 import cv2
 import math
 import win32gui
@@ -48,7 +50,7 @@ class Window:
                 Window.titleOffset = 0
 
         except pywintypes.error:
-            print("Game window not found")
+            logging.info("Game window not found")
             quit()
 
     @staticmethod
@@ -72,7 +74,7 @@ class Window:
         Window.Screen = tempScreen[crop[1]:crop[3], crop[0]:crop[2]]
 
         if Window.Screen.size == 0:
-            print("Don't minimize or drag game window outside the screen")
+            logging.info("Don't minimize or drag game window outside the screen")
             quit(1)
 
     @staticmethod

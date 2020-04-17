@@ -14,9 +14,14 @@ Options:
 """
 
 import cv2
+from docopt import docopt
+from pynput.keyboard import Listener
 
 from fishy.systems import *
 import logging
+
+from fishy.systems.config import Config
+from fishy.systems.gui import GUI, GUIStreamHandler
 
 """
 Start reading from `init.py`
@@ -37,15 +42,15 @@ def on_release(key):
     if c[0] == Control.Keywords.StartPause:
 
         if not G.pause:
-            print("PAUSED")
+            logging.info("PAUSED")
             G.pause = True
             return
 
         if PixelLoc.config():
-            print("STARTED")
+            logging.info("STARTED")
             G.pause = False
         else:
-            print("addon properly not installed, if it is installed try restarting the game.")
+            logging.info("addon properly not installed, if it is installed try restarting the game.")
 
     elif c[0] == Control.Keywords.Debug:
         G.debug = not G.debug
@@ -108,6 +113,14 @@ def startFishing():
 
 
 def main():
+    rootLogger = logging.getLogger('')
+    rootLogger.setLevel(logging.DEBUG)
+
+    gui = GUI(Config())
+    gui.start()
+    new_console = GUIStreamHandler(gui)
+    rootLogger.addHandler(new_console)
+    logging.info("yo")
     G.arguments = docopt(__doc__)
     if G.arguments["--version"]:
         quit()

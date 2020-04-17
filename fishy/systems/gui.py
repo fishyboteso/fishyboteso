@@ -1,5 +1,7 @@
+import logging
 import time
 from enum import Enum
+from logging import StreamHandler
 from tkinter import *
 from tkinter.ttk import *
 from ttkthemes import ThemedTk
@@ -7,6 +9,16 @@ from waiting import wait
 import threading
 
 from fishy.systems.config import Config
+
+
+class GUIStreamHandler(StreamHandler):
+    def __init__(self, gui):
+        StreamHandler.__init__(self)
+        self.gui = gui
+
+    def emit(self, record):
+        msg = self.format(record)
+        self.gui.writeToLog(msg)
 
 
 class Callback(Enum):
@@ -46,8 +58,7 @@ class GUICallback:
 
 class GUI:
 
-    def __init__(self, gui_callback=None,
-                 config: Config = None):
+    def __init__(self,config: Config, gui_callback=None):
         self.callbacks = GUICallback() if gui_callback is None else gui_callback
         self.config = config
         self.start_restart = False
@@ -170,7 +181,7 @@ class GUI:
 
 
 def start(ip, actionkey, fullscreen):
-    print(f"{ip}, {actionkey}, {fullscreen}")
+    logging.info(f"{ip}, {actionkey}, {fullscreen}")
 
 
 def main():

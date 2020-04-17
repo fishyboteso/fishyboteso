@@ -1,3 +1,4 @@
+import logging
 import socket
 import json
 
@@ -20,9 +21,9 @@ def send_message(message, count=1):
         sock.send(bytes(message, "utf-8"))
         sock.close()
     except ConnectionRefusedError:
-        print("Connection Refused, please turn on service on mobile")
+        logging.info("Connection Refused, please turn on service on mobile")
     except TimeoutError:
-        print("Timeout Error")
+        logging.info("Timeout Error")
 
         if count < RETRY_LIMIT:
             send_message(message, count+1)

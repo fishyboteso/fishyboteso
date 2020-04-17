@@ -2,6 +2,7 @@
 Defines different fishing modes (states) which acts as state for state machine
 also implements callbacks which is called when states are changed
 """
+import logging
 import time
 from abc import abstractmethod, ABC
 
@@ -34,7 +35,7 @@ class HookEvent(FishEvent):
         G.fishCaught += 1
         G.totalFishCaught += 1
         timeToHook = time.time() - G.stickInitTime
-        print("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(G.fishCaught) + " caught " + "in " + str(
+        logging.info("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(G.fishCaught) + " caught " + "in " + str(
             round_float(timeToHook)) + " secs.  " + "Total: " + str(G.totalFishCaught))
         pyautogui.press('e')
 
@@ -85,9 +86,9 @@ class IdleEvent(FishEvent):
             net.sendHoleDeplete(G.fishCaught)
 
         if previousMode.name == "hook":
-            print("HOLE DEPLETED")
+            logging.info("HOLE DEPLETED")
         elif previousMode.name == "stick":
-            print("FISHING INTERRUPTED")
+            logging.info("FISHING INTERRUPTED")
 
     def onExitCallback(self, currentMode):
         pass
