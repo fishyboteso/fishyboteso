@@ -1,4 +1,3 @@
-from fishy.systems.controls import Control
 from fishy.systems.fishing_event import HookEvent, StickEvent, LookEvent, IdleEvent
 from fishy.systems.fishing_mode import FishingMode
 from fishy.systems.globals import G

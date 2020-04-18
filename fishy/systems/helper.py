@@ -1,5 +1,8 @@
+import logging
 import sys
+import webbrowser
 from decimal import Decimal
+from threading import Thread
 
 import cv2
 import numpy as np
@@ -38,3 +41,8 @@ def enable_full_array_printing():
     (summarized arrays are printed by default)
     """
     np.set_printoptions(threshold=sys.maxsize)
+
+
+def open_web(website):
+    logging.debug("opening web, please wait...")
+    Thread(target=lambda: webbrowser.open(website, new=2)).start()

@@ -1,15 +1,17 @@
 import logging
 import time
+import webbrowser
 from enum import Enum
 from logging import StreamHandler
 from tkinter import *
 from tkinter.ttk import *
-from typing import Tuple, List, Callable
+from typing import Tuple, List, Callable, Optional
 
 from ttkthemes import ThemedTk
 from waiting import wait
 import threading
 
+from fishy.systems import helper
 from fishy.systems.config import Config
 
 
@@ -24,8 +26,9 @@ class GUIStreamHandler(StreamHandler):
 
 
 class GUIEvent(Enum):
-    START_BUTTON = 0  # args: ip: str, action_key: str, fullscreen: bool
+    START_BUTTON = 0  # args: ip: str, action_key: str, fullscreen: bool, collect_r: bool
     CHECK_PIXELVAL = 1
+    QUIT = 2
 
 
 class GUIFunction(Enum):
@@ -35,7 +38,7 @@ class GUIFunction(Enum):
 
 class GUI:
 
-    def __init__(self, config: Config, event_trigger: Callable[[GUIEvent, Tuple], None]):
+    def __init__(self, config: Config, event_trigger: Callable[[GUIEvent, Optional[Tuple]], None]):
         self.config = config
         self.start_restart = False
         self.destroyed = True
@@ -48,6 +51,8 @@ class GUI:
         self.root = None
         self.console = None
         self.start_button = None
+
+        self.thread = threading.Thread(target=self.create, args=())
 
     def create(self):
         self.root = ThemedTk(theme="equilux", background=True)
@@ -65,9 +70,15 @@ class GUI:
 
         debug_menu = Menu(menubar, tearoff=0)
         debug_menu.add_command(label="Check PixelVal",
-                               command=lambda: logging.error("Not Implemented"))
+                               command=lambda: self._event_trigger(GUIEvent.CHECK_PIXELVAL))
         debug_menu.add_command(label="Log Dump")
-        menubar.add_cascade(label="Debug", menu=debug_menu, command=lambda: logging.error("Not Implemented"))
+        menubar.add_cascade(label="Debug", menu=debug_menu)
+
+        help_menu = Menu(menubar, tearoff=0)
+        help_menu.add_command(label="Need Help?", command=lambda: helper.open_web("http://discord.definex.in"))
+        help_menu.add_command(label="Donate Us", command=lambda: helper.open_web("https://paypal.me/AdamSaudagar"))
+        menubar.add_cascade(label="Help", menu=help_menu)
+
         self.root.config(menu=menubar)
         # endregion
 
@@ -85,10 +96,11 @@ class GUI:
 
         Label(left_frame, text="IP").grid(row=0, column=0)
         ip = Entry(left_frame)
+        ip.insert(0, self.config.get("ip", ""))
         ip.grid(row=0, column=1)
 
         Label(left_frame, text="Fullscreen: ").grid(row=1, column=0, pady=(5, 5))
-        borderless = Checkbutton(left_frame)
+        borderless = Checkbutton(left_frame, variable=IntVar(value=1 if self.config.get("borderless", False) else 0))
         borderless.grid(row=1, column=1)
 
         left_frame.grid(row=0, column=0)
@@ -98,19 +110,27 @@ class GUI:
         Label(right_frame, text="Action Key:").grid(row=0, column=0)
         action_key_entry = Entry(right_frame)
         action_key_entry.grid(row=0, column=1)
-        action_key_entry.insert(0, "e")
+        action_key_entry.insert(0, self.config.get("action_key", "e"))
 
-        Label(right_frame, text="Press start").grid(row=1, columnspan=2, pady=(5, 5))
+        Label(right_frame, text="Collect R: ").grid(row=1, column=0, pady=(5, 5))
+        collect_r = Checkbutton(right_frame, variable=IntVar(value=1 if self.config.get("collect_r", False) else 0))
+        collect_r.grid(row=1, column=1)
 
         right_frame.grid(row=0, column=1, padx=(50, 0))
 
         controls_frame.pack()
 
-        self.start_button = Button(self.root, text="START", width=25)
-        self.start_button["command"] = lambda: self._event_trigger(GUIEvent.START_BUTTON, (ip.get(),
-                                                                                           action_key_entry.get(),
-                                                                                           borderless.instate(
-                                                                                               ['selected'])))
+        self.start_button = Button(self.root, text="STOP" if self._bot_running else "START", width=25)
+
+        def start_button_callback():
+            args = (ip.get(),
+                    action_key_entry.get(),
+                    borderless.instate(['selected']),
+                    collect_r.instate(['selected']))
+            self._event_trigger(GUIEvent.START_BUTTON, args)
+            self._save_config(*args)
+
+        self.start_button["command"] = start_button_callback
         self.start_button.pack(pady=(15, 15))
         # endregion
 
@@ -129,6 +149,7 @@ class GUI:
                 self.start_restart = False
                 self.create()
             if self.destroyed:
+                self._event_trigger(GUIEvent.QUIT)
                 break
             time.sleep(0.01)
 
@@ -138,8 +159,9 @@ class GUI:
 
             if func[0] == GUIFunction.LOG:
                 self._write_to_console(func[1][0])
-            elif func[1] == GUIFunction.STARTED:
-                self.start_button["text"] = "STOP" if func[1][0] else "START"
+            elif func[0] == GUIFunction.STARTED:
+                self._bot_running = func[1][0]
+                self.start_button["text"] = "STOP" if self._bot_running else "START"
 
     def _apply_theme(self, dark):
         self.root["theme"] = "equilux" if dark else "breeze"
@@ -164,25 +186,15 @@ class GUI:
         self.console.see("end")  # scroll to bottom
         self.console['state'] = 'disabled'
 
+    def _save_config(self, ip, action_key, borderless, collect_r):
+        self.config.set("ip", ip, False)
+        self.config.set("action_key", action_key, False)
+        self.config.set("borderless", borderless, False)
+        self.config.set("collect_r", collect_r, False)
+        self.config.save_config()
+
     def start(self):
-        threading.Thread(target=self.create, args=()).start()
+        self.thread.start()
 
-    def call(self, gui_func: GUIFunction, args):
+    def call(self, gui_func: GUIFunction, args: Tuple = None):
         self._function_queue.append((gui_func, args))
-
-# def start(ip, actionkey, fullscreen):
-#     logging.info(f"{ip}, {actionkey}, {fullscreen}")
-#
-#
-# def main():
-#     config = Config()
-#     gui = GUI(config=config, gui_callback=GUICallback(start_callback=start))
-#     gui.start()
-#     wait(lambda: not gui.destroyed)
-#     while not gui.destroyed:
-#         gui.writeToLog("yo")
-#         time.sleep(1)
-#
-#
-# if __name__ == '__main__':
-#     main()

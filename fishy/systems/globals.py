@@ -5,7 +5,5 @@ class G:
     fishCaught = 0
     totalFishCaught = 0
     stickInitTime = 0
-    stop = False
-    pause = True
     debug = False
     arguments = {}

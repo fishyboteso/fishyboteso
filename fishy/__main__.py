@@ -1,97 +1,98 @@
+import time
+from threading import Thread
+
 import cv2
-from docopt import docopt
-from pynput.keyboard import Listener
+import pywintypes
 
 from fishy.systems import *
 import logging
 
 from fishy.systems.config import Config
-from fishy.systems.gui import GUI, GUIStreamHandler, GUICallback
-
-"""
-Start reading from `init.py`
-"""
+from fishy.systems.gui import GUI, GUIStreamHandler, GUIEvent, GUIFunction
 
 
-def on_release(key):
-    """
-    Reads input, finds out the resultant action and performs it
+class Fishy:
+    def __init__(self, gui_ref, gui_event_buffer):
+        self.gui_events = gui_event_buffer
+        self.start = False
+        self.fishPixWindow = None
+        self.fishy_thread = None
+        self.gui = gui_ref
 
-    :param key: key pressed
-    """
+    def start_fishing(self, ip: str, action_key: str, borderless: bool, collect_r: bool):
+        """
+        Starts the fishing
+        code explained in comments in detail
+        """
 
-    c = Control.find(key)
-    if c is None:
-        return
+        if ip != "":
+            net.initialize(ip)
 
-    if c[0] == Control.Keywords.StartPause:
-
-        if not G.pause:
-            logging.info("PAUSED")
-            G.pause = True
+        # initialize widow
+        try:
+            Window.Init(borderless)
+        except pywintypes.error:
+            logging.info("Game window not found")
+            self.start = False
             return
 
-        if PixelLoc.config():
-            logging.info("STARTED")
-            G.pause = False
-        else:
-            logging.info("addon properly not installed, if it is installed try restarting the game.")
+        # initializes fishing modes and their callbacks
+        FishingMode("hook", 0, HookEvent(collect_r))
+        FishingMode("stick", 1, StickEvent())
+        FishingMode("look", 2, LookEvent())
+        FishingMode("idle", 3, IdleEvent(ip != ""))
 
-    elif c[0] == Control.Keywords.Debug:
-        G.debug = not G.debug
+        logging.info("Starting the bot engine, look at the fishing hole to start fishing")
 
-    elif c[0] == Control.Keywords.Stop:
-        G.stop = True
+        self.fishPixWindow = Window(color=cv2.COLOR_RGB2HSV)
 
-    elif c[0] == Control.Keywords.SwitchMode:
-        Control.nextState()
-        logging.info(Control.getControlHelp())
-
-
-def hsv2rgb(img):
-    return cv2.cvtColor(img, cv2.COLOR_HSV2RGB)
-
-
-def startFishing(ip: str, action_key: str, borderless: bool):
-    """
-    Starts the fishing
-    code explained in comments in detail
-    """
-
-    if ip != "":
-        net.initialize(ip)
-
-    # initializes fishing modes and their callbacks
-    FishingMode("hook", 0, HookEvent())
-    FishingMode("stick", 1, StickEvent())
-    FishingMode("look", 2, LookEvent())
-    FishingMode("idle", 3, IdleEvent(ip != ""))
-
-    logging.info("Starting the bot engine, look at the fishing hole to start fishing")
-
-    fishPixWindow = Window(color=cv2.COLOR_RGB2HSV)
-
-    # initialize widow
-    Window.Init()
-    with Listener(on_release=on_release):
-        while not G.stop:
-            # record the time to calculate time taken to execute one loop
-
+        # check for game window and stuff
+        self.gui.call(GUIFunction.STARTED, (True,))
+        while self.start:
             # Services to be ran in the start of the main loop
             Window.Loop()
 
             # get the PixelLoc and find the color values, to give it to `FishingMode.Loop`
-            fishPixWindow.crop = PixelLoc.val
-            hueValue = fishPixWindow.getCapture()[0][0][0]
-            FishingMode.Loop(hueValue, G.pause)
-
-            # if debug is on, show the color on the PixelLoc in a window and print the hue values of it
-            if G.debug:
-                fishPixWindow.show("pixloc", resize=200, func=hsv2rgb)
-                logging.debug(str(FishingMode.CurrentMode.label) + ":" + str(fishPixWindow.getCapture()[0][0]))
+            self.fishPixWindow.crop = PixelLoc.val
+            hueValue = self.fishPixWindow.getCapture()[0][0][0]
+            FishingMode.Loop(hueValue)
 
             # Services to be ran in the end of the main loop
             Window.LoopEnd()
+        logging.info("Fishing engine stopped")
+        self.gui.call(GUIFunction.STARTED, (False,))
+
+    def start_event_handler(self):
+        while True:
+            while len(self.gui_events) > 0:
+                event = self.gui_events.pop(0)
+
+                if event[0] == GUIEvent.START_BUTTON:
+                    self.start = not self.start
+                    if self.start:
+                        self.fishy_thread = Thread(target=self.start_fishing, args=(*event[1],))
+                        self.fishy_thread.start()
+                elif event[0] == GUIEvent.CHECK_PIXELVAL:
+                    if self.start:
+                        self.show_pixel_vals()
+                    else:
+                        logging.debug("Start the engine first before running this command")
+                elif event[0] == GUIEvent.QUIT:
+                    self.start = False
+                    return
+
+    def show_pixel_vals(self):
+        def show():
+            freq = 0.5
+            t = 0
+            while t < 10.0:
+                t += freq
+                logging.debug(str(FishingMode.CurrentMode.label) + ":" + str(self.fishPixWindow.getCapture()[0][0]))
+                time.sleep(freq)
+
+        logging.debug("Will display pixel values for 10 seconds")
+        time.sleep(5)
+        Thread(target=show, args=()).start()
 
 
 def main():
@@ -99,12 +100,14 @@ def main():
     rootLogger = logging.getLogger('')
     rootLogger.setLevel(logging.DEBUG)
 
-    gui = GUI(Config(), lambda a, b: events_buffer.append((a, b)))
+    gui = GUI(Config(), lambda a, b=None: events_buffer.append((a, b)))
     gui.start()
 
     new_console = GUIStreamHandler(gui)
     rootLogger.addHandler(new_console)
-    G.arguments = docopt(__doc__)
+
+    fishy = Fishy(gui, events_buffer)
+    fishy.start_event_handler()
 
 
 if __name__ == "__main__":

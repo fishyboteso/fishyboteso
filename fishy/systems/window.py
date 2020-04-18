@@ -35,23 +35,19 @@ class Window:
         self.scale = scale
 
     @staticmethod
-    def Init():
+    def Init(borderless: bool):
         """
         Executed once before the main loop,
         Finds the game window, and calculates the offset to remove the title bar
         """
-        try:
-            Window.hwnd = win32gui.FindWindow(None, "Elder Scrolls Online")
-            rect = win32gui.GetWindowRect(Window.hwnd)
-            clientRect = win32gui.GetClientRect(Window.hwnd)
-            Window.windowOffset = math.floor(((rect[2] - rect[0]) - clientRect[2]) / 2)
-            Window.titleOffset = ((rect[3] - rect[1]) - clientRect[3]) - Window.windowOffset
-            if G.arguments["--borderless"]:
-                Window.titleOffset = 0
+        Window.hwnd = win32gui.FindWindow(None, "Elder Scrolls Online")
+        rect = win32gui.GetWindowRect(Window.hwnd)
+        clientRect = win32gui.GetClientRect(Window.hwnd)
+        Window.windowOffset = math.floor(((rect[2] - rect[0]) - clientRect[2]) / 2)
+        Window.titleOffset = ((rect[3] - rect[1]) - clientRect[3]) - Window.windowOffset
+        if borderless:
+            Window.titleOffset = 0
 
-        except pywintypes.error:
-            logging.info("Game window not found")
-            quit()
 
     @staticmethod
     def Loop():

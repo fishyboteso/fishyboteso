@@ -46,7 +46,7 @@ class FishingMode:
                 return m
 
     @staticmethod
-    def Loop(hueValue, pause):
+    def Loop(hueValue):
         """
         Executed in the start of the main loop in fishy.py
         Changes modes, calls mode events (callbacks) when mode is changed
@@ -69,7 +69,7 @@ class FishingMode:
         if FishingMode.CurrentCount >= FishingMode.Threshold:
             FishingMode.CurrentMode = FishingMode.GetByLabel(current_label)
 
-        if not pause and FishingMode.CurrentMode != FishingMode.PrevMode and FishingMode.PrevMode is not None:
+        if FishingMode.CurrentMode != FishingMode.PrevMode and FishingMode.PrevMode is not None:
 
             if FishingMode.PrevMode.event is not None:
                 FishingMode.PrevMode.event.onExitCallback(FishingMode.CurrentMode)

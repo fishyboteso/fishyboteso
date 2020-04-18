@@ -1,5 +1,6 @@
 import json
 import os
+from threading import Thread
 
 filename = "config.json"
 
@@ -14,10 +15,14 @@ class Config:
             return self.config_dict[key]
         return default
 
-    def set(self, key, value):
+    def set(self, key, value, save=True):
         self.config_dict[key] = value
-        self.save_config()
+        if save:
+            self.save_config()
 
     def save_config(self):
-        with open(filename, 'w') as f:
-            f.write(json.dumps(self.config_dict))
+        def save():
+            with open(filename, 'w') as f:
+                f.write(json.dumps(self.config_dict))
+
+        Thread(target=save).start()
