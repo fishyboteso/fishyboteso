@@ -1,18 +1,3 @@
-"""Fishy
-
-Usage:
-  fishy.py -h | --help
-  fishy.py -v | --version
-  fishy.py [--debug] [--ip=<ipv4>] [--collect-r] [--borderless]
-
-Options:
-  -h, --help                Show this screen.
-  -v, --version             Show version.
-  --ip=<ipv4>               Local Ip Address of the android phone.
-  --debug                   Start program in debug controls.
-  --borderless              Use if the game is in fullscreen or borderless window
-"""
-
 import cv2
 from docopt import docopt
 from pynput.keyboard import Listener
@@ -21,7 +6,7 @@ from fishy.systems import *
 import logging
 
 from fishy.systems.config import Config
-from fishy.systems.gui import GUI, GUIStreamHandler
+from fishy.systems.gui import GUI, GUIStreamHandler, GUICallback
 
 """
 Start reading from `init.py`
@@ -67,25 +52,22 @@ def hsv2rgb(img):
     return cv2.cvtColor(img, cv2.COLOR_HSV2RGB)
 
 
-def startFishing():
+def startFishing(ip: str, action_key: str, borderless: bool):
     """
     Starts the fishing
     code explained in comments in detail
     """
 
-    Control.current = 1 if G.arguments["--debug"] else 0
-
-    use_net = G.arguments["--ip"] is not None
-    if use_net:
-        net.initialize(G.arguments["--ip"])
+    if ip != "":
+        net.initialize(ip)
 
     # initializes fishing modes and their callbacks
     FishingMode("hook", 0, HookEvent())
     FishingMode("stick", 1, StickEvent())
     FishingMode("look", 2, LookEvent())
-    FishingMode("idle", 3, IdleEvent(use_net))
+    FishingMode("idle", 3, IdleEvent(ip != ""))
 
-    logging.info(Control.getControlHelp())
+    logging.info("Starting the bot engine, look at the fishing hole to start fishing")
 
     fishPixWindow = Window(color=cv2.COLOR_RGB2HSV)
 
@@ -113,19 +95,16 @@ def startFishing():
 
 
 def main():
+    events_buffer = []
     rootLogger = logging.getLogger('')
     rootLogger.setLevel(logging.DEBUG)
 
-    gui = GUI(Config())
+    gui = GUI(Config(), lambda a, b: events_buffer.append((a, b)))
     gui.start()
+
     new_console = GUIStreamHandler(gui)
     rootLogger.addHandler(new_console)
-    logging.info("yo")
     G.arguments = docopt(__doc__)
-    if G.arguments["--version"]:
-        quit()
-
-    startFishing()
 
 
 if __name__ == "__main__":
