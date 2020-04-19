@@ -4,3 +4,4 @@ from fishy.systems.globals import G
 from fishy.systems.pixel_loc import PixelLoc
 import fishy.systems.fishy_network as net
 from fishy.systems.window import Window
+from fishy.systems.auto_update import auto_upgrade

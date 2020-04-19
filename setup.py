@@ -112,7 +112,6 @@ setup(
         # that you indicate whether you support Python 2, Python 3 or both.
         # These classifiers are *not* checked by 'pip install'. See instead
         # 'python_requires' below.
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
@@ -136,14 +135,14 @@ setup(
     #
     #   py_modules=["my_module"],
     #
-    packages={'': 'fishy'},  # Required
+    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),  # Required
 
     # Specify which Python versions you support. In contrast to the
     # 'Programming Language' classifiers above, 'pip install' will check this
     # and refuse to install the project if the version does not match. If you
     # do not support Python 2, you can simplify this to '>=3.5' or similar, see
     # https://packaging.python.org/guides/distributing-packages-using-setuptools/#python-requires
-    python_requires='>=3.6',
+    python_requires='>=3.7',
 
     # This field lists other packages that your project depends on to run.
     # Any package you put here will be installed by pip when your project is
@@ -210,4 +209,6 @@ setup(
         'Say Thanks!': 'http://discord.definex.in',
         'Source': 'https://github.com/adsau59/fishyboteso',
     },
+
+    include_package_data=True
 )

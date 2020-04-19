@@ -1,6 +1,6 @@
 import logging
+import os
 import time
-import webbrowser
 from enum import Enum
 from logging import StreamHandler
 from tkinter import *
@@ -8,7 +8,6 @@ from tkinter.ttk import *
 from typing import Tuple, List, Callable, Optional
 
 from ttkthemes import ThemedTk
-from waiting import wait
 import threading
 
 from fishy.systems import helper
@@ -59,24 +58,40 @@ class GUI:
         self.root.title("Fiishybot for Elder Scrolls Online")
         self.root.geometry('650x550')
 
+        self.root.iconbitmap(helper.get_data_file_path('icon.ico'))
+
         # region menu
         menubar = Menu(self.root)
 
         filemenu = Menu(menubar, tearoff=0)
-        filemenu.add_command(label="Create Shortcut", command=lambda: logging.error("Not Implemented"))
-        filemenu.add_command(label="{} Dark Mode".format("Disable" if self.config.get("dark_mode", True) else "Enable"),
-                             command=self._toggle_mode)
+        filemenu.add_command(label="Create Shortcut", command=lambda: helper.create_shortcut())
+
+        dark_mode_var = IntVar()
+        dark_mode_var.set(int(self.config.get('dark_mode', True)))
+        filemenu.add_checkbutton(label="Dark Mode", command=self._toggle_mode,
+                                 variable=dark_mode_var)
+
         menubar.add_cascade(label="File", menu=filemenu)
 
         debug_menu = Menu(menubar, tearoff=0)
         debug_menu.add_command(label="Check PixelVal",
                                command=lambda: self._event_trigger(GUIEvent.CHECK_PIXELVAL))
-        debug_menu.add_command(label="Log Dump")
+
+        debug_var = IntVar()
+        debug_var.set(int(self.config.get('debug', False)))
+
+        def keep_console():
+            self.config.set("debug", bool(debug_var.get()))
+            logging.debug("Restart to update the changes")
+        debug_menu.add_checkbutton(label="Keep Console", command=keep_console, variable=debug_var)
+
+        debug_menu.add_command(label="Log Dump", command=lambda: logging.error("Not Implemented"))
         menubar.add_cascade(label="Debug", menu=debug_menu)
 
         help_menu = Menu(menubar, tearoff=0)
+        help_menu.add_command(label="Troubleshoot Guide", command=lambda: logging.debug("Not Implemented"))
         help_menu.add_command(label="Need Help?", command=lambda: helper.open_web("http://discord.definex.in"))
-        help_menu.add_command(label="Donate Us", command=lambda: helper.open_web("https://paypal.me/AdamSaudagar"))
+        help_menu.add_command(label="Donate", command=lambda: helper.open_web("https://paypal.me/AdamSaudagar"))
         menubar.add_cascade(label="Help", menu=help_menu)
 
         self.root.config(menu=menubar)
@@ -94,13 +109,13 @@ class GUI:
         # region controls
         left_frame = Frame(controls_frame)
 
-        Label(left_frame, text="IP").grid(row=0, column=0)
+        Label(left_frame, text="Android IP").grid(row=0, column=0)
         ip = Entry(left_frame)
         ip.insert(0, self.config.get("ip", ""))
         ip.grid(row=0, column=1)
 
         Label(left_frame, text="Fullscreen: ").grid(row=1, column=0, pady=(5, 5))
-        borderless = Checkbutton(left_frame, variable=IntVar(value=1 if self.config.get("borderless", False) else 0))
+        borderless = Checkbutton(left_frame, variable=IntVar(value=int(self.config.get("borderless", False))))
         borderless.grid(row=1, column=1)
 
         left_frame.grid(row=0, column=0)

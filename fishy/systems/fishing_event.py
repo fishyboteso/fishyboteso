@@ -24,8 +24,10 @@ class FishEvent(ABC):
 
 
 class HookEvent(FishEvent):
-    def __init__(self, collect_r: bool):
+    def __init__(self, action_key: str, collect_r: bool):
+        self.action_key = action_key
         self.collect_r = collect_r
+
 
     def onEnterCallback(self, previousMode):
         """
@@ -40,7 +42,7 @@ class HookEvent(FishEvent):
         timeToHook = time.time() - G.stickInitTime
         logging.info("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(G.fishCaught) + " caught " + "in " + str(
             round_float(timeToHook)) + " secs.  " + "Total: " + str(G.totalFishCaught))
-        pyautogui.press('e')
+        pyautogui.press(self.action_key)
 
         if self.collect_r:
             time.sleep(0.1)

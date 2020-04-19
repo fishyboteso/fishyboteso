@@ -7,10 +7,7 @@ from win32api import GetSystemMetrics
 
 import imutils
 import numpy as np
-import pywintypes
 from PIL import ImageGrab
-
-from fishy.systems.globals import G
 
 
 class Window:

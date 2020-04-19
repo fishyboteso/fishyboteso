@@ -9,3 +9,5 @@ venv/
 *.pickle
 fishy.egg-info/
 config.json
+dist/
+build/

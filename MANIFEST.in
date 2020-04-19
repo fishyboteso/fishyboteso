@@ -1,0 +1,12 @@
+include LICENSE
+include README.md
+include requirements.txt
+include fishy/icon.ico
+include fishy/ProvisionsChalutier.zip
+include fishy/FishybotESO.lnk
+
+recursive-include tests *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+
+recursive-include docs *.md

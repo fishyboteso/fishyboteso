@@ -1,12 +1,15 @@
+import logging
+import sys
 import time
+import win32con
+import win32gui
 from threading import Thread
 
 import cv2
 import pywintypes
-
+import fishy
 from fishy.systems import *
-import logging
-
+from fishy.systems import helper
 from fishy.systems.config import Config
 from fishy.systems.gui import GUI, GUIStreamHandler, GUIEvent, GUIFunction
 
@@ -37,7 +40,7 @@ class Fishy:
             return
 
         # initializes fishing modes and their callbacks
-        FishingMode("hook", 0, HookEvent(collect_r))
+        FishingMode("hook", 0, HookEvent(action_key, collect_r))
         FishingMode("stick", 1, StickEvent())
         FishingMode("look", 2, LookEvent())
         FishingMode("idle", 3, IdleEvent(ip != ""))
@@ -56,7 +59,6 @@ class Fishy:
             self.fishPixWindow.crop = PixelLoc.val
             hueValue = self.fishPixWindow.getCapture()[0][0][0]
             FishingMode.Loop(hueValue)
-
             # Services to be ran in the end of the main loop
             Window.LoopEnd()
         logging.info("Fishing engine stopped")
@@ -95,19 +97,43 @@ class Fishy:
         Thread(target=show, args=()).start()
 
 
-def main():
-    events_buffer = []
+def initialize(c: Config, gui):
+    if c.get("first_launch", True, False):
+        helper.create_shortcut()
+        c.set("first_launch", False)
+
+    try:
+        auto_upgrade()
+        helper.ping(c, "started")
+    except Exception:
+        pass
+
+    if not c.get("debug", False):
+        The_program_to_hide = win32gui.GetForegroundWindow()
+        win32gui.ShowWindow(The_program_to_hide, win32con.SW_HIDE)
+        helper.install_thread_excepthook()
+        sys.excepthook = helper.unhandled_exception_logging
+
     rootLogger = logging.getLogger('')
     rootLogger.setLevel(logging.DEBUG)
-
-    gui = GUI(Config(), lambda a, b=None: events_buffer.append((a, b)))
-    gui.start()
-
     new_console = GUIStreamHandler(gui)
     rootLogger.addHandler(new_console)
 
-    fishy = Fishy(gui, events_buffer)
-    fishy.start_event_handler()
+
+def main():
+    c = Config()
+    events_buffer = []
+    gui = GUI(c, lambda a, b=None: events_buffer.append((a, b)))
+    initialize(c, gui)
+
+    gui.start()
+    logging.info(f"Fishybot v{fishy.__version__}")
+
+    helper.check_addon()
+
+    bot = Fishy(gui, events_buffer)
+    bot.start_event_handler()
+    helper.ping(c, f"closed,fishes:{G.totalFishCaught}")
 
 
 if __name__ == "__main__":
