@@ -118,16 +118,17 @@ def get_data_file_path(rel_path):
 
 
 def create_shortcut():
-    desktop = os.path.expanduser(r"~/Desktop/")
-    shutil.copy(get_data_file_path('FishybotESO.lnk'), os.path.join(desktop, "Fishybot ESO.lnk"))
+    user = os.path.expanduser("~")
+    shutil.copy(get_data_file_path('FishybotESO.lnk'), os.path.join(user, "Desktop", "Fishybot ESO.lnk"))
     logging.info("Shortcut created")
 
 
 def check_addon():
-    addon_dir = os.path.expanduser(r"~/Documents/Elder Scrolls Online/live/Addons")
-    folder_path = os.path.join(addon_dir, 'ProvisionsChalutier')
-    if not os.path.exists(folder_path):
+    user = os.path.expanduser("~")
+    addon_dir = os.path.join(user, "Documents", "Elder Scrolls Online", "live", "Addons")
+    if not os.path.exists(os.path.join(addon_dir, 'ProvisionsChalutier')):
         logging.info("Addon not found, installing it...")
         with ZipFile(get_data_file_path("ProvisionsChalutier.zip"), 'r') as zip:
             zip.extractall(path=addon_dir)
-        logging.info("Please make sure you enable \"Allow outdated addons\" in-game")
+        logging.info("Please make sure you enable \"Allow outdated addons\" in-game\n"
+                     "Also, make sure the addon is visible clearly on top left corner of the game window")

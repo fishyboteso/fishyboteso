@@ -51,6 +51,7 @@ class Fishy:
 
         # check for game window and stuff
         self.gui.call(GUIFunction.STARTED, (True,))
+        Thread(target=wait_and_check).start()
         while self.start:
             # Services to be ran in the start of the main loop
             Window.Loop()
@@ -118,6 +119,13 @@ def initialize(c: Config, gui):
     rootLogger.setLevel(logging.DEBUG)
     new_console = GUIStreamHandler(gui)
     rootLogger.addHandler(new_console)
+
+
+def wait_and_check():
+    time.sleep(10)
+    if not G.FishingStarted:
+        logging.info("\nDoesn't look like fishing has started\n"
+                     "Make sure ProvisionsChalutier addon is visible on top left corner of the screen")
 
 
 def main():

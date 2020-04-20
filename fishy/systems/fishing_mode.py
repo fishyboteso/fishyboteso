@@ -16,7 +16,6 @@ class FishingMode:
     PrevLabel = -1
     CurrentMode = None
     PrevMode = None
-    FishingStarted = False
 
     Modes = []
 

@@ -110,6 +110,7 @@ class StickEvent(FishEvent):
         :param previousMode: previous mode in the state machine
         """
         G.stickInitTime = time.time()
+        G.FishingStarted = True
 
     def onExitCallback(self, currentMode):
         pass

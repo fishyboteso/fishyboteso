@@ -5,3 +5,4 @@ class G:
     fishCaught = 0
     totalFishCaught = 0
     stickInitTime = 0
+    FishingStarted = False

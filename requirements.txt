@@ -6,3 +6,4 @@ pypiwin32
 ttkthemes
 pyautogui
 requests
+beautifulsoup4
