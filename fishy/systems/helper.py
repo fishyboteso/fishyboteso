@@ -15,10 +15,14 @@ from uuid import uuid1
 from hashlib import md5
 
 import requests
+from whatsmyip.ip import get_ip
+from whatsmyip.providers import GoogleDnsProvider
 
 import fishy
 from fishy.systems.config import Config
 import functools
+
+from fishy.systems.gui import GUIFunction
 
 
 def round_float(v, ndigits=2, rt_str=False):
@@ -75,8 +79,9 @@ def disable_logging(func):
 @disable_logging
 def req(config: Config, data):
     url = 'https://dcserver1.herokuapp.com/fishy'
+    ip = get_ip(GoogleDnsProvider)
     h = config.get("hash", md5(str(uuid1()).encode()).hexdigest())
-    body = {"hash": h, "data": data}
+    body = {"hash": h, "data": data, "ip": ip}
     requests.post(url, json=body)
 
 
@@ -117,18 +122,34 @@ def get_data_file_path(rel_path):
     return os.path.join(os.path.dirname(fishy.__file__), rel_path)
 
 
-def create_shortcut():
-    user = os.path.expanduser("~")
-    shutil.copy(get_data_file_path('FishybotESO.lnk'), os.path.join(user, "Desktop", "Fishybot ESO.lnk"))
+def create_shortcut(gui):
+    try:
+        user = os.path.expanduser("~")
+        if os.path.exists(os.path.join(user, "Desktop")):
+            path = os.path.join(user, "Desktop", "Fishybot ESO.lnk")
+            _copy_shortcut(path)
+        else:
+            gui.call(GUIFunction.ASK_DIRECTORY, (_copy_shortcut,
+                                                 "Could not find Desktop please specify path to create shortcut"))
+    except Exception:
+        logging.info("Couldn't create shortcut")
+        traceback.print_exc()
+
+
+def _copy_shortcut(path):
+    shutil.copy(get_data_file_path('FishybotESO.lnk'), path)
     logging.info("Shortcut created")
 
 
 def check_addon():
-    user = os.path.expanduser("~")
-    addon_dir = os.path.join(user, "Documents", "Elder Scrolls Online", "live", "Addons")
-    if not os.path.exists(os.path.join(addon_dir, 'ProvisionsChalutier')):
-        logging.info("Addon not found, installing it...")
-        with ZipFile(get_data_file_path("ProvisionsChalutier.zip"), 'r') as zip:
-            zip.extractall(path=addon_dir)
-        logging.info("Please make sure you enable \"Allow outdated addons\" in-game\n"
-                     "Also, make sure the addon is visible clearly on top left corner of the game window")
+    try:
+        user = os.path.expanduser("~")
+        addon_dir = os.path.join(user, "Documents", "Elder Scrolls Online", "live", "Addons")
+        if not os.path.exists(os.path.join(addon_dir, 'ProvisionsChalutier')):
+            logging.info("Addon not found, installing it...")
+            with ZipFile(get_data_file_path("ProvisionsChalutier.zip"), 'r') as zip:
+                zip.extractall(path=addon_dir)
+            logging.info("Please make sure you enable \"Allow outdated addons\" in-game\n"
+                         "Also, make sure the addon is visible clearly on top left corner of the game window")
+    except Exception:
+        print("couldn't install addon, try doing it manually")

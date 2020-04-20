@@ -11,7 +11,7 @@ import fishy
 from fishy.systems import *
 from fishy.systems import helper
 from fishy.systems.config import Config
-from fishy.systems.gui import GUI, GUIStreamHandler, GUIEvent, GUIFunction
+from fishy.systems.gui import GUI, GUIEvent, GUIFunction
 
 
 class Fishy:
@@ -100,7 +100,7 @@ class Fishy:
 
 def initialize(c: Config, gui):
     if c.get("first_launch", True, False):
-        helper.create_shortcut()
+        helper.create_shortcut(gui)
         c.set("first_launch", False)
 
     try:
@@ -115,10 +115,7 @@ def initialize(c: Config, gui):
         helper.install_thread_excepthook()
         sys.excepthook = helper.unhandled_exception_logging
 
-    rootLogger = logging.getLogger('')
-    rootLogger.setLevel(logging.DEBUG)
-    new_console = GUIStreamHandler(gui)
-    rootLogger.addHandler(new_console)
+
 
 
 def wait_and_check():
@@ -132,10 +129,10 @@ def main():
     c = Config()
     events_buffer = []
     gui = GUI(c, lambda a, b=None: events_buffer.append((a, b)))
-    initialize(c, gui)
-
     gui.start()
     logging.info(f"Fishybot v{fishy.__version__}")
+
+    initialize(c, gui)
 
     helper.check_addon()
 

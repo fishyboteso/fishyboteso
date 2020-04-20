@@ -4,6 +4,7 @@ import time
 from enum import Enum
 from logging import StreamHandler
 from tkinter import *
+from tkinter import filedialog, messagebox
 from tkinter.ttk import *
 from typing import Tuple, List, Callable, Optional
 
@@ -33,6 +34,7 @@ class GUIEvent(Enum):
 class GUIFunction(Enum):
     LOG = 0  # args: str
     STARTED = 1  # args: bool
+    ASK_DIRECTORY = 2  # callback: callable
 
 
 class GUI:
@@ -53,6 +55,11 @@ class GUI:
 
         self.thread = threading.Thread(target=self.create, args=())
 
+        rootLogger = logging.getLogger('')
+        rootLogger.setLevel(logging.DEBUG)
+        new_console = GUIStreamHandler(self)
+        rootLogger.addHandler(new_console)
+
     def create(self):
         self.root = ThemedTk(theme="equilux", background=True)
         self.root.title("Fiishybot for Elder Scrolls Online")
@@ -64,7 +71,7 @@ class GUI:
         menubar = Menu(self.root)
 
         filemenu = Menu(menubar, tearoff=0)
-        filemenu.add_command(label="Create Shortcut", command=lambda: helper.create_shortcut())
+        filemenu.add_command(label="Create Shortcut", command=lambda: helper.create_shortcut(self))
 
         dark_mode_var = IntVar()
         dark_mode_var.set(int(self.config.get('dark_mode', True)))
@@ -109,7 +116,7 @@ class GUI:
         # region controls
         left_frame = Frame(controls_frame)
 
-        Label(left_frame, text="Android IP").grid(row=0, column=0)
+        # Label(left_frame, text="Android IP").grid(row=0, column=0)
         ip = Entry(left_frame)
         ip.insert(0, self.config.get("ip", ""))
         ip.grid(row=0, column=1)
@@ -175,8 +182,13 @@ class GUI:
             if func[0] == GUIFunction.LOG:
                 self._write_to_console(func[1][0])
             elif func[0] == GUIFunction.STARTED:
-                self._bot_running = func[1][0]
+                # self._bot_running = func[1][0]
                 self.start_button["text"] = "STOP" if self._bot_running else "START"
+            elif func[0] == GUIFunction.ASK_DIRECTORY:
+                messagebox.showinfo("Directory?", func[1][1])
+                path = filedialog.askdirectory()
+                if path != '':
+                    threading.Thread(target=func[1][0], args=(path,)).start()
 
     def _apply_theme(self, dark):
         self.root["theme"] = "equilux" if dark else "breeze"
