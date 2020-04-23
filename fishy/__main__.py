@@ -45,12 +45,11 @@ class Fishy:
         FishingMode("look", 2, LookEvent())
         FishingMode("idle", 3, IdleEvent(ip != ""))
 
-        logging.info("Starting the bot engine, look at the fishing hole to start fishing")
-
         self.fishPixWindow = Window(color=cv2.COLOR_RGB2HSV)
 
         # check for game window and stuff
         self.gui.call(GUIFunction.STARTED, (True,))
+        logging.info("Starting the bot engine, look at the fishing hole to start fishing")
         Thread(target=wait_and_check).start()
         while self.start:
             # Services to be ran in the start of the main loop
@@ -114,8 +113,6 @@ def initialize(c: Config, gui):
         win32gui.ShowWindow(The_program_to_hide, win32con.SW_HIDE)
         helper.install_thread_excepthook()
         sys.excepthook = helper.unhandled_exception_logging
-
-
 
 
 def wait_and_check():

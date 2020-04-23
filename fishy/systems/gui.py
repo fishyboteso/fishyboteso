@@ -116,7 +116,7 @@ class GUI:
         # region controls
         left_frame = Frame(controls_frame)
 
-        # Label(left_frame, text="Android IP").grid(row=0, column=0)
+        Label(left_frame, text="Android IP").grid(row=0, column=0)
         ip = Entry(left_frame)
         ip.insert(0, self.config.get("ip", ""))
         ip.grid(row=0, column=1)
@@ -182,7 +182,7 @@ class GUI:
             if func[0] == GUIFunction.LOG:
                 self._write_to_console(func[1][0])
             elif func[0] == GUIFunction.STARTED:
-                # self._bot_running = func[1][0]
+                self._bot_running = func[1][0]
                 self.start_button["text"] = "STOP" if self._bot_running else "START"
             elif func[0] == GUIFunction.ASK_DIRECTORY:
                 messagebox.showinfo("Directory?", func[1][1])
