@@ -8,9 +8,9 @@ from abc import abstractmethod, ABC
 
 import pyautogui
 
+from fishy.systems import web
 from fishy.systems.globals import G
 from fishy.systems.helper import round_float
-import fishy.systems.fishy_network as net
 
 
 class FishEvent(ABC):
@@ -73,12 +73,12 @@ class IdleEvent(FishEvent):
     State when the fishing hole is depleted or the bot is doing nothing
     """
 
-    def __init__(self, use_net):
+    def __init__(self, uid):
         """
         sets the flag to send notification on phone
         :param use_net: true if user wants to send notification on phone
         """
-        self.use_net = use_net
+        self.uid = uid
 
     def onEnterCallback(self, previousMode):
         """
@@ -87,8 +87,7 @@ class IdleEvent(FishEvent):
         """
 
         G.fishCaught = 0
-        if self.use_net:
-            net.sendHoleDeplete(G.fishCaught)
+        web.send_hole_deplete(self.uid, G.fishCaught)
 
         if previousMode.name == "hook":
             logging.info("HOLE DEPLETED")

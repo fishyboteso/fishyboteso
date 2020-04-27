@@ -1,5 +1,6 @@
 import logging
 import os
+import tempfile
 import time
 from enum import Enum
 from logging import StreamHandler
@@ -8,10 +9,10 @@ from tkinter import filedialog, messagebox
 from tkinter.ttk import *
 from typing import Tuple, List, Callable, Optional
 
+import pyqrcode
 from ttkthemes import ThemedTk
 import threading
 
-from fishy.systems import helper
 from fishy.systems.config import Config
 
 
@@ -52,6 +53,7 @@ class GUI:
         self.root = None
         self.console = None
         self.start_button = None
+        self.notif = None
 
         self.thread = threading.Thread(target=self.create, args=())
 
@@ -61,6 +63,9 @@ class GUI:
         rootLogger.addHandler(new_console)
 
     def create(self):
+        from fishy.systems import helper
+        from fishy.systems import web
+
         self.root = ThemedTk(theme="equilux", background=True)
         self.root.title("Fiishybot for Elder Scrolls Online")
         self.root.geometry('650x550')
@@ -82,7 +87,7 @@ class GUI:
 
         debug_menu = Menu(menubar, tearoff=0)
         debug_menu.add_command(label="Check PixelVal",
-                               command=lambda: self._event_trigger(GUIEvent.CHECK_PIXELVAL))
+                               command=lambda: self._event_trigger(GUIEvent.CHECK_PIXELVAL, ()))
 
         debug_var = IntVar()
         debug_var.set(int(self.config.get('debug', False)))
@@ -90,6 +95,7 @@ class GUI:
         def keep_console():
             self.config.set("debug", bool(debug_var.get()))
             logging.debug("Restart to update the changes")
+
         debug_menu.add_checkbutton(label="Keep Console", command=keep_console, variable=debug_var)
 
         debug_menu.add_command(label="Log Dump", command=lambda: logging.error("Not Implemented"))
@@ -116,13 +122,14 @@ class GUI:
         # region controls
         left_frame = Frame(controls_frame)
 
-        Label(left_frame, text="Android IP").grid(row=0, column=0)
-        ip = Entry(left_frame)
-        ip.insert(0, self.config.get("ip", ""))
-        ip.grid(row=0, column=1)
+        Label(left_frame, text="Notification:").grid(row=0, column=0)
+
+        self.notif = IntVar(value=int(web.is_subbed(self.config.get('uid'))))
+        Checkbutton(left_frame, command=self.give_notification_link,
+                    variable=self.notif).grid(row=0, column=1)
 
         Label(left_frame, text="Fullscreen: ").grid(row=1, column=0, pady=(5, 5))
-        borderless = Checkbutton(left_frame, variable=IntVar(value=int(self.config.get("borderless", False))))
+        borderless = Checkbutton(left_frame, )
         borderless.grid(row=1, column=1)
 
         left_frame.grid(row=0, column=0)
@@ -145,8 +152,7 @@ class GUI:
         self.start_button = Button(self.root, text="STOP" if self._bot_running else "START", width=25)
 
         def start_button_callback():
-            args = (ip.get(),
-                    action_key_entry.get(),
+            args = (action_key_entry.get(),
                     borderless.instate(['selected']),
                     collect_r.instate(['selected']))
             self._event_trigger(GUIEvent.START_BUTTON, args)
@@ -158,7 +164,7 @@ class GUI:
 
         self._apply_theme(self.config.get("dark_mode", True))
         self.root.update()
-        self.root.minsize(self.root.winfo_width(), self.root.winfo_height())
+        self.root.minsize(self.root.winfo_width()+10, self.root.winfo_height()+10)
         self.root.protocol("WM_DELETE_WINDOW", self._set_destroyed)
         self.destroyed = False
 
@@ -171,7 +177,7 @@ class GUI:
                 self.start_restart = False
                 self.create()
             if self.destroyed:
-                self._event_trigger(GUIEvent.QUIT)
+                self._event_trigger(GUIEvent.QUIT, ())
                 break
             time.sleep(0.01)
 
@@ -213,8 +219,7 @@ class GUI:
         self.console.see("end")  # scroll to bottom
         self.console['state'] = 'disabled'
 
-    def _save_config(self, ip, action_key, borderless, collect_r):
-        self.config.set("ip", ip, False)
+    def _save_config(self, action_key, borderless, collect_r):
         self.config.set("action_key", action_key, False)
         self.config.set("borderless", borderless, False)
         self.config.set("collect_r", collect_r, False)
@@ -225,3 +230,52 @@ class GUI:
 
     def call(self, gui_func: GUIFunction, args: Tuple = None):
         self._function_queue.append((gui_func, args))
+
+    def give_notification_link(self):
+        from fishy.systems import web
+
+        if web.is_subbed(self.config.get("uid")):
+            web.unsub(self.config.get("uid"))
+            return
+
+        self.notif.set(0)
+
+        def quit_top():
+            top.destroy()
+            top_running[0] = False
+
+        def check():
+            if web.is_subbed(self.config.get("uid"), False):
+                messagebox.showinfo("Note!", "Notification configured successfully!")
+                web.send_notification(self.config.get("uid"), "Sending a test notification :D")
+                self.notif.set(1)
+                quit_top()
+            else:
+                messagebox.showerror("Error", "Subscription wasn't successful")
+
+        qrcode = pyqrcode.create(web.get_notification_page(self.config.get("uid")))
+        t = os.path.join(tempfile.gettempdir(), "fishyqr.png")
+        qrcode.png(t, scale=8)
+
+        top_running = [True]
+
+        top = Toplevel(background=self.root["background"])
+        top.minsize(width=500, height=500)
+        top.title("Notification Setup")
+
+        Label(top, text="Step 1.").pack(pady=(5, 5))
+        Label(top, text="Scan the QR Code on your Phone and press \"Enable Notification\"").pack(pady=(5, 5))
+        canvas = Canvas(top, width=qrcode.get_png_size(8), height=qrcode.get_png_size(8))
+        canvas.pack(pady=(5, 5))
+        Label(top, text="Step 2.").pack(pady=(5, 5))
+        Button(top, text="Check", command=check).pack(pady=(5, 5))
+
+        image = PhotoImage(file=t)
+        canvas.create_image(0, 0, anchor="nw", image=image)
+
+
+        top.protocol("WM_DELETE_WINDOW", quit_top)
+        top.grab_set()
+        while top_running[0]:
+            top.update()
+        top.grab_release()

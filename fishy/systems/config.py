@@ -10,12 +10,9 @@ class Config:
     def __init__(self):
         self.config_dict = json.loads(open(filename).read()) if os.path.exists(filename) else dict()
 
-    def get(self, key, default=None, save=True):
+    def get(self, key, default=None):
         if key in self.config_dict:
             return self.config_dict[key]
-
-        if save:
-            self.set(key, default)
         return default
 
     def set(self, key, value, save=True):

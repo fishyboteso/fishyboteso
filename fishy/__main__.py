@@ -9,27 +9,25 @@ import cv2
 import pywintypes
 import fishy
 from fishy.systems import *
-from fishy.systems import helper
+from fishy.systems import helper, web
 from fishy.systems.config import Config
 from fishy.systems.gui import GUI, GUIEvent, GUIFunction
 
 
 class Fishy:
-    def __init__(self, gui_ref, gui_event_buffer):
+    def __init__(self, gui_ref, gui_event_buffer, config):
         self.gui_events = gui_event_buffer
         self.start = False
         self.fishPixWindow = None
         self.fishy_thread = None
         self.gui = gui_ref
+        self.config = config
 
-    def start_fishing(self, ip: str, action_key: str, borderless: bool, collect_r: bool):
+    def start_fishing(self, action_key: str, borderless: bool, collect_r: bool):
         """
         Starts the fishing
         code explained in comments in detail
         """
-
-        if ip != "":
-            net.initialize(ip)
 
         # initialize widow
         try:
@@ -43,7 +41,7 @@ class Fishy:
         FishingMode("hook", 0, HookEvent(action_key, collect_r))
         FishingMode("stick", 1, StickEvent())
         FishingMode("look", 2, LookEvent())
-        FishingMode("idle", 3, IdleEvent(ip != ""))
+        FishingMode("idle", 3, IdleEvent(self.config.get("uid")))
 
         self.fishPixWindow = Window(color=cv2.COLOR_RGB2HSV)
 
@@ -97,14 +95,29 @@ class Fishy:
         Thread(target=show, args=()).start()
 
 
-def initialize(c: Config, gui):
-    if c.get("first_launch", True, False):
+def create_shortcut_first(gui, c):
+    if not c.get("shortcut_created", False):
         helper.create_shortcut(gui)
-        c.set("first_launch", False)
+        c.set("shortcut_created", True)
+
+
+def initialize_uid(config: Config):
+    if config.get("uid") is not None:
+        return
+
+    new_uid = helper.create_new_uid()
+    if web.register_user(new_uid):
+        config.set("uid", new_uid)
+    else:
+        logging.error("Couldn't register uid, some features might not work")
+
+
+def initialize(gui, c: Config):
+    create_shortcut_first(gui, c)
+    initialize_uid(c)
 
     try:
         auto_upgrade()
-        helper.ping(c, "started")
     except Exception:
         pass
 
@@ -113,6 +126,8 @@ def initialize(c: Config, gui):
         win32gui.ShowWindow(The_program_to_hide, win32con.SW_HIDE)
         helper.install_thread_excepthook()
         sys.excepthook = helper.unhandled_exception_logging
+
+    helper.check_addon()
 
 
 def wait_and_check():
@@ -129,13 +144,10 @@ def main():
     gui.start()
     logging.info(f"Fishybot v{fishy.__version__}")
 
-    initialize(c, gui)
-
-    helper.check_addon()
+    initialize(gui, c)
 
     bot = Fishy(gui, events_buffer)
     bot.start_event_handler()
-    helper.ping(c, f"closed,fishes:{G.totalFishCaught}")
 
 
 if __name__ == "__main__":

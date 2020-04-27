@@ -14,12 +14,7 @@ import numpy as np
 from uuid import uuid1
 from hashlib import md5
 
-import requests
-from whatsmyip.ip import get_ip
-from whatsmyip.providers import GoogleDnsProvider
-
 import fishy
-from fishy.systems.config import Config
 import functools
 
 from fishy.systems.gui import GUIFunction
@@ -76,18 +71,8 @@ def disable_logging(func):
     return wrapper
 
 
-@disable_logging
-def req(config: Config, data):
-    url = 'https://dcserver1.herokuapp.com/fishy'
-    ip = get_ip(GoogleDnsProvider)
-    h = config.get("hash", md5(str(uuid1()).encode()).hexdigest())
-    body = {"hash": h, "data": data, "ip": ip}
-    requests.post(url, json=body)
-
-
-def ping(config: Config, data):
-    if config.get("check", True, False):
-        threading.Thread(target=req, args=(config, data,)).start()
+def create_new_uid():
+    return md5(str(uuid1()).encode()).hexdigest()
 
 
 def install_thread_excepthook():

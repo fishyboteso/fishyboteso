@@ -8,3 +8,5 @@ pyautogui
 requests
 beautifulsoup4
 whatsmyip
+pyqrcode
+pypng
