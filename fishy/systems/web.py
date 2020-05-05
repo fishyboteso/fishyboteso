@@ -83,18 +83,18 @@ def send_hole_deplete(uid, fish_caught, hole_time, fish_times):
     requests.post(domain + hole_depleted, json=body)
 
 
-@fallback(False)
+@fallback((False, False))
 def is_subbed(uid, lazy=True):
     if lazy and G._is_subbed is not None:
-        return G._is_subbed
+        return G._is_subbed, True
 
     if uid is None:
-        return False
+        return False, False
 
     body = {"uid": uid}
     response = requests.get(domain + subscription, params=body)
     G._is_subbed = response.json()["subbed"]
-    return G._is_subbed
+    return G._is_subbed, True
 
 
 @fallback(None)

@@ -37,6 +37,7 @@ class GUIFunction(Enum):
     STARTED = 1  # args: bool
     ASK_DIRECTORY = 2  # callback: callable
     SHOW_ERROR = 3
+    SET_NOTIFY = 4
 
 
 class GUI:
@@ -54,7 +55,8 @@ class GUI:
         self.root = None
         self.console = None
         self.start_button = None
-        self.notif = None
+        self.notify = None
+        self.notify_check = None
 
         self.thread = threading.Thread(target=self.create, args=())
 
@@ -99,8 +101,8 @@ class GUI:
             logging.debug("Restart to update the changes")
 
         debug_menu.add_checkbutton(label="Keep Console", command=keep_console, variable=debug_var)
-
         debug_menu.add_command(label="Log Dump", command=lambda: logging.error("Not Implemented"))
+        debug_menu.add_command(label="Restart", command=helper.restart)
         menubar.add_cascade(label="Debug", menu=debug_menu)
 
         help_menu = Menu(menubar, tearoff=0)
@@ -126,9 +128,17 @@ class GUI:
 
         Label(left_frame, text="Notification:").grid(row=0, column=0)
 
-        self.notif = IntVar(value=int(web.is_subbed(self.config.get('uid'))))
-        Checkbutton(left_frame, command=self.give_notification_link,
-                    variable=self.notif).grid(row=0, column=1)
+        self.notify = IntVar(0)
+        self.notify_check = Checkbutton(left_frame, command=self.give_notification_link,
+                                   variable=self.notify)
+        self.notify_check.grid(row=0, column=1)
+        self.notify_check['state'] = DISABLED
+
+        def update_notify_check():
+            is_subbed = web.is_subbed(self.config.get('uid'))
+            self.call(GUIFunction.SET_NOTIFY, (int(is_subbed[0]),is_subbed[1]))
+
+        threading.Thread(target=update_notify_check).start()
 
         Label(left_frame, text="Fullscreen: ").grid(row=1, column=0, pady=(5, 5))
         borderless = Checkbutton(left_frame, )
@@ -199,6 +209,10 @@ class GUI:
                     threading.Thread(target=func[1][0], args=(path,)).start()
             elif func[0] == GUIFunction.SHOW_ERROR:
                 messagebox.showerror("ERROR", func[1][0])
+            elif func[0] == GUIFunction.SET_NOTIFY:
+                self.notify.set(func[1][0])
+                if func[1][1]:
+                    self.notify_check['state'] = NORMAL
 
     def _apply_theme(self, dark):
         self.root["theme"] = "equilux" if dark else "breeze"
@@ -238,22 +252,22 @@ class GUI:
     def give_notification_link(self):
         from fishy.systems import web
 
-        if web.is_subbed(self.config.get("uid")):
+        if web.is_subbed(self.config.get("uid"))[0]:
             web.unsub(self.config.get("uid"))
             return
 
         # set notification checkbutton
-        self.notif.set(0)
+        self.notify.set(0)
 
         def quit_top():
             top.destroy()
             top_running[0] = False
 
         def check():
-            if web.is_subbed(self.config.get("uid"), False):
+            if web.is_subbed(self.config.get("uid"), False)[0]:
                 messagebox.showinfo("Note!", "Notification configured successfully!")
                 web.send_notification(self.config.get("uid"), "Sending a test notification :D")
-                self.notif.set(1)
+                self.notify.set(1)
                 quit_top()
             else:
                 messagebox.showerror("Error", "Subscription wasn't successful")

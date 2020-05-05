@@ -1,6 +1,9 @@
+import ctypes
 import logging
+import os
 import sys
 import time
+from os import execl
 from tkinter import messagebox
 
 import win32con
@@ -128,6 +131,14 @@ def initialize(gui, c: Config):
     if new_session is None:
         logging.error("Couldn't create a session, some features might not work")
     print(f"created session {new_session}")
+
+    try:
+        is_admin = os.getuid() == 0
+    except AttributeError:
+        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
+
+    if is_admin and c.get("debug"):
+        logging.info("Running with admin privileges")
 
     try:
         auto_upgrade()

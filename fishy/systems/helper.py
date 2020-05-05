@@ -14,7 +14,10 @@ import numpy as np
 from uuid import uuid1
 from hashlib import md5
 
+from win32com.client import Dispatch
+
 import fishy
+import winshell
 import functools
 
 from fishy.systems.gui import GUIFunction
@@ -58,9 +61,6 @@ def enable_full_array_printing():
 def open_web(website):
     logging.debug("opening web, please wait...")
     Thread(target=lambda: webbrowser.open(website, new=2)).start()
-
-
-
 
 
 def create_new_uid():
@@ -114,7 +114,16 @@ def create_shortcut(gui):
 
 
 def _copy_shortcut(path):
-    shutil.copy(get_data_file_path('FishybotESO.lnk'), path)
+    desktop = winshell.desktop()
+    path = os.path.join(desktop, "Fishybot ESO.lnk")
+
+    shell = Dispatch('WScript.Shell')
+    shortcut = shell.CreateShortCut(path)
+    shortcut.Targetpath = os.path.join(os.path.dirname(sys.executable), "python.exe")
+    shortcut.Arguments = "-m fishy"
+    shortcut.IconLocation = get_data_file_path("icon.ico")
+    shortcut.save()
+
     logging.info("Shortcut created")
 
 
@@ -130,3 +139,7 @@ def check_addon():
                          "Also, make sure the addon is visible clearly on top left corner of the game window")
     except Exception:
         print("couldn't install addon, try doing it manually")
+
+
+def restart():
+    os.execl(sys.executable, *([sys.executable] + sys.argv))
