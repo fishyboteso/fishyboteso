@@ -28,7 +28,6 @@ class HookEvent(FishEvent):
         self.action_key = action_key
         self.collect_r = collect_r
 
-
     def onEnterCallback(self, previousMode):
         """
         called when the fish hook is detected
@@ -40,6 +39,7 @@ class HookEvent(FishEvent):
         G.fishCaught += 1
         G.totalFishCaught += 1
         timeToHook = time.time() - G.stickInitTime
+        G.fish_times.append(timeToHook)
         logging.info("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(G.fishCaught) + " caught " + "in " + str(
             round_float(timeToHook)) + " secs.  " + "Total: " + str(G.totalFishCaught))
         pyautogui.press(self.action_key)
@@ -57,6 +57,7 @@ class LookEvent(FishEvent):
     """
     state when looking on a fishing hole
     """
+
     def onEnterCallback(self, previousMode):
         """
         presses e to throw the fishing rod
@@ -86,11 +87,10 @@ class IdleEvent(FishEvent):
         :param previousMode: previous mode in the state machine
         """
 
-        G.fishCaught = 0
-        web.send_hole_deplete(self.uid, G.fishCaught)
-
         if previousMode.name == "hook":
             logging.info("HOLE DEPLETED")
+            web.send_hole_deplete(self.uid, G.fishCaught, time.time() - G.hole_start_time, G.fish_times)
+            G.fishCaught = 0
         elif previousMode.name == "stick":
             logging.info("FISHING INTERRUPTED")
 
@@ -110,6 +110,10 @@ class StickEvent(FishEvent):
         """
         G.stickInitTime = time.time()
         G.FishingStarted = True
+
+        if G.fishCaught == 0:
+            G.hole_start_time = time.time()
+            G.fish_times = []
 
     def onExitCallback(self, currentMode):
         pass

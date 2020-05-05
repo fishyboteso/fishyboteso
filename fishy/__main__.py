@@ -1,6 +1,8 @@
 import logging
 import sys
 import time
+from tkinter import messagebox
+
 import win32con
 import win32gui
 from threading import Thread
@@ -8,10 +10,16 @@ from threading import Thread
 import cv2
 import pywintypes
 import fishy
-from fishy.systems import *
+from fishy.systems.fishing_event import HookEvent, StickEvent, LookEvent, IdleEvent
+from fishy.systems.fishing_mode import FishingMode
+from fishy.systems.globals import G
+from fishy.systems.pixel_loc import PixelLoc
+from fishy.systems.window import Window
+from fishy.systems.auto_update import auto_upgrade
 from fishy.systems import helper, web
 from fishy.systems.config import Config
 from fishy.systems.gui import GUI, GUIEvent, GUIFunction
+from fishy.systems.terms_gui import check_eula
 
 
 class Fishy:
@@ -48,7 +56,7 @@ class Fishy:
         # check for game window and stuff
         self.gui.call(GUIFunction.STARTED, (True,))
         logging.info("Starting the bot engine, look at the fishing hole to start fishing")
-        Thread(target=wait_and_check).start()
+        Thread(target=wait_and_check, args=(self.gui,)).start()
         while self.start:
             # Services to be ran in the start of the main loop
             Window.Loop()
@@ -116,6 +124,11 @@ def initialize(gui, c: Config):
     create_shortcut_first(gui, c)
     initialize_uid(c)
 
+    new_session = web.get_session(c.get('uid'))
+    if new_session is None:
+        logging.error("Couldn't create a session, some features might not work")
+    print(f"created session {new_session}")
+
     try:
         auto_upgrade()
     except Exception:
@@ -130,23 +143,36 @@ def initialize(gui, c: Config):
     helper.check_addon()
 
 
-def wait_and_check():
+def wait_and_check(gui):
     time.sleep(10)
     if not G.FishingStarted:
-        logging.info("\nDoesn't look like fishing has started\n"
-                     "Make sure ProvisionsChalutier addon is visible on top left corner of the screen")
+        gui.call(GUIFunction.SHOW_ERROR, ("Doesn't look like fishing has started\n\n"
+                                          "Make sure ProvisionsChalutier addon is visible clearly on top "
+                                          "left corner of the screen, either,\n"
+                                          "1) Outdated addons are disabled\n"
+                                          "2) Other addons are overlapping ProvisionsChalutier\n"
+                                          "3) Post processing (re shader) is on\n\n"
+                                          "If fixing those doesnt work, try running the bot as admin",))
+
+
+def ask_terms():
+    messagebox.askquestion("Terms and Condition", )
 
 
 def main():
     c = Config()
+
+    if not check_eula(c):
+        return
+
     events_buffer = []
     gui = GUI(c, lambda a, b=None: events_buffer.append((a, b)))
     gui.start()
-    logging.info(f"Fishybot v{fishy.__version__}")
 
+    logging.info(f"Fishybot v{fishy.__version__}")
     initialize(gui, c)
 
-    bot = Fishy(gui, events_buffer)
+    bot = Fishy(gui, events_buffer, c)
     bot.start_event_handler()
 
 

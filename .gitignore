@@ -11,3 +11,4 @@ fishy.egg-info/
 config.json
 dist/
 build/
+temp.py

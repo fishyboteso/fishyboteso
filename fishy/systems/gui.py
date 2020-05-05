@@ -36,6 +36,7 @@ class GUIFunction(Enum):
     LOG = 0  # args: str
     STARTED = 1  # args: bool
     ASK_DIRECTORY = 2  # callback: callable
+    SHOW_ERROR = 3
 
 
 class GUI:
@@ -59,6 +60,7 @@ class GUI:
 
         rootLogger = logging.getLogger('')
         rootLogger.setLevel(logging.DEBUG)
+        logging.getLogger('urllib3').setLevel(logging.WARNING)
         new_console = GUIStreamHandler(self)
         rootLogger.addHandler(new_console)
 
@@ -164,7 +166,7 @@ class GUI:
 
         self._apply_theme(self.config.get("dark_mode", True))
         self.root.update()
-        self.root.minsize(self.root.winfo_width()+10, self.root.winfo_height()+10)
+        self.root.minsize(self.root.winfo_width() + 10, self.root.winfo_height() + 10)
         self.root.protocol("WM_DELETE_WINDOW", self._set_destroyed)
         self.destroyed = False
 
@@ -195,6 +197,8 @@ class GUI:
                 path = filedialog.askdirectory()
                 if path != '':
                     threading.Thread(target=func[1][0], args=(path,)).start()
+            elif func[0] == GUIFunction.SHOW_ERROR:
+                messagebox.showerror("ERROR", func[1][0])
 
     def _apply_theme(self, dark):
         self.root["theme"] = "equilux" if dark else "breeze"
@@ -238,6 +242,7 @@ class GUI:
             web.unsub(self.config.get("uid"))
             return
 
+        # set notification checkbutton
         self.notif.set(0)
 
         def quit_top():
@@ -253,6 +258,7 @@ class GUI:
             else:
                 messagebox.showerror("Error", "Subscription wasn't successful")
 
+        print("got to {}".format(web.get_notification_page(self.config.get("uid"))))
         qrcode = pyqrcode.create(web.get_notification_page(self.config.get("uid")))
         t = os.path.join(tempfile.gettempdir(), "fishyqr.png")
         qrcode.png(t, scale=8)
@@ -271,8 +277,7 @@ class GUI:
         Button(top, text="Check", command=check).pack(pady=(5, 5))
 
         image = PhotoImage(file=t)
-        canvas.create_image(0, 0, anchor="nw", image=image)
-
+        canvas.create_image(0, 0, anchor=NW, image=image)
 
         top.protocol("WM_DELETE_WINDOW", quit_top)
         top.grab_set()

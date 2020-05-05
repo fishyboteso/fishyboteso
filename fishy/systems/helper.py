@@ -60,15 +60,7 @@ def open_web(website):
     Thread(target=lambda: webbrowser.open(website, new=2)).start()
 
 
-def disable_logging(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        logging.disable(logging.DEBUG)
-        result = func(*args, **kwargs)
-        logging.disable(logging.NOTSET)
-        return result
 
-    return wrapper
 
 
 def create_new_uid():

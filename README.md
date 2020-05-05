@@ -14,15 +14,8 @@ Don't forget to star this repository if you really liked it :)
 - Then open PowerShell and type these commands,
 ```
 pip install fishy
-fishy
+python -m fishy
 ```
-
-### For Phone Notifications (Only Android)
-- Install [notificationApp.apk](https://drive.google.com/open?id=1o8w3PQ8JPH_N85MTKO2UTyjhHd9E7Hq6)
-- Go to the app settings of the fishy app and allow all the notification permissions if you want the floating notification with sound.
-- Make sure your PC and your phone are on the same network.
-- Open the app and press the start service button.
-- Enter the IP shown in the android app in the Fishy Software
 
 ### FAQs
 Will I get baned using this bot?
