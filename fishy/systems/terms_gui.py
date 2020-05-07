@@ -88,7 +88,7 @@ def _formatHyperLink(text, message):
                       lambda *a, **k: text.config(cursor="arrow"))
         text.tag_bind(str(index),
                       "<Button-1>",
-                      lambda: webbrowser.open(groups['address']))
+                      lambda x: webbrowser.open(groups['address']))
         start = match.end()
     else:
         text.insert("end", message[start:])

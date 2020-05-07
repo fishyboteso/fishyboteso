@@ -1,14 +1,16 @@
 import logging
+import traceback
 from functools import wraps
 
 import requests
 from whatsmyip.ip import get_ip
 from whatsmyip.providers import GoogleDnsProvider
 
+from fishy.systems import helper
 from fishy.systems.globals import G
 
-# domain = "https://fishyeso.herokuapp.com"
-domain = "http://127.0.0.1:5000"
+domain = "https://fishyeso.herokuapp.com"
+# domain = "http://127.0.0.1:5000"
 
 user = "/api/user"
 notify = "/api/notify"
@@ -37,8 +39,8 @@ def fallback(default):
             try:
                 return f(*args, **kwargs)
             except:
+                traceback.print_exc()
                 return default
-
         return wrapper
 
     return inner
@@ -105,11 +107,17 @@ def unsub(uid):
 
 
 @fallback(None)
-def get_session(uid, lazy=True):
+def get_session(config, lazy=True):
     if lazy and G._session_id is not None:
         return G._session_id
 
-    body = {"uid": uid}
+    body = {"uid": config.get("uid")}
     response = requests.post(domain + session, params=body)
+
+    if response.status_code == 405:
+        config.delete("uid")
+        helper.restart()
+        return None
+
     G._session_id = response.json()["session_id"]
     return G._session_id

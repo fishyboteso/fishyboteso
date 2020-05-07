@@ -3,7 +3,6 @@ import logging
 import os
 import sys
 import time
-from os import execl
 from tkinter import messagebox
 
 import win32con
@@ -127,7 +126,7 @@ def initialize(gui, c: Config):
     create_shortcut_first(gui, c)
     initialize_uid(c)
 
-    new_session = web.get_session(c.get('uid'))
+    new_session = web.get_session(c)
     if new_session is None:
         logging.error("Couldn't create a session, some features might not work")
     print(f"created session {new_session}")
@@ -171,6 +170,8 @@ def ask_terms():
 
 
 def main():
+    print("launching please wait...")
+
     c = Config()
 
     if not check_eula(c):

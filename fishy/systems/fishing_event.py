@@ -87,11 +87,13 @@ class IdleEvent(FishEvent):
         :param previousMode: previous mode in the state machine
         """
 
-        if previousMode.name == "hook":
-            logging.info("HOLE DEPLETED")
+        if G.fishCaught > 0:
             web.send_hole_deplete(self.uid, G.fishCaught, time.time() - G.hole_start_time, G.fish_times)
             G.fishCaught = 0
-        elif previousMode.name == "stick":
+
+        if previousMode.name == "hook":
+            logging.info("HOLE DEPLETED")
+        else:
             logging.info("FISHING INTERRUPTED")
 
     def onExitCallback(self, currentMode):

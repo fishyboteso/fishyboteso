@@ -11,8 +11,9 @@ Don't forget to star this repository if you really liked it :)
 ### How to Install?
 
 - Install [Python v3.7.3](https://www.python.org/downloads/release/python-373/) (make sure you tick, `Add Python to PATH`)
-- Then open PowerShell and type these commands,
+- Then open PowerShell and type these commands, one by one,
 ```
+python -m pip install pip --upgrade
 pip install fishy
 python -m fishy
 ```

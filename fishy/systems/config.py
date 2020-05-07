@@ -20,9 +20,11 @@ class Config:
         if save:
             self.save_config()
 
-    def save_config(self):
-        def save():
-            with open(filename, 'w') as f:
-                f.write(json.dumps(self.config_dict))
+    def delete(self, key):
+        del self.config_dict[key]
+        self.save_config()
 
-        Thread(target=save).start()
+    def save_config(self):
+        with open(filename, 'w') as f:
+            f.write(json.dumps(self.config_dict))
+
