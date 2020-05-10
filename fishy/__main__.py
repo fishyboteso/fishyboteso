@@ -122,7 +122,7 @@ def initialize_uid(config: Config):
         logging.error("Couldn't register uid, some features might not work")
 
 
-def initialize(gui, c: Config):
+def initialize(gui, c: Config, The_program_to_hide):
     create_shortcut_first(gui, c)
     initialize_uid(c)
 
@@ -145,7 +145,6 @@ def initialize(gui, c: Config):
         pass
 
     if not c.get("debug", False):
-        The_program_to_hide = win32gui.GetForegroundWindow()
         win32gui.ShowWindow(The_program_to_hide, win32con.SW_HIDE)
         helper.install_thread_excepthook()
         sys.excepthook = helper.unhandled_exception_logging
@@ -170,6 +169,8 @@ def ask_terms():
 
 
 def main():
+    The_program_to_hide = win32gui.GetForegroundWindow()
+
     print("launching please wait...")
 
     c = Config()
@@ -182,7 +183,7 @@ def main():
     gui.start()
 
     logging.info(f"Fishybot v{fishy.__version__}")
-    initialize(gui, c)
+    initialize(gui, c, The_program_to_hide)
 
     bot = Fishy(gui, events_buffer, c)
     bot.start_event_handler()

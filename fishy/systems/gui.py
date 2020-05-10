@@ -265,9 +265,9 @@ class GUI:
 
         def check():
             if web.is_subbed(self.config.get("uid"), False)[0]:
-                messagebox.showinfo("Note!", "Notification configured successfully!")
-                web.send_notification(self.config.get("uid"), "Sending a test notification :D")
                 self.notify.set(1)
+                web.send_notification(self.config.get("uid"), "Sending a test notification :D")
+                messagebox.showinfo("Note!", "Notification configured successfully!")
                 quit_top()
             else:
                 messagebox.showerror("Error", "Subscription wasn't successful")
