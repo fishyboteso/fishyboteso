@@ -58,12 +58,15 @@ class LookEvent(FishEvent):
     state when looking on a fishing hole
     """
 
+    def __init__(self, action_key: str):
+        self.action_key = action_key
+
     def onEnterCallback(self, previousMode):
         """
         presses e to throw the fishing rod
         :param previousMode: previous mode in the state machine
         """
-        pyautogui.press('e')
+        pyautogui.press(self.action_key)
 
     def onExitCallback(self, currentMode):
         pass
