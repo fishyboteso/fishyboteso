@@ -74,7 +74,7 @@ class GUI:
         self.root.title("Fiishybot for Elder Scrolls Online")
         self.root.geometry('650x550')
 
-        self.root.iconbitmap(helper.get_data_file_path('icon.ico'))
+        self.root.iconbitmap(helper.manifest_file('icon.ico'))
 
         # region menu
         menubar = Menu(self.root)

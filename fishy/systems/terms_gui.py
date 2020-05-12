@@ -31,12 +31,12 @@ def _run_terms_window(config: Config):
     message = f'I agree to the [Terms of Service and Privacy Policy]({web.get_terms_page()})'
     root.title("EULA")
     root.resizable(False, False)
-    root.iconbitmap(helper.get_data_file_path('icon.ico'))
+    root.iconbitmap(helper.manifest_file('icon.ico'))
 
     f = Frame(root)
     canvas = Canvas(f, width=300, height=200)
     canvas.pack()
-    root.image = Image.open(helper.get_data_file_path('fishybot_logo.png')).resize((300, 200))
+    root.image = Image.open(helper.manifest_file('fishybot_logo.png')).resize((300, 200))
     root.image = ImageTk.PhotoImage(root.image)
     canvas.create_image(0, 0, anchor=NW, image=root.image)
 

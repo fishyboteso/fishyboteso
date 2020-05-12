@@ -1,4 +1,5 @@
 """
+fishing_event.py
 Defines different fishing modes (states) which acts as state for state machine
 also implements callbacks which is called when states are changed
 """
@@ -10,7 +11,6 @@ import pyautogui
 
 from fishy.systems import web
 from fishy.systems.globals import G
-from fishy.systems.helper import round_float
 
 
 class FishEvent(ABC):
@@ -41,7 +41,7 @@ class HookEvent(FishEvent):
         timeToHook = time.time() - G.stickInitTime
         G.fish_times.append(timeToHook)
         logging.info("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(G.fishCaught) + " caught " + "in " + str(
-            round_float(timeToHook)) + " secs.  " + "Total: " + str(G.totalFishCaught))
+            round(timeToHook, 2)) + " secs.  " + "Total: " + str(G.totalFishCaught))
         pyautogui.press(self.action_key)
 
         if self.collect_r:
