@@ -6,7 +6,7 @@ import json
 import os
 
 # path to save the configuration file
-filename = os.path.expanduser(r"~/Documents/fishy_config.json")
+filename = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"], "Documents", "fishy_config.json")
 
 
 class Config:

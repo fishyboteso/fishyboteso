@@ -1,15 +1,12 @@
 import logging
 import traceback
-import typing
 from functools import wraps
-
-if typing.TYPE_CHECKING:
-        from fishy.web.web import get_session
 
 
 def uses_session(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
+        from .web import get_session
         if get_session(args[0]) is None:
             logging.error("Couldn't create a session")
             return None
