@@ -15,6 +15,9 @@ from win32com.client import Dispatch
 import fishy
 import winshell
 
+from fishy import web
+from . import Config
+
 
 def open_web(website):
     """
@@ -26,7 +29,18 @@ def open_web(website):
     Thread(target=lambda: webbrowser.open(website, new=2)).start()
 
 
-def create_new_uid():
+def initialize_uid(config: Config):
+    if config.get("uid") is not None:
+        return
+
+    new_uid = _create_new_uid()
+    if web.register_user(new_uid):
+        config.set("uid", new_uid)
+    else:
+        logging.error("Couldn't register uid, some features might not work")
+
+
+def _create_new_uid():
     """
     Creates a unique id for user
     """
@@ -45,12 +59,13 @@ def install_thread_excepthook():
     import sys
     run_old = threading.Thread.run
 
+    # noinspection PyBroadException
     def run(*args, **kwargs):
         try:
             run_old(*args, **kwargs)
         except (KeyboardInterrupt, SystemExit):
             raise
-        except:
+        except Exception:
             sys.excepthook(*sys.exc_info())
 
     threading.Thread.run = run
@@ -71,10 +86,16 @@ def manifest_file(rel_path):
     return os.path.join(os.path.dirname(fishy.__file__), rel_path)
 
 
-def create_shortcut(gui):
+def create_shortcut_first(c):
+    if not c.get("shortcut_created", False):
+        create_shortcut()
+        c.set("shortcut_created", True)
+
+
+# noinspection PyBroadException
+def create_shortcut():
     """
     creates a new shortcut on desktop
-    :param gui: does nothing todo
     """
     try:
         desktop = winshell.desktop()
@@ -82,16 +103,17 @@ def create_shortcut(gui):
 
         shell = Dispatch('WScript.Shell')
         shortcut = shell.CreateShortCut(path)
-        shortcut.Targetpath = os.path.join(os.path.dirname(sys.executable), "python.exe")
+        shortcut.TargetPath = os.path.join(os.path.dirname(sys.executable), "python.exe")
         shortcut.Arguments = "-m fishy"
         shortcut.IconLocation = manifest_file("icon.ico")
         shortcut.save()
 
         logging.info("Shortcut created")
-    except:
+    except Exception:
         logging.error("Couldn't create shortcut")
 
 
+# noinspection PyBroadException
 def check_addon():
     """
     Extracts the addon from zip and installs it into the AddOn folder of eso
@@ -101,8 +123,8 @@ def check_addon():
         addon_dir = os.path.join(user, "Documents", "Elder Scrolls Online", "live", "Addons")
         if not os.path.exists(os.path.join(addon_dir, 'ProvisionsChalutier')):
             logging.info("Addon not found, installing it...")
-            with ZipFile(manifest_file("ProvisionsChalutier.zip"), 'r') as zip:
-                zip.extractall(path=addon_dir)
+            with ZipFile(manifest_file("ProvisionsChalutier.zip"), 'r') as z:
+                z.extractall(path=addon_dir)
             logging.info("Please make sure you enable \"Allow outdated addons\" in-game\n"
                          "Also, make sure the addon is visible clearly on top left corner of the game window")
     except Exception:

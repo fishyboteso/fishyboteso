@@ -32,22 +32,21 @@ class Window:
         self.scale = scale
 
     @staticmethod
-    def Init(borderless: bool):
+    def init(borderless: bool):
         """
         Executed once before the main loop,
         Finds the game window, and calculates the offset to remove the title bar
         """
         Window.hwnd = win32gui.FindWindow(None, "Elder Scrolls Online")
         rect = win32gui.GetWindowRect(Window.hwnd)
-        clientRect = win32gui.GetClientRect(Window.hwnd)
-        Window.windowOffset = math.floor(((rect[2] - rect[0]) - clientRect[2]) / 2)
-        Window.titleOffset = ((rect[3] - rect[1]) - clientRect[3]) - Window.windowOffset
+        client_rect = win32gui.GetClientRect(Window.hwnd)
+        Window.windowOffset = math.floor(((rect[2] - rect[0]) - client_rect[2]) / 2)
+        Window.titleOffset = ((rect[3] - rect[1]) - client_rect[3]) - Window.windowOffset
         if borderless:
             Window.titleOffset = 0
 
-
     @staticmethod
-    def Loop():
+    def loop():
         """
         Executed in the start of the main loop
         finds the game window location and captures it
@@ -56,22 +55,22 @@ class Window:
 
         bbox = (0, 0, GetSystemMetrics(0), GetSystemMetrics(1))
 
-        tempScreen = np.array(ImageGrab.grab(bbox=bbox))
+        temp_screen = np.array(ImageGrab.grab(bbox=bbox))
 
-        tempScreen = cv2.cvtColor(tempScreen, cv2.COLOR_BGR2RGB)
+        temp_screen = cv2.cvtColor(temp_screen, cv2.COLOR_BGR2RGB)
 
         rect = win32gui.GetWindowRect(Window.hwnd)
         crop = (rect[0] + Window.windowOffset, rect[1] + Window.titleOffset, rect[2] - Window.windowOffset,
                 rect[3] - Window.windowOffset)
 
-        Window.Screen = tempScreen[crop[1]:crop[3], crop[0]:crop[2]]
+        Window.Screen = temp_screen[crop[1]:crop[3], crop[0]:crop[2]]
 
         if Window.Screen.size == 0:
             logging.info("Don't minimize or drag game window outside the screen")
             quit(1)
 
     @staticmethod
-    def LoopEnd():
+    def loop_end():
         """
         Executed in the end of the game loop
         """
@@ -80,7 +79,7 @@ class Window:
         if not Window.showing:
             cv2.destroyAllWindows()
 
-    def getCapture(self):
+    def get_capture(self):
         """
         copies the recorded screen and then pre processes its
         :return: game window image
@@ -98,16 +97,16 @@ class Window:
 
         return temp_img
 
-    def processedImage(self, func=None):
+    def processed_image(self, func=None):
         """
         processes the image using the function provided
         :param func: function to process image
         :return: processed image
         """
         if func is None:
-            return self.getCapture()
+            return self.get_capture()
         else:
-            return func(self.getCapture())
+            return func(self.get_capture())
 
     def show(self, name, resize=None, func=None):
         """
@@ -116,7 +115,7 @@ class Window:
         :param resize: scale the image to make small images more visible
         :param func: function to process the image
         """
-        img = self.processedImage(func)
+        img = self.processed_image(func)
 
         if resize is not None:
             img = imutils.resize(img, width=resize)

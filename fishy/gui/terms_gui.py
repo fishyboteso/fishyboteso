@@ -2,11 +2,10 @@ import webbrowser
 from tkinter import *
 from tkinter.ttk import *
 
-from fishy.systems import helper, web
-
 from PIL import Image, ImageTk
 
-from fishy.systems.config import Config
+from fishy import helper, web
+from fishy.helper import Config
 
 hyperlinkPattern = re.compile(r'\[(?P<title>.*?)\]\((?P<address>.*?)\)')
 
@@ -25,7 +24,7 @@ def _run_terms_window(config: Config):
         root.destroy()
 
     def disable_enable_button():
-        accept_button.config(state=NORMAL if checkValue.get() else DISABLED)
+        accept_button.config(state=NORMAL if check_value.get() else DISABLED)
 
     root = Tk()
     message = f'I agree to the [Terms of Service and Privacy Policy]({web.get_terms_page()})'
@@ -40,15 +39,15 @@ def _run_terms_window(config: Config):
     root.image = ImageTk.PhotoImage(root.image)
     canvas.create_image(0, 0, anchor=NW, image=root.image)
 
-    checkValue = IntVar(0)
+    check_value = IntVar(0)
 
     g1 = Frame(f)
-    Checkbutton(g1, command=disable_enable_button, variable=checkValue).pack(side=LEFT)
+    Checkbutton(g1, command=disable_enable_button, variable=check_value).pack(side=LEFT)
     text = Text(g1, width=len(hyperlinkPattern.sub('\g<title>', message)),
                 height=1, borderwidth=0, highlightthickness=0)
     text["background"] = root["background"]
 
-    _formatHyperLink(text, message)
+    _format_hyper_link(text, message)
     text.config(state=DISABLED)
     text.pack(side=LEFT)
     g1.pack()
@@ -67,7 +66,7 @@ def _run_terms_window(config: Config):
     root.mainloop()
 
 
-def _formatHyperLink(text, message):
+def _format_hyper_link(text, message):
     start = 0
     for index, match in enumerate(hyperlinkPattern.finditer(message)):
         groups = match.groupdict()

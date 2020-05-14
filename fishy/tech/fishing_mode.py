@@ -3,7 +3,7 @@ class FishingMode:
     State machine for fishing modes
 
     HValues         hue values for each fishing mode
-    CuurentCount    number of times same hue color is read before it changes state
+    CurrentCount    number of times same hue color is read before it changes state
     CurrentMode     current mode of the state machine
     PrevMode        previous mode of the state machine
     FishingStarted  probably does nothing (not sure though)
@@ -34,7 +34,7 @@ class FishingMode:
         FishingMode.Modes.append(self)
 
     @staticmethod
-    def GetByLabel(label):
+    def get_by_label(label):
         """
         find a state using label
         :param label: label integer
@@ -45,17 +45,16 @@ class FishingMode:
                 return m
 
     @staticmethod
-    def Loop(hueValue):
+    def loop(hue_values):
         """
         Executed in the start of the main loop in fishy.py
         Changes modes, calls mode events (callbacks) when mode is changed
 
-        :param hueValue: huevValue read by the bot
-        :param pause: true if bot is paused or not started
+        :param hue_values: hue_values read by the bot
         """
         current_label = 3
         for i, val in enumerate(FishingMode.HValues):
-            if hueValue == val:
+            if hue_values == val:
                 current_label = i
 
         # check if it passes threshold, if so change labelNum
@@ -66,14 +65,14 @@ class FishingMode:
         FishingMode.PrevLabel = current_label
 
         if FishingMode.CurrentCount >= FishingMode.Threshold:
-            FishingMode.CurrentMode = FishingMode.GetByLabel(current_label)
+            FishingMode.CurrentMode = FishingMode.get_by_label(current_label)
 
         if FishingMode.CurrentMode != FishingMode.PrevMode and FishingMode.PrevMode is not None:
 
             if FishingMode.PrevMode.event is not None:
-                FishingMode.PrevMode.event.onExitCallback(FishingMode.CurrentMode)
+                FishingMode.PrevMode.event.on_exit_callback(FishingMode.CurrentMode)
 
             if FishingMode.CurrentMode.event is not None:
-                FishingMode.CurrentMode.event.onEnterCallback(FishingMode.PrevMode)
+                FishingMode.CurrentMode.event.on_enter_callback(FishingMode.PrevMode)
 
         FishingMode.PrevMode = FishingMode.CurrentMode

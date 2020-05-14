@@ -63,7 +63,7 @@ def _get_highest_version(index, pkg):
 def _get_current_version(pkg):
     """
     Gets the current version of the package installed
-    :param pkg: name of the installed backage
+    :param pkg: name of the installed package
     :return: version normalized
     """
     return _normalize_version(pkg_resources.get_distribution(pkg).version)

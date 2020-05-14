@@ -9,17 +9,23 @@ from abc import abstractmethod, ABC
 
 import pyautogui
 
-from fishy.systems import web
-from fishy.systems.globals import G
+from fishy import web
+
+_fishCaught = 0
+_totalFishCaught = 0
+_stickInitTime = 0
+_fish_times = []
+_hole_start_time = 0
+_FishingStarted = False
 
 
 class FishEvent(ABC):
     @abstractmethod
-    def onEnterCallback(self, previousMode):
+    def on_enter_callback(self, previous_mode):
         pass
 
     @abstractmethod
-    def onExitCallback(self, currentMode):
+    def on_exit_callback(self, current_mode):
         pass
 
 
@@ -28,20 +34,22 @@ class HookEvent(FishEvent):
         self.action_key = action_key
         self.collect_r = collect_r
 
-    def onEnterCallback(self, previousMode):
+    def on_enter_callback(self, previous_mode):
         """
         called when the fish hook is detected
         increases the `fishCaught`  and `totalFishCaught`, calculates the time it took to catch
         presses e to catch the fish
 
-        :param previousMode: previous mode in the state machine
+        :param previous_mode: previous mode in the state machine
         """
-        G.fishCaught += 1
-        G.totalFishCaught += 1
-        timeToHook = time.time() - G.stickInitTime
-        G.fish_times.append(timeToHook)
-        logging.info("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(G.fishCaught) + " caught " + "in " + str(
-            round(timeToHook, 2)) + " secs.  " + "Total: " + str(G.totalFishCaught))
+        global _fishCaught, _totalFishCaught
+
+        _fishCaught += 1
+        _totalFishCaught += 1
+        time_to_hook = time.time() - _stickInitTime
+        _fish_times.append(time_to_hook)
+        logging.info("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(_fishCaught) + " caught " + "in " + str(
+            round(time_to_hook, 2)) + " secs.  " + "Total: " + str(_totalFishCaught))
         pyautogui.press(self.action_key)
 
         if self.collect_r:
@@ -49,7 +57,7 @@ class HookEvent(FishEvent):
             pyautogui.press('r')
             time.sleep(0.1)
 
-    def onExitCallback(self, currentMode):
+    def on_exit_callback(self, current_mode):
         pass
 
 
@@ -61,14 +69,14 @@ class LookEvent(FishEvent):
     def __init__(self, action_key: str):
         self.action_key = action_key
 
-    def onEnterCallback(self, previousMode):
+    def on_enter_callback(self, previous_mode):
         """
         presses e to throw the fishing rod
-        :param previousMode: previous mode in the state machine
+        :param previous_mode: previous mode in the state machine
         """
         pyautogui.press(self.action_key)
 
-    def onExitCallback(self, currentMode):
+    def on_exit_callback(self, current_mode):
         pass
 
 
@@ -80,26 +88,26 @@ class IdleEvent(FishEvent):
     def __init__(self, uid):
         """
         sets the flag to send notification on phone
-        :param use_net: true if user wants to send notification on phone
         """
         self.uid = uid
 
-    def onEnterCallback(self, previousMode):
+    def on_enter_callback(self, previous_mode):
         """
         Resets the fishCaught counter and logs a message depending on the previous state
-        :param previousMode: previous mode in the state machine
+        :param previous_mode: previous mode in the state machine
         """
+        global _fishCaught
 
-        if G.fishCaught > 0:
-            web.send_hole_deplete(self.uid, G.fishCaught, time.time() - G.hole_start_time, G.fish_times)
-            G.fishCaught = 0
+        if _fishCaught > 0:
+            web.send_hole_deplete(self.uid, _fishCaught, time.time() - _hole_start_time, _fish_times)
+            _fishCaught = 0
 
-        if previousMode.name == "hook":
+        if previous_mode.name == "hook":
             logging.info("HOLE DEPLETED")
         else:
             logging.info("FISHING INTERRUPTED")
 
-    def onExitCallback(self, currentMode):
+    def on_exit_callback(self, current_mode):
         pass
 
 
@@ -108,17 +116,19 @@ class StickEvent(FishEvent):
     State when fishing is going on
     """
 
-    def onEnterCallback(self, previousMode):
+    def on_enter_callback(self, previous_mode):
         """
         resets the fishing timer
-        :param previousMode: previous mode in the state machine
+        :param previous_mode: previous mode in the state machine
         """
-        G.stickInitTime = time.time()
-        G.FishingStarted = True
+        global _stickInitTime, _hole_start_time, _fish_times, _FishingStarted
 
-        if G.fishCaught == 0:
-            G.hole_start_time = time.time()
-            G.fish_times = []
+        _stickInitTime = time.time()
+        _FishingStarted = True
 
-    def onExitCallback(self, currentMode):
+        if _fishCaught == 0:
+            _hole_start_time = time.time()
+            _fish_times = []
+
+    def on_exit_callback(self, current_mode):
         pass
