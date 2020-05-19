@@ -49,18 +49,18 @@ def main():
 
     window_to_hide = win32gui.GetForegroundWindow()
     c = Config()
-    events_buffer = []
 
     if not gui.check_eula(c):
         return
 
-    gui_window = GUI(c, lambda a, b=None: events_buffer.append((a, b)))
+    bot = Engine(c, lambda: gui_window)
+    gui_window = GUI(c, lambda: bot)
+
     gui_window.start()
 
     logging.info(f"Fishybot v{fishy.__version__}")
     initialize(c, window_to_hide)
 
-    bot = Engine(gui_window, events_buffer, c)
     bot.start_event_handler()
 
 

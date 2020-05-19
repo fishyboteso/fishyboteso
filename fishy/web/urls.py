@@ -1,6 +1,11 @@
 import sys
 
-domain = "http://127.0.0.1:5000" if "--local-server" in sys.argv else "https://fishyeso.herokuapp.com"
+if "--local-server" in sys.argv:
+    domain = "http://127.0.0.1:5000"
+elif "--test-server" in sys.argv:
+    domain = "https://fishyeso-test.herokuapp.com"
+else:
+    domain = "https://fishyeso.herokuapp.com"
 
 user = domain + "/api/user"
 notify = domain + "/api/notify"

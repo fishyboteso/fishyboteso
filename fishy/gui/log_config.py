@@ -12,9 +12,8 @@ class GUIStreamHandler(StreamHandler):
         self.gui = gui
 
     def emit(self, record):
-        from .comms import GUIFunction
         msg = self.format(record)
-        self.gui.call(GUIFunction.LOG, (msg,))
+        self.gui.call_in_thread(lambda: _write_to_console(self.gui, msg))
 
 
 def _write_to_console(root: 'GUI', msg):

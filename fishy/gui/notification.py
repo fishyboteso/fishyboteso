@@ -1,9 +1,8 @@
-import os
-import tempfile
+import time
 from tkinter import *
 from tkinter import messagebox
 from tkinter.ttk import *
-import pyqrcode
+from tkhtmlview import HTMLLabel
 
 from fishy import web
 import typing
@@ -12,6 +11,7 @@ if typing.TYPE_CHECKING:
     from . import GUI
 
 
+# noinspection PyProtectedMember
 def _give_notification_link(gui: 'GUI'):
     if web.is_subbed(gui._config.get("uid"))[0]:
         web.unsub(gui._config.get("uid"))
@@ -25,37 +25,49 @@ def _give_notification_link(gui: 'GUI'):
         top_running[0] = False
 
     def check():
-        if web.is_subbed(gui._config.get("uid"), False)[0]:
-            gui._notify.set(1)
-            web.send_notification(gui._config.get("uid"), "Sending a test notification :D")
-            messagebox.showinfo("Note!", "Notification configured successfully!")
-            quit_top()
+        if web.sub(gui._config.get("uid"), discord_name.get()):
+            if web.is_subbed(gui._config.get("uid"), False)[0]:
+                gui._notify.set(1)
+                messagebox.showinfo("Note!", "Notification configured successfully!")
+                quit_top()
         else:
             messagebox.showerror("Error", "Subscription wasn't successful")
-
-    print("got to {}".format(web.get_notification_page(gui._config.get("uid"))))
-    qrcode = pyqrcode.create(web.get_notification_page(gui._config.get("uid")))
-    t = os.path.join(tempfile.gettempdir(), "fishyqr.png")
-    qrcode.png(t, scale=8)
 
     top_running = [True]
 
     top = Toplevel(background=gui._root["background"])
-    top.minsize(width=500, height=500)
+    top.minsize(width=300, height=300)
     top.title("Notification Setup")
 
-    Label(top, text="Step 1.").pack(pady=(5, 5))
-    Label(top, text="Scan the QR Code on your Phone and press \"Enable Notification\"").pack(pady=(5, 5))
-    canvas = Canvas(top, width=qrcode.get_png_size(8), height=qrcode.get_png_size(8))
-    canvas.pack(pady=(5, 5))
-    Label(top, text="Step 2.").pack(pady=(5, 5))
-    Button(top, text="Check", command=check).pack(pady=(5, 5))
+    html_label = HTMLLabel(top,
+                           html=f'<div style="color: {gui._console["fg"]}; text-align: center">'
+                                f'<p><span style="font-size:20px">Step 1.</span><br/>'
+                                f'Join <a href="https://discord.definex.in/">Discord server</a></p>'
+                                f'<p><span style="font-size:20px">Step 2.</span><br/>'
+                                f'Enter username (ex. Fishy#1234)'
+                                f'</div>', background=gui._root["background"])
 
-    image = PhotoImage(file=t)
-    canvas.create_image(0, 0, anchor=NW, image=image)
+    html_label.pack(pady=(20, 5))
+    html_label.fit_height()
+
+    discord_name = Entry(top, justify=CENTER, font="Calibri 15")
+    discord_name.pack(padx=(15, 15), expand=True, fill=BOTH)
+
+    html_label = HTMLLabel(top,
+                           html=f'<div style="color: {gui._console["fg"]}; text-align: center">'
+                                f'<p><span style="font-size:20px">Step 3.</span><br/>'
+                                f'Install Discord App on your phone</p>'
+                                f'<p><span style="font-size:20px">Step 4.</span><br/></p>'
+                                f'</div>', background=gui._root["background"])
+
+    html_label.pack(pady=(5, 5))
+    html_label.fit_height()
+
+    Button(top, text="REGISTER", command=check).pack(pady=(5, 20))
 
     top.protocol("WM_DELETE_WINDOW", quit_top)
     top.grab_set()
     while top_running[0]:
         top.update()
+        time.sleep(0.01)
     top.grab_release()

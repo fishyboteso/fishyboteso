@@ -7,7 +7,6 @@ from ttkthemes import ThemedTk
 
 from fishy import helper, web
 
-from .comms import GUIEvent, GUIFunction, _clear_function_queue
 from .notification import _give_notification_link
 import typing
 
@@ -16,7 +15,7 @@ if typing.TYPE_CHECKING:
 
 
 def _apply_theme(gui: 'GUI'):
-    dark = gui._config.get("dark", True)
+    dark = gui._config.get("dark_mode", True)
     gui._root["theme"] = "equilux" if dark else "breeze"
     gui._console["background"] = "#707070" if dark else "#ffffff"
     gui._console["fg"] = "#ffffff" if dark else "#000000"
@@ -25,7 +24,6 @@ def _apply_theme(gui: 'GUI'):
 def _create(gui: 'GUI'):
     gui._root = ThemedTk(theme="equilux", background=True)
     gui._root.title("Fishybot for Elder Scrolls Online")
-    gui._root.geometry('650x550')
 
     gui._root.iconbitmap(helper.manifest_file('icon.ico'))
 
@@ -48,7 +46,7 @@ def _create(gui: 'GUI'):
 
     debug_menu = Menu(menubar, tearoff=0)
     debug_menu.add_command(label="Check PixelVal",
-                           command=lambda: gui._event_trigger(GUIEvent.CHECK_PIXELVAL, ()))
+                           command=lambda: gui.engine.check_pixel_val())
 
     debug_var = IntVar()
     debug_var.set(int(gui._config.get('debug', False)))
@@ -93,7 +91,8 @@ def _create(gui: 'GUI'):
 
     def update_notify_check():
         is_subbed = web.is_subbed(gui._config.get('uid'))
-        gui.call(GUIFunction.SET_NOTIFY, (int(is_subbed[0]), is_subbed[1]))
+        if is_subbed[1]:
+            gui.funcs.set_notify(is_subbed[0])
 
     threading.Thread(target=update_notify_check).start()
 
@@ -121,10 +120,9 @@ def _create(gui: 'GUI'):
     gui._start_button = Button(gui._root, text="STOP" if gui._bot_running else "START", width=25)
 
     def start_button_callback():
-        args = (action_key_entry.get(),
-                borderless.instate(['selected']),
-                collect_r.instate(['selected']))
-        gui._event_trigger(GUIEvent.START_BUTTON, args)
+        gui.engine.start_button_pressed(action_key_entry.get(),
+                                        borderless.instate(['selected']),
+                                        collect_r.instate(['selected']))
 
         gui._config.set("action_key", action_key_entry.get(), False)
         gui._config.set("borderless", borderless.instate(['selected']), False)
@@ -147,13 +145,13 @@ def _create(gui: 'GUI'):
 
     while True:
         gui._root.update()
-        _clear_function_queue(gui)
+        gui._clear_function_queue()
         if gui._start_restart:
             gui._root.destroy()
             gui._root.quit()
             gui._start_restart = False
             gui.create()
         if gui._destroyed:
-            gui._event_trigger(GUIEvent.QUIT, ())
+            gui.engine.quit()
             break
         time.sleep(0.01)

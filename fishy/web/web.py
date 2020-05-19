@@ -41,8 +41,20 @@ def send_hole_deplete(uid, fish_caught, hole_time, fish_times):
     requests.post(urls.hole_depleted, json=body)
 
 
+@fallback(False)
+def sub(uid, name):
+    body = {"uid": uid, "discord_name": name}
+    response = requests.post(urls.subscription, json=body)
+    return response.json()["success"]
+
+
 @fallback((False, False))
 def is_subbed(uid, lazy=True):
+    """
+    :param uid:
+    :param lazy:
+    :return: Tuple[is_subbed, success]
+    """
     global _is_subbed
 
     if lazy and _is_subbed is not None:

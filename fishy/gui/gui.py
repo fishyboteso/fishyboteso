@@ -1,25 +1,27 @@
 import logging
-from typing import Tuple, List, Callable, Optional
+from typing import List, Callable
 import threading
 
+from fishy.gui.funcs import GUIFuncs
+from fishy.tech import Engine
 from . import main_gui
-from .comms import GUIEvent, GUIFunction
 from .log_config import GUIStreamHandler
 from fishy.helper import Config
 
 
 class GUI:
-    def __init__(self, config: Config, event_trigger: Callable[[GUIEvent, Optional[Tuple]], None]):
+    def __init__(self, config: Config, get_engine: Callable[[], Engine]):
         """
         :param config: used to get and set configuration settings
-        :param event_trigger: used to communicate with other threads
         """
+        self.funcs = GUIFuncs(self)
+        self.get_engine = get_engine
+
         self._config = config
         self._start_restart = False
         self._destroyed = True
         self._log_strings = []
-        self._function_queue: List[Tuple[GUIFunction, Tuple]] = []
-        self._event_trigger = event_trigger
+        self._function_queue: List[Callable] = []
         self._bot_running = False
 
         # UI items
@@ -37,11 +39,20 @@ class GUI:
         new_console = GUIStreamHandler(self)
         root_logger.addHandler(new_console)
 
+    @property
+    def engine(self):
+        return self.get_engine().funcs
+
     def create(self):
         main_gui._create(self)
 
     def start(self):
         self._thread.start()
 
-    def call(self, gui_func, args):
-        self._function_queue.append((gui_func, args))
+    def _clear_function_queue(self):
+        while len(self._function_queue) > 0:
+            func = self._function_queue.pop(0)
+            func()
+
+    def call_in_thread(self, func: Callable):
+        self._function_queue.append(func)

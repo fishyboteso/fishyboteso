@@ -1,3 +1,4 @@
+urllib3
 winshell
 imutils
 numpy
@@ -9,5 +10,5 @@ pyautogui
 requests
 beautifulsoup4
 whatsmyip
-pyqrcode
 pypng
+tkhtmlview
