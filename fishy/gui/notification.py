@@ -2,10 +2,11 @@ import time
 from tkinter import *
 from tkinter import messagebox
 from tkinter.ttk import *
-from tkhtmlview import HTMLLabel
 
 from fishy import web
 import typing
+
+from fishy.libs.tkhtmlview import HTMLLabel
 
 if typing.TYPE_CHECKING:
     from . import GUI
