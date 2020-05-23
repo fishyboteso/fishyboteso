@@ -47,11 +47,14 @@ class SemiFisherEngine:
     def gui(self):
         return self.get_gui().funcs
 
-    def start_fishing(self, action_key: str, borderless: bool, collect_r: bool):
+    def start_fishing(self):
         """
         Starts the fishing
         code explained in comments in detail
         """
+
+        action_key = self.config.get("action_key", "e")
+        borderless = self.config.get("borderless", False)
 
         # initialize widow
         # noinspection PyUnresolvedReferences
@@ -63,7 +66,7 @@ class SemiFisherEngine:
             return
 
         # initializes fishing modes and their callbacks
-        FishingMode("hook", 0, HookEvent(action_key, collect_r))
+        FishingMode("hook", 0, HookEvent(action_key, False))
         FishingMode("stick", 1, StickEvent())
         FishingMode("look", 2, LookEvent(action_key))
         FishingMode("idle", 3, IdleEvent(self.config.get("uid")))

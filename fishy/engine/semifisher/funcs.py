@@ -7,11 +7,11 @@ class SemiFisherFuncs:
     def __init__(self, engine):
         self.engine = engine
 
-    def start_button_pressed(self, *params):
+    def start_button_pressed(self):
         def func():
             self.engine.start = not self.engine.start
             if self.engine.start:
-                self.engine.fishy_thread = Thread(target=self.engine.start_fishing, args=(*params,))
+                self.engine.fishy_thread = Thread(target=self.engine.start_fishing)
                 self.engine.fishy_thread.start()
 
         self.engine.gui_events.append(func)

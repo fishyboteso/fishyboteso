@@ -1,14 +1,15 @@
 import logging
-import threading
 import time
 from tkinter import *
 from tkinter.ttk import *
 from ttkthemes import ThemedTk
 
 from fishy import helper, web
+from fishy.gui import config_top
 
-from .notification import _give_notification_link
 import typing
+
+from fishy.helper import not_implemented
 
 if typing.TYPE_CHECKING:
     from . import GUI
@@ -22,6 +23,12 @@ def _apply_theme(gui: 'GUI'):
 
 
 def _create(gui: 'GUI'):
+    engines = {
+        "Semi Fisher": [lambda: config_top.start_semifisher_config(gui), gui.engine.start_button_pressed],
+        # "Full-Auto Fisher": [not_implemented, not_implemented],
+        # "Lock Picker": [not_implemented, not_implemented]
+    }
+
     gui._root = ThemedTk(theme="equilux", background=True)
     gui._root.title("Fishybot for Elder Scrolls Online")
 
@@ -56,12 +63,12 @@ def _create(gui: 'GUI'):
         logging.debug("Restart to update the changes")
 
     debug_menu.add_checkbutton(label="Keep Console", command=keep_console, variable=debug_var)
-    debug_menu.add_command(label="Log Dump", command=lambda: logging.error("Not Implemented"))
+    debug_menu.add_command(label="Log Dump", command=not_implemented)
     debug_menu.add_command(label="Restart", command=helper.restart)
     menubar.add_cascade(label="Debug", menu=debug_menu)
 
     help_menu = Menu(menubar, tearoff=0)
-    help_menu.add_command(label="Troubleshoot Guide", command=lambda: logging.debug("Not Implemented"))
+    help_menu.add_command(label="Troubleshoot Guide", command=not_implemented)
     help_menu.add_command(label="Need Help?", command=lambda: helper.open_web("http://discord.definex.in"))
     help_menu.add_command(label="Donate", command=lambda: helper.open_web("https://paypal.me/AdamSaudagar"))
     menubar.add_cascade(label="Help", menu=help_menu)
@@ -71,66 +78,27 @@ def _create(gui: 'GUI'):
 
     # region console
     gui._console = Text(gui._root, state='disabled', wrap='none', background="#707070", fg="#ffffff")
-    gui._console.pack(fill=BOTH, expand=True, pady=(15, 15), padx=(5, 5))
+    gui._console.pack(fill=BOTH, expand=True, pady=(15, 15), padx=(10, 10))
     gui._console.mark_set("sentinel", INSERT)
     gui._console.config(state=DISABLED)
-
-    controls_frame = Frame(gui._root)
     # endregion
 
     # region controls
-    left_frame = Frame(controls_frame)
+    start_frame = Frame(gui._root)
 
-    Label(left_frame, text="Notification:").grid(row=0, column=0)
+    engine_var = StringVar(start_frame)
+    labels = list(engines.keys())
+    engine_select = OptionMenu(start_frame, engine_var, labels[0], *labels)
+    engine_select.pack(side=LEFT)
 
-    gui._notify = IntVar(0)
-    gui._notify_check = Checkbutton(left_frame, command=lambda: _give_notification_link(gui),
-                                    variable=gui._notify)
-    gui._notify_check.grid(row=0, column=1)
-    gui._notify_check['state'] = DISABLED
+    button = Button(start_frame, text="⚙", width=0, command=lambda: engines[engine_var.get()][0]())
+    button.pack(side=RIGHT)
 
-    def update_notify_check():
-        is_subbed = web.is_subbed(gui._config.get('uid'))
-        if is_subbed[1]:
-            gui.funcs.set_notify(is_subbed[0])
+    gui._start_button = Button(start_frame, text="STOP" if gui._bot_running else "START", width=25,
+                               command=lambda: engines[engine_var.get()][1]())
+    gui._start_button.pack(side=RIGHT)
 
-    threading.Thread(target=update_notify_check).start()
-
-    Label(left_frame, text="Fullscreen: ").grid(row=1, column=0, pady=(5, 5))
-    borderless = Checkbutton(left_frame, )
-    borderless.grid(row=1, column=1)
-
-    left_frame.grid(row=0, column=0)
-
-    right_frame = Frame(controls_frame)
-
-    Label(right_frame, text="Action Key:").grid(row=0, column=0)
-    action_key_entry = Entry(right_frame)
-    action_key_entry.grid(row=0, column=1)
-    action_key_entry.insert(0, gui._config.get("action_key", "e"))
-
-    Label(right_frame, text="Collect R: ").grid(row=1, column=0, pady=(5, 5))
-    collect_r = Checkbutton(right_frame, variable=IntVar(value=1 if gui._config.get("collect_r", False) else 0))
-    collect_r.grid(row=1, column=1)
-
-    right_frame.grid(row=0, column=1, padx=(50, 0))
-
-    controls_frame.pack()
-
-    gui._start_button = Button(gui._root, text="STOP" if gui._bot_running else "START", width=25)
-
-    def start_button_callback():
-        gui.engine.start_button_pressed(action_key_entry.get(),
-                                        borderless.instate(['selected']),
-                                        collect_r.instate(['selected']))
-
-        gui._config.set("action_key", action_key_entry.get(), False)
-        gui._config.set("borderless", borderless.instate(['selected']), False)
-        gui._config.set("collect_r", collect_r.instate(['selected']), False)
-        gui._config.save_config()
-
-    gui._start_button["command"] = start_button_callback
-    gui._start_button.pack(pady=(15, 15))
+    start_frame.pack(padx=(10, 10), pady=(5, 15), fill=X)
     # endregion
 
     _apply_theme(gui)

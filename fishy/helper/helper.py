@@ -19,6 +19,10 @@ from fishy import web
 from . import Config
 
 
+def not_implemented():
+    logging.error("Not Implemented")
+
+
 def open_web(website):
     """
     Opens a website on browser,

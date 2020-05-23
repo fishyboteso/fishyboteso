@@ -2,7 +2,7 @@
 auto_update.py
 checks version and auto updates
 """
-
+import logging
 import re
 import subprocess
 import sys
@@ -77,6 +77,8 @@ def auto_upgrade():
     """
     index = "https://pypi.python.org/simple"
     pkg = "fishy"
-    if _get_highest_version(index, pkg) > _get_current_version(pkg):
+    hightest_version = _get_highest_version(index, pkg)
+    if hightest_version > _get_current_version(pkg):
+        logging.info(f"Updating to v{'.'.join(hightest_version)}, Please Wait...")
         subprocess.call(["python", '-m', 'pip', 'install', '--upgrade', 'fishy', '--user'])
         execl(sys.executable, *([sys.executable] + sys.argv))
