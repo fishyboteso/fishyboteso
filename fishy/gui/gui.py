@@ -3,14 +3,14 @@ from typing import List, Callable
 import threading
 
 from fishy.gui.funcs import GUIFuncs
-from fishy.tech import Engine
+from fishy.engine import SemiFisherEngine
 from . import main_gui
 from .log_config import GUIStreamHandler
 from fishy.helper import Config
 
 
 class GUI:
-    def __init__(self, config: Config, get_engine: Callable[[], Engine]):
+    def __init__(self, config: Config, get_engine: Callable[[], SemiFisherEngine]):
         """
         :param config: used to get and set configuration settings
         """

@@ -10,7 +10,7 @@ import fishy
 from fishy import web, helper, gui
 from fishy.gui import GUI
 from fishy.helper import Config
-from fishy.tech import Engine
+from fishy.engine import SemiFisherEngine
 
 
 # noinspection PyBroadException
@@ -53,7 +53,7 @@ def main():
     if not gui.check_eula(c):
         return
 
-    bot = Engine(c, lambda: gui_window)
+    bot = SemiFisherEngine(c, lambda: gui_window)
     gui_window = GUI(c, lambda: bot)
 
     gui_window.start()

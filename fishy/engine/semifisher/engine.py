@@ -8,8 +8,8 @@ import logging
 
 import pywintypes
 
-from fishy.tech.funcs import EngineFuncs
-from . import fishing_event
+from fishy.engine.semifisher.funcs import SemiFisherFuncs
+from fishy.engine.semifisher import fishing_event
 from .fishing_event import HookEvent, StickEvent, LookEvent, IdleEvent
 from .fishing_mode import FishingMode
 from .pixel_loc import PixelLoc
@@ -31,9 +31,9 @@ def _wait_and_check(gui):
                        "If fixing those doesnt work, try running the bot as admin")
 
 
-class Engine:
+class SemiFisherEngine:
     def __init__(self, config, gui_ref: 'Callable[[], GUI]'):
-        self.funcs = EngineFuncs(self)
+        self.funcs = SemiFisherFuncs(self)
         self.get_gui = gui_ref
 
         self.start = False

@@ -3,7 +3,7 @@ from threading import Thread
 
 
 # noinspection PyProtectedMember
-class EngineFuncs:
+class SemiFisherFuncs:
     def __init__(self, engine):
         self.engine = engine
 
