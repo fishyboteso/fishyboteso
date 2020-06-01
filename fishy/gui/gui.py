@@ -2,6 +2,7 @@ import logging
 from typing import List, Callable
 import threading
 
+from fishy.engine.event_handler import EngineEventHandler
 from fishy.gui.funcs import GUIFuncs
 from fishy.engine import SemiFisherEngine
 from . import main_gui
@@ -10,7 +11,7 @@ from fishy.helper import Config
 
 
 class GUI:
-    def __init__(self, config: Config, get_engine: Callable[[], SemiFisherEngine]):
+    def __init__(self, config: Config, get_engine: Callable[[], EngineEventHandler]):
         """
         :param config: used to get and set configuration settings
         """
@@ -41,7 +42,7 @@ class GUI:
 
     @property
     def engine(self):
-        return self.get_engine().funcs
+        return self.get_engine()
 
     def create(self):
         main_gui._create(self)

@@ -24,10 +24,14 @@ def _apply_theme(gui: 'GUI'):
 
 def _create(gui: 'GUI'):
     engines = {
-        "Semi Fisher": [lambda: config_top.start_semifisher_config(gui), gui.engine.start_button_pressed],
-        # "Full-Auto Fisher": [not_implemented, not_implemented],
+        "Semi Fisher": [lambda: config_top.start_semifisher_config(gui), gui.engine.toggle_semifisher],
+        "Full-Auto Fisher": [not_implemented, gui.engine.toggle_fullfisher],
         # "Lock Picker": [not_implemented, not_implemented]
     }
+
+    def start_engine(label):
+        gui._config.set("last_started", label)
+        engines[label][1]()
 
     gui._root = ThemedTk(theme="equilux", background=True)
     gui._root.title("Fishybot for Elder Scrolls Online")
@@ -88,14 +92,15 @@ def _create(gui: 'GUI'):
 
     engine_var = StringVar(start_frame)
     labels = list(engines.keys())
-    engine_select = OptionMenu(start_frame, engine_var, labels[0], *labels)
+    last_started = gui._config.get("last_started", labels[0])
+    engine_select = OptionMenu(start_frame, engine_var, last_started, *labels)
     engine_select.pack(side=LEFT)
 
-    button = Button(start_frame, text="⚙", width=0, command=lambda: engines[engine_var.get()][0]())
-    button.pack(side=RIGHT)
+    config_button = Button(start_frame, text="⚙", width=0, command=lambda: engines[engine_var.get()][0]())
+    config_button.pack(side=RIGHT)
 
     gui._start_button = Button(start_frame, text="STOP" if gui._bot_running else "START", width=25,
-                               command=lambda: engines[engine_var.get()][1]())
+                               command=lambda: start_engine(engine_var.get()))
     gui._start_button.pack(side=RIGHT)
 
     start_frame.pack(padx=(10, 10), pady=(5, 15), fill=X)

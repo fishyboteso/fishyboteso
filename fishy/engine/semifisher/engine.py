@@ -8,12 +8,12 @@ import logging
 
 import pywintypes
 
-from fishy.engine.semifisher.funcs import SemiFisherFuncs
+from fishy.engine.IEngine import IEngine
 from fishy.engine.semifisher import fishing_event
 from .fishing_event import HookEvent, StickEvent, LookEvent, IdleEvent
 from .fishing_mode import FishingMode
 from .pixel_loc import PixelLoc
-from .window import Window
+from fishy.engine.window import Window
 
 if typing.TYPE_CHECKING:
     from fishy.gui import GUI
@@ -23,31 +23,14 @@ def _wait_and_check(gui):
     time.sleep(10)
     if not fishing_event._FishingStarted:
         gui.show_error("Doesn't look like fishing has started\n\n"
-                       "Make sure ProvisionsChalutier addon is visible clearly on top "
-                       "left corner of the screen, either,\n"
-                       "1) Outdated addons are disabled\n"
-                       "2) Other addons are overlapping ProvisionsChalutier\n"
-                       "3) Post processing (re shader) is on\n\n"
-                       "If fixing those doesnt work, try running the bot as admin")
+                       "Check out #faqs on our discord channel to troubleshoot the issue")
 
 
-class SemiFisherEngine:
+class SemiFisherEngine(IEngine):
     def __init__(self, config, gui_ref: 'Callable[[], GUI]'):
-        self.funcs = SemiFisherFuncs(self)
-        self.get_gui = gui_ref
+        super().__init__(config, gui_ref)
 
-        self.start = False
-        self.fishPixWindow = None
-        self.fishy_thread = None
-        self.config = config
-        self.event_handler_running = True
-        self.gui_events = []
-
-    @property
-    def gui(self):
-        return self.get_gui().funcs
-
-    def start_fishing(self):
+    def run(self):
         """
         Starts the fishing
         code explained in comments in detail
@@ -90,13 +73,7 @@ class SemiFisherEngine:
         logging.info("Fishing engine stopped")
         self.gui.bot_started(False)
 
-    def start_event_handler(self):
-        while self.event_handler_running:
-            while len(self.gui_events) > 0:
-                event = self.gui_events.pop(0)
-                event()
-
-    def _show_pixel_vals(self):
+    def show_pixel_vals(self):
         def show():
             freq = 0.5
             t = 0
