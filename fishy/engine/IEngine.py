@@ -12,7 +12,7 @@ class IEngine(ABC):
     def __init__(self, config, gui_ref: 'Callable[[], GUI]'):
         self.get_gui = gui_ref
         self.start = False
-        self.fishPixWindow = None
+        self.window = None
         self.thread = None
         self.config = config
 

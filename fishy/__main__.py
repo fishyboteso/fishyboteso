@@ -29,7 +29,7 @@ def initialize(c: Config, window_to_hide):
     except AttributeError:
         is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
 
-    if is_admin and c.get("debug"):
+    if is_admin:
         logging.info("Running with admin privileges")
 
     try:

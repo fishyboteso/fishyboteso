@@ -108,18 +108,20 @@ class Window:
         else:
             return func(self.get_capture())
 
-    def show(self, name, resize=None, func=None):
+    def show(self, name, resize=None, func=None, ready_img=None):
         """
         Displays the processed image for debugging purposes
         :param name: unique name for the image, used to create a new window
         :param resize: scale the image to make small images more visible
         :param func: function to process the image
         """
-        img = self.processed_image(func)
+        if ready_img is None:
+            img = self.processed_image(func)
 
-        if resize is not None:
-            img = imutils.resize(img, width=resize)
-
+            if resize is not None:
+                img = imutils.resize(img, width=resize)
+        else:
+            img = ready_img
         cv2.imshow(name, img)
 
         Window.showing = True
