@@ -6,6 +6,7 @@ import threading
 from ttkthemes import ThemedTk
 
 from fishy.engine.event_handler import EngineEventHandler
+from fishy.gui import config_top
 from fishy.gui.funcs import GUIFuncs
 from . import main_gui
 from .log_config import GUIStreamHandler
@@ -35,6 +36,7 @@ class GUI:
         self._notify_check = None
         self._engine_select: OptionMenu = None
         self._config_button: Button = None
+        self._engine_var = None
 
         self._thread = threading.Thread(target=self.create, args=())
 
@@ -47,6 +49,17 @@ class GUI:
     @property
     def engine(self):
         return self.get_engine()
+
+    @property
+    def engines(self):
+        engines = {
+            "Semi Fisher": [lambda: config_top.start_semifisher_config(self), self.engine.toggle_semifisher],
+        }
+
+        if self._config.get('debug', False):
+            engines["Full-Auto Fisher"] = [lambda: config_top.start_fullfisher_config(self),
+                                           self.engine.toggle_fullfisher]
+        return engines
 
     def create(self):
         main_gui._create(self)

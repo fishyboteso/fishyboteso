@@ -3,12 +3,9 @@ import time
 from tkinter import *
 from tkinter.ttk import *
 
-from pynput import keyboard
-from pynput.keyboard import Key
 from ttkthemes import ThemedTk
 
 from fishy import helper
-from fishy.gui import config_top
 
 import typing
 
@@ -26,16 +23,7 @@ def _apply_theme(gui: 'GUI'):
 
 
 def _create(gui: 'GUI'):
-    engines = {
-        "Semi Fisher": [lambda: config_top.start_semifisher_config(gui), gui.engine.toggle_semifisher],
-    }
-
-    if gui._config.get('debug', False):
-        engines["Full-Auto Fisher"] = [lambda: config_top.start_fullfisher_config(gui), gui.engine.toggle_fullfisher]
-
-    def start_engine(label):
-        gui._config.set("last_started", label)
-        engines[label][1]()
+    engines = gui.engines
 
     gui._root = ThemedTk(theme="equilux", background=True)
     gui._root.title("Fishybot for Elder Scrolls Online")
@@ -93,17 +81,17 @@ def _create(gui: 'GUI'):
     # region controls
     start_frame = Frame(gui._root)
 
-    engine_var = StringVar(start_frame)
+    gui._engine_var = StringVar(start_frame)
     labels = list(engines.keys())
     last_started = gui._config.get("last_started", labels[0])
-    gui._engine_select = OptionMenu(start_frame, engine_var, last_started, *labels)
+    gui._engine_select = OptionMenu(start_frame, gui._engine_var, last_started, *labels)
     gui._engine_select.pack(side=LEFT)
 
-    gui._config_button = Button(start_frame, text="⚙", width=0, command=lambda: engines[engine_var.get()][0]())
+    gui._config_button = Button(start_frame, text="⚙", width=0, command=lambda: engines[gui._engine_var.get()][0]())
     gui._config_button.pack(side=RIGHT)
 
     gui._start_button = Button(start_frame, text=gui._get_start_stop_text(), width=25,
-                               command=lambda: start_engine(engine_var.get()))
+                               command=gui.funcs.start_engine)
     gui._start_button.pack(side=RIGHT)
 
     start_frame.pack(padx=(10, 10), pady=(5, 15), fill=X)
@@ -112,15 +100,6 @@ def _create(gui: 'GUI'):
     _apply_theme(gui)
     gui._root.update()
     gui._root.minsize(gui._root.winfo_width() + 10, gui._root.winfo_height() + 10)
-
-    def keyboard_listener(key):
-        if key == Key.f9:
-            gui.call_in_thread(lambda: start_engine(engine_var.get()))
-
-    kb_listener = keyboard.Listener(
-        on_release=keyboard_listener,
-    )
-    kb_listener.start()
 
     def set_destroy():
         gui._destroyed = True
@@ -140,5 +119,3 @@ def _create(gui: 'GUI'):
             gui.engine.quit()
             break
         time.sleep(0.01)
-
-    kb_listener.stop()

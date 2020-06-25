@@ -12,3 +12,4 @@ beautifulsoup4
 whatsmyip
 pynput
 pytesseract
+keyboard

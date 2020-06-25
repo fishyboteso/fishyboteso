@@ -27,3 +27,9 @@ class GUIFuncs:
             self.gui._root.destroy()
 
         self.gui.call_in_thread(func)
+
+    def start_engine(self):
+        def start_engine():
+            self.gui._config.set("last_started", self.gui._engine_var.get())
+            self.gui.engines[self.gui._engine_var.get()][1]()
+        self.gui.call_in_thread(start_engine)

@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 
+import keyboard
 import win32con
 import win32gui
 
@@ -58,6 +59,8 @@ def main():
 
     bot = EngineEventHandler(c, lambda: gui_window)
     gui_window = GUI(c, lambda: bot)
+
+    keyboard.add_hotkey("f9", gui_window.funcs.start_engine)
 
     gui_window.start()
 

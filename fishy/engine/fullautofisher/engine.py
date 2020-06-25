@@ -19,8 +19,10 @@ kb = keyboard.Controller()
 
 rotate_by = 30
 
+
 def sign(x):
     return -1 if x < 0 else 1
+
 
 def get_crop_coods(window):
     Window.loop()
@@ -75,8 +77,6 @@ class FullAuto(IEngine):
 
         if self.factors is None:
             logging.warning("Please callibrate first")
-        else:
-            print(self.factors)
 
     def run(self):
 
@@ -176,15 +176,15 @@ class FullAuto(IEngine):
         angle_diff = target_angle - current[2]
 
         if abs(angle_diff) > 180:
-            angle_diff = (360 - abs(angle_diff))*sign(angle_diff)*-1
+            angle_diff = (360 - abs(angle_diff)) * sign(angle_diff) * -1
 
         rotate_times = int(angle_diff / self.factors[1]) * -1
-        walking_time = math.sqrt(move_vec[0]**2 + move_vec[1]**2) / self.factors[0]
+        walking_time = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2) / self.factors[0]
 
         print(f"Rotating by {angle_diff}\nrotate_times {rotate_times}\nwalking_time {walking_time}")
 
         for _ in range(abs(rotate_times)):
-            mse.move(sign(rotate_times)*rotate_by*-1, 0)
+            mse.move(sign(rotate_times) * rotate_by * -1, 0)
             time.sleep(0.05)
 
         kb.press('w')
@@ -214,4 +214,3 @@ if __name__ == '__main__':
             on_release=bot.on_press,
     ) as listener:
         listener.join()
-
