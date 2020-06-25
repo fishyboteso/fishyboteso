@@ -17,6 +17,8 @@ class GUIFuncs:
         def func():
             self.gui._bot_running = started
             self.gui._start_button["text"] = self.gui._get_start_stop_text()
+            self.gui._engine_select["state"] = "disabled" if self.gui._bot_running else "normal"
+            self.gui._config_button["state"] = "disabled" if self.gui._bot_running else "normal"
 
         self.gui.call_in_thread(func)
 

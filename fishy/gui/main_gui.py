@@ -96,11 +96,11 @@ def _create(gui: 'GUI'):
     engine_var = StringVar(start_frame)
     labels = list(engines.keys())
     last_started = gui._config.get("last_started", labels[0])
-    engine_select = OptionMenu(start_frame, engine_var, last_started, *labels)
-    engine_select.pack(side=LEFT)
+    gui._engine_select = OptionMenu(start_frame, engine_var, last_started, *labels)
+    gui._engine_select.pack(side=LEFT)
 
-    config_button = Button(start_frame, text="⚙", width=0, command=lambda: engines[engine_var.get()][0]())
-    config_button.pack(side=RIGHT)
+    gui._config_button = Button(start_frame, text="⚙", width=0, command=lambda: engines[engine_var.get()][0]())
+    gui._config_button.pack(side=RIGHT)
 
     gui._start_button = Button(start_frame, text=gui._get_start_stop_text(), width=25,
                                command=lambda: start_engine(engine_var.get()))

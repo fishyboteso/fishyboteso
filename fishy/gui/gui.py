@@ -1,4 +1,5 @@
 import logging
+from tkinter import OptionMenu, Button
 from typing import List, Callable
 import threading
 
@@ -32,6 +33,8 @@ class GUI:
         self._start_button = None
         self._notify = None
         self._notify_check = None
+        self._engine_select: OptionMenu = None
+        self._config_button: Button = None
 
         self._thread = threading.Thread(target=self.create, args=())
 
