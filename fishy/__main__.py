@@ -2,8 +2,8 @@ import ctypes
 import logging
 import os
 import sys
+import traceback
 
-import keyboard
 import win32con
 import win32gui
 
@@ -11,7 +11,7 @@ import fishy
 from fishy import web, helper, gui
 from fishy.engine.event_handler import EngineEventHandler
 from fishy.gui import GUI
-from fishy.helper import Config
+from fishy.helper import Config, hotkey
 
 
 # noinspection PyBroadException
@@ -35,7 +35,7 @@ def initialize(c: Config, window_to_hide):
     try:
         helper.auto_upgrade()
     except Exception:
-        pass
+        logging.error(traceback.format_exc())
 
     if not c.get("debug", False):
         win32gui.ShowWindow(window_to_hide, win32con.SW_HIDE)
@@ -60,7 +60,7 @@ def main():
     bot = EngineEventHandler(c, lambda: gui_window)
     gui_window = GUI(c, lambda: bot)
 
-    keyboard.add_hotkey("f9", gui_window.funcs.start_engine)
+    hotkey.initalize()
 
     gui_window.start()
 

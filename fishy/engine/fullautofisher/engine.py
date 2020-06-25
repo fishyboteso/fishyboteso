@@ -10,9 +10,8 @@ import pytesseract
 from fishy.engine.IEngine import IEngine
 from fishy.engine.window import Window
 from pynput import keyboard, mouse
-from pynput.keyboard import Key
 
-from fishy.helper import Config
+from fishy.helper import Config, hotkey
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
@@ -68,6 +67,12 @@ def get_values_from_image(img, tesseract_dir):
         return None
 
 
+def unassign_keys():
+    keys = ["up", "down", "left", "right"]
+    for k in keys:
+        hotkey.free_key(k)
+
+
 class FullAuto(IEngine):
     def __init__(self, config, gui_ref):
         super().__init__(config, gui_ref)
@@ -79,6 +84,8 @@ class FullAuto(IEngine):
             logging.warning("Please callibrate first")
 
     def run(self):
+        logging.info("Loading please wait...")
+        self.initalize_keys()
 
         try:
             Window.init(False)
@@ -101,15 +108,13 @@ class FullAuto(IEngine):
             self.gui.bot_started(True)
 
         logging.info("Controlls:\nUP: Callibrate\nLEFT: Print Coordinates\nDOWN: Set target\nRIGHT: Move to target")
-        with keyboard.Listener(
-                on_press=self.on_press,
-        ):
-            while self.start:
-                Window.loop()
+        while self.start:
+            Window.loop()
 
-                # self.window.show("test", func=image_pre_process)
-                Window.loop_end()
+            # self.window.show("test", func=image_pre_process)
+            Window.loop_end()
         self.gui.bot_started(False)
+        unassign_keys()
 
     def get_coods(self):
         return get_values_from_image(self.window.processed_image(func=image_pre_process), self.tesseract_dir)
@@ -192,25 +197,22 @@ class FullAuto(IEngine):
         kb.release('w')
         print("done")
 
-    def on_press(self, key):
-        if key == Key.left:
-            logging.info(self.get_coods())
-        elif key == Key.up:
-            self.callibrate()
-        elif key == Key.right:
-            self.move_to(self.config.get("target", None))
-        elif key == Key.down:
+    def initalize_keys(self):
+        hotkey.set_hotkey("left", lambda: logging.info(self.get_coods()))
+        hotkey.set_hotkey("up", lambda: self.callibrate())
+
+        def down():
             t = self.get_coods()[:-1]
             self.config.set("target", t)
             print(f"target_coods are {t}")
+        hotkey.set_hotkey("down", down)
+
+        hotkey.set_hotkey("right", lambda: self.move_to(self.config.get("target", None)))
 
 
 if __name__ == '__main__':
     logging.getLogger("").setLevel(logging.DEBUG)
     # noinspection PyTypeChecker
     bot = FullAuto(Config(), None)
+    hotkey.initalize()
     bot.toggle_start()
-    with keyboard.Listener(
-            on_release=bot.on_press,
-    ) as listener:
-        listener.join()

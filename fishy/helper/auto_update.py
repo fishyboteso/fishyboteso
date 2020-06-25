@@ -9,7 +9,6 @@ import sys
 import urllib.request
 from os import execl
 
-import pkg_resources
 from bs4 import BeautifulSoup
 
 
@@ -46,7 +45,7 @@ def _get_highest_version(index, pkg):
     html = urllib.request.urlopen(url)
     if html.getcode() != 200:
         raise Exception  # not found
-    soup = BeautifulSoup(html.read(), "html5lib")
+    soup = BeautifulSoup(html.read(), "html.parser")
     versions = []
     for link in soup.find_all('a'):
         text = link.get_text()
@@ -60,13 +59,13 @@ def _get_highest_version(index, pkg):
     return max(versions)
 
 
-def _get_current_version(pkg):
+def _get_current_version():
     """
     Gets the current version of the package installed
-    :param pkg: name of the installed package
     :return: version normalized
     """
-    return _normalize_version(pkg_resources.get_distribution(pkg).version)
+    import fishy
+    return _normalize_version(fishy.__version__)
 
 
 def auto_upgrade():
@@ -78,7 +77,8 @@ def auto_upgrade():
     index = "https://pypi.python.org/simple"
     pkg = "fishy"
     hightest_version = _get_highest_version(index, pkg)
-    if hightest_version > _get_current_version(pkg):
-        logging.info(f"Updating to v{'.'.join(hightest_version)}, Please Wait...")
+    if hightest_version > _get_current_version():
+        version = '.'.join([str(x) for x in hightest_version])
+        logging.info(f"Updating to v{version}, Please Wait...")
         subprocess.call(["python", '-m', 'pip', 'install', '--upgrade', 'fishy', '--user'])
         execl(sys.executable, *([sys.executable] + sys.argv))

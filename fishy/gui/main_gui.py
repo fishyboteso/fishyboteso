@@ -9,7 +9,7 @@ from fishy import helper
 
 import typing
 
-from fishy.helper import not_implemented
+from fishy.helper import not_implemented, hotkey
 
 if typing.TYPE_CHECKING:
     from . import GUI
@@ -100,6 +100,8 @@ def _create(gui: 'GUI'):
     _apply_theme(gui)
     gui._root.update()
     gui._root.minsize(gui._root.winfo_width() + 10, gui._root.winfo_height() + 10)
+
+    hotkey.set_hotkey("f9", gui.funcs.start_engine)
 
     def set_destroy():
         gui._destroyed = True
