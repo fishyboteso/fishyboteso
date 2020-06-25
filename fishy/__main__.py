@@ -11,7 +11,6 @@ from fishy import web, helper, gui
 from fishy.engine.event_handler import EngineEventHandler
 from fishy.gui import GUI
 from fishy.helper import Config
-from fishy.engine import SemiFisherEngine
 
 
 # noinspection PyBroadException
@@ -42,7 +41,10 @@ def initialize(c: Config, window_to_hide):
         helper.install_thread_excepthook()
         sys.excepthook = helper.unhandled_exception_logging
 
-    helper.check_addon()
+    helper.check_addon("ProvisionsChalutier")
+
+    if c.get("debug", False):
+        helper.check_addon("FooAddon")
 
 
 def main():

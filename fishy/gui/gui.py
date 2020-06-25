@@ -2,9 +2,10 @@ import logging
 from typing import List, Callable
 import threading
 
+from ttkthemes import ThemedTk
+
 from fishy.engine.event_handler import EngineEventHandler
 from fishy.gui.funcs import GUIFuncs
-from fishy.engine import SemiFisherEngine
 from . import main_gui
 from .log_config import GUIStreamHandler
 from fishy.helper import Config
@@ -26,7 +27,7 @@ class GUI:
         self._bot_running = False
 
         # UI items
-        self._root = None
+        self._root: ThemedTk = None
         self._console = None
         self._start_button = None
         self._notify = None
@@ -57,3 +58,6 @@ class GUI:
 
     def call_in_thread(self, func: Callable):
         self._function_queue.append(func)
+
+    def _get_start_stop_text(self):
+        return "STOP (F9)" if self._bot_running else "START (F9)"

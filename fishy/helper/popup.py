@@ -9,7 +9,7 @@ def center(win):
     height = win.winfo_height()
 
     offset_x = win.master.winfo_x() + win.master.winfo_width() // 2 - (width // 2)
-    offset_y = win.master.winfo_y()+ win.master.winfo_height() // 2 - (height // 2)
+    offset_y = win.master.winfo_y() + win.master.winfo_height() // 2 - (height // 2)
 
     win.geometry('{}x{}+{}+{}'.format(width, height, offset_x, offset_y))
 
@@ -18,7 +18,7 @@ class PopUp(Toplevel):
     def __init__(self, quit_callback, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.running = True
-        self.quit_callback  = quit_callback
+        self.quit_callback = quit_callback
 
     def quit_top(self):
         self.quit_callback()

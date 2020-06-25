@@ -67,7 +67,9 @@ class Window:
 
         if Window.Screen.size == 0:
             logging.info("Don't minimize or drag game window outside the screen")
-            quit(1)
+            return False
+
+        return True
 
     @staticmethod
     def loop_end():
@@ -111,6 +113,7 @@ class Window:
     def show(self, name, resize=None, func=None, ready_img=None):
         """
         Displays the processed image for debugging purposes
+        :param ready_img: send ready image, just show the `ready_img` directly
         :param name: unique name for the image, used to create a new window
         :param resize: scale the image to make small images more visible
         :param func: function to process the image

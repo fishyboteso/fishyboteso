@@ -12,6 +12,24 @@ if typing.TYPE_CHECKING:
     from fishy.gui import GUI
 
 
+def start_fullfisher_config(gui: 'GUI'):
+    def save():
+        gui._config.set("tesseract_dir", tesseract_entry.get(), False)
+        gui._config.save_config()
+
+    top = PopUp(save, gui._root, background=gui._root["background"])
+    controls_frame = Frame(top)
+    top.title("Config")
+
+    Label(controls_frame, text="Tesseract Directory:").grid(row=0, column=0)
+    tesseract_entry = Entry(controls_frame, justify=CENTER)
+    tesseract_entry.insert(0, gui._config.get("tesseract_dir", ""))
+    tesseract_entry.grid(row=0, column=1)
+
+    controls_frame.pack(padx=(5, 5), pady=(5, 5))
+    top.start()
+
+
 def start_semifisher_config(gui: 'GUI'):
     def save():
         gui._config.set("action_key", action_key_entry.get(), False)
@@ -45,4 +63,3 @@ def start_semifisher_config(gui: 'GUI'):
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()
-

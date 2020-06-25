@@ -2,9 +2,12 @@ import logging
 import time
 from tkinter import *
 from tkinter.ttk import *
+
+from pynput import keyboard
+from pynput.keyboard import Key
 from ttkthemes import ThemedTk
 
-from fishy import helper, web
+from fishy import helper
 from fishy.gui import config_top
 
 import typing
@@ -25,9 +28,10 @@ def _apply_theme(gui: 'GUI'):
 def _create(gui: 'GUI'):
     engines = {
         "Semi Fisher": [lambda: config_top.start_semifisher_config(gui), gui.engine.toggle_semifisher],
-        "Full-Auto Fisher": [not_implemented, gui.engine.toggle_fullfisher],
-        # "Lock Picker": [not_implemented, not_implemented]
     }
+
+    if gui._config.get('debug', False):
+        engines["Full-Auto Fisher"] = [lambda: config_top.start_fullfisher_config(gui), gui.engine.toggle_fullfisher]
 
     def start_engine(label):
         gui._config.set("last_started", label)
@@ -67,7 +71,6 @@ def _create(gui: 'GUI'):
         logging.debug("Restart to update the changes")
 
     debug_menu.add_checkbutton(label="Keep Console", command=keep_console, variable=debug_var)
-    debug_menu.add_command(label="Log Dump", command=not_implemented)
     debug_menu.add_command(label="Restart", command=helper.restart)
     menubar.add_cascade(label="Debug", menu=debug_menu)
 
@@ -99,7 +102,7 @@ def _create(gui: 'GUI'):
     config_button = Button(start_frame, text="⚙", width=0, command=lambda: engines[engine_var.get()][0]())
     config_button.pack(side=RIGHT)
 
-    gui._start_button = Button(start_frame, text="STOP" if gui._bot_running else "START", width=25,
+    gui._start_button = Button(start_frame, text=gui._get_start_stop_text(), width=25,
                                command=lambda: start_engine(engine_var.get()))
     gui._start_button.pack(side=RIGHT)
 
@@ -109,6 +112,15 @@ def _create(gui: 'GUI'):
     _apply_theme(gui)
     gui._root.update()
     gui._root.minsize(gui._root.winfo_width() + 10, gui._root.winfo_height() + 10)
+
+    def keyboard_listener(key):
+        if key == Key.f9:
+            gui.call_in_thread(lambda: start_engine(engine_var.get()))
+
+    kb_listener = keyboard.Listener(
+        on_press=keyboard_listener,
+    )
+    kb_listener.start()
 
     def set_destroy():
         gui._destroyed = True
@@ -128,3 +140,5 @@ def _create(gui: 'GUI'):
             gui.engine.quit()
             break
         time.sleep(0.01)
+
+    kb_listener.stop()

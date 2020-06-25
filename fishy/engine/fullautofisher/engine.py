@@ -46,15 +46,16 @@ def image_pre_process(img):
     return img
 
 
-def get_values_from_image(img):
+# noinspection PyBroadException
+def get_values_from_image(img, tesseract_dir):
     try:
-        pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files (x86)/Tesseract-OCR/tesseract.exe'
-        tessdata_dir_config = '--tessdata-dir "C:/Program Files (x86)/Tesseract-OCR/" -c tessedit_char_whitelist=0123456789.'
+        pytesseract.pytesseract.tesseract_cmd = tesseract_dir+'/tesseract.exe'
+        tessdata_dir_config = f'--tessdata-dir "{tesseract_dir}" -c tessedit_char_whitelist=0123456789.'
 
         text = pytesseract.image_to_string(img, lang="eng", config=tessdata_dir_config)
         vals = text.split(":")
         return float(vals[0]), float(vals[1]), float(vals[2])
-    except:
+    except Exception:
         logging.error("Couldn't read coods")
         return None
 
@@ -63,6 +64,7 @@ class FullAuto(IEngine):
     def __init__(self, config, gui_ref):
         super().__init__(config, gui_ref)
         self.factors = None
+        self.tesseract_dir = None
 
     def run(self):
 
@@ -70,25 +72,35 @@ class FullAuto(IEngine):
             Window.init(False)
         except pywintypes.error:
             logging.info("Game window not found")
-            self.start = False
+            self.toggle_start()
             return
 
         self.window = Window(color=cv2.COLOR_RGB2GRAY)
         self.window.crop = get_crop_coods(self.window)
+        self.tesseract_dir = self.config.get("tesseract_dir", None)
 
-        time.sleep(2)
+        if self.tesseract_dir is None:
+            logging.warning("Can't start without Tesseract Directory")
+            self.gui.bot_started(False)
+            self.toggle_start()
+            return
 
         if self.get_gui is not None:
             self.gui.bot_started(True)
-        while self.start:
-            Window.loop()
 
-            self.window.show("test", func=image_pre_process)
-            Window.loop_end()
+        logging.info("Controlls:\nUP: Callibrate\nLEFT: Pring Coordinates\nDOWN: Quit")
+        with keyboard.Listener(
+                on_press=self.on_press,
+        ):
+            while self.start:
+                Window.loop()
+
+                self.window.show("test", func=image_pre_process)
+                Window.loop_end()
         self.gui.bot_started(False)
 
     def get_coods(self):
-        return get_values_from_image(self.window.processed_image(func=image_pre_process))
+        return get_values_from_image(self.window.processed_image(func=image_pre_process), self.tesseract_dir)
 
     def callibrate(self):
         logging.debug("Callibrating...")
@@ -130,7 +142,9 @@ class FullAuto(IEngine):
     def on_press(self, key):
         if key == Key.down:
             bot.start = False
-            quit()
+            self.toggle_start()
+            if self.get_gui is not None:
+                quit()
         elif key == Key.left:
             logging.info(self.get_coods())
         elif key == Key.up:
@@ -139,6 +153,7 @@ class FullAuto(IEngine):
 
 if __name__ == '__main__':
     logging.getLogger("").setLevel(logging.DEBUG)
+    # noinspection PyTypeChecker
     bot = FullAuto(None, None)
     bot.toggle_start()
     with keyboard.Listener(

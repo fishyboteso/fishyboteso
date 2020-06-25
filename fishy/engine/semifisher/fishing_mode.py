@@ -10,10 +10,7 @@ class FishingMode:
     Modes           list of states
     """
     HValues = [60, 18, 100]
-    Threshold = 1
 
-    CurrentCount = 0
-    PrevLabel = -1
     CurrentMode = None
     PrevMode = None
 
@@ -52,22 +49,17 @@ class FishingMode:
 
         :param hue_values: hue_values read by the bot
         """
+        if FishingMode.PrevMode is None:
+            FishingMode.PrevMode = FishingMode.get_by_label(3)
+
         current_label = 3
         for i, val in enumerate(FishingMode.HValues):
             if hue_values == val:
                 current_label = i
 
-        # check if it passes threshold, if so change labelNum
-        if FishingMode.PrevLabel == current_label:
-            FishingMode.CurrentCount += 1
-        else:
-            FishingMode.CurrentCount = 0
-        FishingMode.PrevLabel = current_label
+        FishingMode.CurrentMode = FishingMode.get_by_label(current_label)
 
-        if FishingMode.CurrentCount >= FishingMode.Threshold:
-            FishingMode.CurrentMode = FishingMode.get_by_label(current_label)
-
-        if FishingMode.CurrentMode != FishingMode.PrevMode and FishingMode.PrevMode is not None:
+        if FishingMode.CurrentMode != FishingMode.PrevMode:
 
             if FishingMode.PrevMode.event is not None:
                 FishingMode.PrevMode.event.on_exit_callback(FishingMode.CurrentMode)

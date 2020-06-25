@@ -118,19 +118,18 @@ def create_shortcut():
 
 
 # noinspection PyBroadException
-def check_addon():
+def check_addon(name):
     """
     Extracts the addon from zip and installs it into the AddOn folder of eso
     """
     try:
         user = os.path.expanduser("~")
         addon_dir = os.path.join(user, "Documents", "Elder Scrolls Online", "live", "Addons")
-        if not os.path.exists(os.path.join(addon_dir, 'ProvisionsChalutier')):
-            logging.info("Addon not found, installing it...")
-            with ZipFile(manifest_file("ProvisionsChalutier.zip"), 'r') as z:
+        if not os.path.exists(os.path.join(addon_dir, name)):
+            logging.info(f"{name} Addon not found, installing it...")
+            with ZipFile(manifest_file(f"{name}.zip"), 'r') as z:
                 z.extractall(path=addon_dir)
-            logging.info("Please make sure you enable \"Allow outdated addons\" in-game\n"
-                         "Also, make sure the addon is visible clearly on top left corner of the game window")
+            logging.info("Please make sure you enable \"Allow outdated addons\" in-game")
     except Exception:
         logging.error("couldn't install addon, try doing it manually")
 

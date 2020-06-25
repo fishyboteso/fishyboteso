@@ -19,16 +19,10 @@ if typing.TYPE_CHECKING:
     from fishy.gui import GUI
 
 
-def _wait_and_check(gui):
-    time.sleep(10)
-    if not fishing_event._FishingStarted:
-        gui.show_error("Doesn't look like fishing has started\n\n"
-                       "Check out #faqs on our discord channel to troubleshoot the issue")
-
-
 class SemiFisherEngine(IEngine):
     def __init__(self, config, gui_ref: 'Callable[[], GUI]'):
         super().__init__(config, gui_ref)
+        self.fishPixWindow = None
 
     def run(self):
         """
@@ -59,10 +53,15 @@ class SemiFisherEngine(IEngine):
         # check for game window and stuff
         self.gui.bot_started(True)
         logging.info("Starting the bot engine, look at the fishing hole to start fishing")
-        Thread(target=_wait_and_check, args=(self.gui,)).start()
+        Thread(target=self._wait_and_check).start()
         while self.start:
             # Services to be ran in the start of the main loop
-            Window.loop()
+            success = Window.loop()
+
+            if not success:
+                self.gui.bot_started(False)
+                self.toggle_start()
+                continue
 
             # get the PixelLoc and find the color values, to give it to `FishingMode.Loop`
             self.fishPixWindow.crop = PixelLoc.val
@@ -72,6 +71,12 @@ class SemiFisherEngine(IEngine):
             Window.loop_end()
         logging.info("Fishing engine stopped")
         self.gui.bot_started(False)
+
+    def _wait_and_check(self):
+        time.sleep(10)
+        if not fishing_event._FishingStarted and self.start:
+            self.gui.show_error("Doesn't look like fishing has started\n\n"
+                                "Check out #read-me-first on our discord channel to troubleshoot the issue")
 
     def show_pixel_vals(self):
         def show():

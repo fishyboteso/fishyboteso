@@ -10,3 +10,5 @@ pyautogui
 requests
 beautifulsoup4
 whatsmyip
+pynput
+pytesseract
