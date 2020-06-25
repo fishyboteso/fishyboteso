@@ -118,7 +118,7 @@ def _create(gui: 'GUI'):
             gui.call_in_thread(lambda: start_engine(engine_var.get()))
 
     kb_listener = keyboard.Listener(
-        on_press=keyboard_listener,
+        on_release=keyboard_listener,
     )
     kb_listener.start()
 
