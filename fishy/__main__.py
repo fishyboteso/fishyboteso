@@ -14,6 +14,14 @@ from fishy.gui import GUI
 from fishy.helper import Config, hotkey
 
 
+def check_window_name(title):
+    titles = ["Command Prompt", "PowerShell", "Fishy"]
+    for t in titles:
+        if t in title:
+            return True
+    return False
+
+
 # noinspection PyBroadException
 def initialize(c: Config, window_to_hide):
     helper.create_shortcut_first(c)
@@ -37,7 +45,7 @@ def initialize(c: Config, window_to_hide):
     except Exception:
         logging.error(traceback.format_exc())
 
-    if not c.get("debug", False):
+    if not c.get("debug", False) and check_window_name(win32gui.GetWindowText(window_to_hide)):
         win32gui.ShowWindow(window_to_hide, win32con.SW_HIDE)
         helper.install_thread_excepthook()
         sys.excepthook = helper.unhandled_exception_logging
