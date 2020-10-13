@@ -136,8 +136,10 @@ def check_addon(name):
     Extracts the addon from zip and installs it into the AddOn folder of eso
     """
     try:
-        user = os.path.expanduser("~")
-        addon_dir = os.path.join(user, "Documents", "Elder Scrolls Online", "live", "Addons")
+        # noinspection PyUnresolvedReferences
+        from win32com.shell import shell, shellcon
+        documents = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
+        addon_dir = os.path.join(documents, "Elder Scrolls Online", "live", "Addons")
         if not os.path.exists(os.path.join(addon_dir, name)):
             logging.info(f"{name} Addon not found, installing it...")
             with ZipFile(manifest_file(f"{name}.zip"), 'r') as z:
