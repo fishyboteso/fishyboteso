@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import traceback
+from threading import Thread
 
 import win32con
 import win32gui
@@ -10,7 +11,7 @@ import win32gui
 import fishy
 from fishy import web, helper, gui
 from fishy.engine.event_handler import EngineEventHandler
-from fishy.gui import GUI
+from fishy.gui import GUI, splash
 from fishy.helper import Config, hotkey
 
 
@@ -57,7 +58,11 @@ def initialize(c: Config, window_to_hide):
 
 
 def main():
+    splash.start()
     print("launching please wait...")
+
+    pil_logger = logging.getLogger('PIL')
+    pil_logger.setLevel(logging.INFO)
 
     window_to_hide = win32gui.GetForegroundWindow()
     c = Config()

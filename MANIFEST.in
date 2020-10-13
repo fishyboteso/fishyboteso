@@ -5,6 +5,7 @@ include fishy/icon.ico
 include fishy/ProvisionsChalutier.zip
 include fishy/FooAddon.zip
 include fishy/fishybot_logo.png
+include fishy/sound.mp3
 
 recursive-include tests *
 recursive-exclude * __pycache__

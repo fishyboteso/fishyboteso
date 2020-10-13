@@ -34,7 +34,8 @@ def _create(gui: 'GUI'):
     menubar = Menu(gui._root)
 
     filemenu = Menu(menubar, tearoff=0)
-    filemenu.add_command(label="Create Shortcut", command=helper.create_shortcut)
+    filemenu.add_command(label="Create Shortcut", command=lambda: helper.create_shortcut(False))
+    filemenu.add_command(label="Create Anti-Ghost Shortcut", command=lambda: helper.create_shortcut(True))
 
     def _toggle_mode():
         gui._config.set("dark_mode", not gui._config.get("dark_mode", True))

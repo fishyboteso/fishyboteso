@@ -34,6 +34,7 @@ def start_semifisher_config(gui: 'GUI'):
     def save():
         gui._config.set("action_key", action_key_entry.get(), False)
         gui._config.set("borderless", borderless.instate(['selected']), False)
+        gui._config.set("sound_notification", sound.instate(['selected']), False)
         gui._config.save_config()
 
     top = PopUp(save, gui._root, background=gui._root["background"])
@@ -60,6 +61,10 @@ def start_semifisher_config(gui: 'GUI'):
     action_key_entry = Entry(controls_frame, justify=CENTER)
     action_key_entry.grid(row=2, column=1)
     action_key_entry.insert(0, gui._config.get("action_key", "e"))
+
+    Label(controls_frame, text="Sound Notification: ").grid(row=3, column=0, pady=(5, 5))
+    sound = Checkbutton(controls_frame, var=BooleanVar(value=gui._config.get("sound_notification")))
+    sound.grid(row=3, column=1)
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()

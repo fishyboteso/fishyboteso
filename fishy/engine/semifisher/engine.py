@@ -46,7 +46,7 @@ class SemiFisherEngine(IEngine):
         FishingMode("hook", 0, HookEvent(action_key, False))
         FishingMode("stick", 1, StickEvent())
         FishingMode("look", 2, LookEvent(action_key))
-        FishingMode("idle", 3, IdleEvent(self.config.get("uid")))
+        FishingMode("idle", 3, IdleEvent(self.config.get("uid"), self.config.get("sound_notification")))
 
         self.fishPixWindow = Window(color=cv2.COLOR_RGB2HSV)
 

@@ -102,7 +102,7 @@ def create_shortcut_first(c):
 
 
 # noinspection PyBroadException
-def create_shortcut():
+def create_shortcut(anti_ghosting: bool):
     """
     creates a new shortcut on desktop
     """
@@ -112,13 +112,21 @@ def create_shortcut():
 
         shell = Dispatch('WScript.Shell')
         shortcut = shell.CreateShortCut(path)
-        shortcut.TargetPath = os.path.join(os.path.dirname(sys.executable), "python.exe")
-        shortcut.Arguments = "-m fishy"
+
+        if anti_ghosting:
+            shortcut.TargetPath = r"C:\Windows\System32\cmd.exe"
+            python_dir = os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
+            shortcut.Arguments = f"/C start /affinity 1 /low {python_dir} -m fishy"
+        else:
+            shortcut.TargetPath = os.path.join(os.path.dirname(sys.executable), "python.exe")
+            shortcut.Arguments = "-m fishy"
+
         shortcut.IconLocation = manifest_file("icon.ico")
         shortcut.save()
 
         logging.info("Shortcut created")
     except Exception:
+        traceback.print_exc()
         logging.error("Couldn't create shortcut")
 
 

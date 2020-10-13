@@ -8,8 +8,10 @@ import time
 from abc import abstractmethod, ABC
 
 import pyautogui
+from playsound import playsound
 
 from fishy import web
+from fishy.helper import helper
 
 _fishCaught = 0
 _totalFishCaught = 0
@@ -85,11 +87,12 @@ class IdleEvent(FishEvent):
     State when the fishing hole is depleted or the bot is doing nothing
     """
 
-    def __init__(self, uid):
+    def __init__(self, uid, sound: bool):
         """
         sets the flag to send notification on phone
         """
         self.uid = uid
+        self.sound = sound
 
     def on_enter_callback(self, previous_mode):
         """
@@ -101,6 +104,8 @@ class IdleEvent(FishEvent):
         if _fishCaught > 0:
             web.send_hole_deplete(self.uid, _fishCaught, time.time() - _hole_start_time, _fish_times)
             _fishCaught = 0
+            if self.sound:
+                playsound(helper.manifest_file("sound.mp3"), False)
 
         if previous_mode.name == "hook":
             logging.info("HOLE DEPLETED")

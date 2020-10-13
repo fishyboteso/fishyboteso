@@ -13,3 +13,4 @@ whatsmyip
 pynput
 pytesseract
 keyboard
+playsound 
