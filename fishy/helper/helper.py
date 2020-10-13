@@ -97,7 +97,7 @@ def manifest_file(rel_path):
 
 def create_shortcut_first(c):
     if not c.get("shortcut_created", False):
-        create_shortcut()
+        create_shortcut(False)
         c.set("shortcut_created", True)
 
 
