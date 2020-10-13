@@ -7,11 +7,11 @@ import logging
 import time
 from abc import abstractmethod, ABC
 
-import pyautogui
 from playsound import playsound
 
 from fishy import web
 from fishy.helper import helper
+import keyboard
 
 _fishCaught = 0
 _totalFishCaught = 0
@@ -52,11 +52,12 @@ class HookEvent(FishEvent):
         _fish_times.append(time_to_hook)
         logging.info("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(_fishCaught) + " caught " + "in " + str(
             round(time_to_hook, 2)) + " secs.  " + "Total: " + str(_totalFishCaught))
-        pyautogui.press(self.action_key)
+        # pyautogui.press(self.action_key)
+        keyboard.press_and_release(self.action_key)
 
         if self.collect_r:
             time.sleep(0.1)
-            pyautogui.press('r')
+            keyboard.press_and_release('r')
             time.sleep(0.1)
 
     def on_exit_callback(self, current_mode):
@@ -76,7 +77,7 @@ class LookEvent(FishEvent):
         presses e to throw the fishing rod
         :param previous_mode: previous mode in the state machine
         """
-        pyautogui.press(self.action_key)
+        keyboard.press_and_release(self.action_key)
 
     def on_exit_callback(self, current_mode):
         pass
