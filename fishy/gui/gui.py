@@ -29,13 +29,13 @@ class GUI:
         self._bot_running = False
 
         # UI items
-        self._root: ThemedTk = None
+        self._root: ThemedTk
         self._console = None
         self._start_button = None
         self._notify = None
         self._notify_check = None
-        self._engine_select: OptionMenu = None
-        self._config_button: Button = None
+        self._engine_select: OptionMenu
+        self._config_button: Button
         self._engine_var = None
 
         self._thread = threading.Thread(target=self.create, args=())

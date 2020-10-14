@@ -50,7 +50,7 @@ def _get_highest_version(index, pkg):
     for link in soup.find_all('a'):
         text = link.get_text()
         try:
-            version = re.search(pkg + '-(.*)\.tar\.gz', text).group(1)
+            version = re.search(pkg + r'-(.*)\.tar\.gz', text).group(1)
             versions.append(_normalize_version(version))
         except AttributeError:
             pass

@@ -3,8 +3,6 @@ import logging
 import os
 import sys
 import traceback
-from threading import Thread
-
 import win32con
 import win32gui
 

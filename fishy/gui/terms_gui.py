@@ -43,7 +43,7 @@ def _run_terms_window(config: Config):
 
     g1 = Frame(f)
     Checkbutton(g1, command=disable_enable_button, variable=check_value).pack(side=LEFT)
-    text = Text(g1, width=len(hyperlinkPattern.sub('\g<title>', message)),
+    text = Text(g1, width=len(hyperlinkPattern.sub(r'\g<title>', message)),
                 height=1, borderwidth=0, highlightthickness=0)
     text["background"] = root["background"]
 
