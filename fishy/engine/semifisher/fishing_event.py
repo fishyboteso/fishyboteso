@@ -20,6 +20,13 @@ _fish_times = []
 _hole_start_time = 0
 _FishingStarted = False
 
+subscribers = []
+
+
+def _notify(event):
+    for subscriber in subscribers:
+        subscriber(event)
+
 
 class FishEvent(ABC):
     @abstractmethod
@@ -32,6 +39,7 @@ class FishEvent(ABC):
 
 
 class HookEvent(FishEvent):
+
     def __init__(self, action_key: str, collect_r: bool):
         self.action_key = action_key
         self.collect_r = collect_r
@@ -60,6 +68,10 @@ class HookEvent(FishEvent):
             keyboard.press_and_release('r')
             time.sleep(0.1)
 
+        _notify("hook")
+
+
+
     def on_exit_callback(self, current_mode):
         pass
 
@@ -78,6 +90,7 @@ class LookEvent(FishEvent):
         :param previous_mode: previous mode in the state machine
         """
         keyboard.press_and_release(self.action_key)
+        _notify("look")
 
     def on_exit_callback(self, current_mode):
         pass
@@ -113,6 +126,8 @@ class IdleEvent(FishEvent):
         else:
             logging.info("FISHING INTERRUPTED")
 
+        _notify("idle")
+
     def on_exit_callback(self, current_mode):
         pass
 
@@ -135,6 +150,8 @@ class StickEvent(FishEvent):
         if _fishCaught == 0:
             _hole_start_time = time.time()
             _fish_times = []
+
+        _notify("stick")
 
     def on_exit_callback(self, current_mode):
         pass

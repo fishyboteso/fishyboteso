@@ -80,8 +80,8 @@ def callibrate(engine):
 
     time_to_reach_bottom = time.time() - y_cal_start_time
 
-    engine.factors = move_factor, rot_factor, time_to_reach_bottom
-    engine.config.set("full_auto_factors", engine.factors)
-    logging.info(engine.factors)
+    engine._factors = move_factor, rot_factor, time_to_reach_bottom
+    engine.config.set("full_auto_factors", engine._factors)
+    logging.info(engine._factors)
 
     hotkey.free_key(Key.F8)

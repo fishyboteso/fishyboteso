@@ -1,11 +1,12 @@
 import json
 import logging
 import time
+from threading import Thread
 from tkinter.filedialog import asksaveasfile, askopenfile
 
 from fishy.engine.fullautofisher.engine import FullAuto
 
-from fishy.helper import hotkey
+from fishy.helper import hotkey, helper
 from fishy.helper.hotkey import Key
 
 
@@ -14,6 +15,7 @@ class Player:
         self.recording = False
         self.engine = engine
         self.timeline = []
+        self.hole_complete_flag = False
 
     def _mark_hole(self):
         coods = self.engine.get_coods()
@@ -22,7 +24,14 @@ class Player:
     def _stop_recording(self):
         self.recording = False
 
-    def start_recording(self):
+    def _hole_complete_callback(self, e):
+        if e == "idle":
+            self.hole_complete_flag = True
+
+    def start(self):
+        Thread(target=self.start_route).start()
+
+    def start_route(self):
         file = askopenfile(mode='r', filetypes=[('Python Files', '*.py')])
         if not file:
             logging.error("file not selected")
@@ -41,31 +50,9 @@ class Player:
                 self.engine.move_to(action[1])
                 self.engine.rotate_to(action[1][2])
                 # scan for fish hole
+                if self.engine.look_for_hole():
+                    self.hole_complete_flag = False
+                    helper.wait_until(lambda: self.hole_complete_flag)
                 # if found start fishing and wait for hole to complete
                 # contine when hole completes
-
-        logging.info("f7 for marking hole, f8 to stop recording")
-        hotkey.set_hotkey(Key.F7, self._mark_hole)
-        hotkey.set_hotkey(Key.F8, self._stop_recording)
-
-        self.recording = True
-        self.timeline = []
-
-        while self.recording:
-            start_time = time.time()
-            coods = self.engine.get_coods()
-            self.timeline.append(("goto", (coods[0], coods[1])))
-
-            time_took = time.time() - start_time
-            if time_took <= Recorder.recording_fps:
-                time.sleep(Recorder.recording_fps - time_took)
-            else:
-                logging.warning("Took too much time to record")
-
-        file = None
-        while not file:
-            file = asksaveasfile(mode='wb', filetypes=[('Fishy File', '*.fishy')])
-        data = {"full_auto_path": self.timeline}
-        json.dump(data, file)
-        file.close()
 

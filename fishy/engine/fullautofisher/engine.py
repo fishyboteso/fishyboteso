@@ -7,6 +7,10 @@ import numpy as np
 import pywintypes
 import pytesseract
 
+from fishy.engine.fullautofisher.player import Player
+from fishy.engine.fullautofisher.recorder import Recorder
+from fishy.engine.semifisher import fishing_event
+
 from fishy.engine.IEngine import IEngine
 from fishy.engine.fullautofisher.calibrate import callibrate
 from fishy.engine.window import Window
@@ -81,14 +85,15 @@ class FullAuto(IEngine):
 
     def __init__(self, config, gui_ref):
         super().__init__(config, gui_ref)
-        self.factors = self.config.get("full_auto_factors", None)
-        self.tesseract_dir = None
-        self.target = None
+        self._factors = self.config.get("full_auto_factors", None)
+        self._tesseract_dir = None
+        self._target = None
 
-        self.callibrate_state = -1
-
-        if self.factors is None:
+        if self._factors is None:
             logging.warning("Please callibrate first")
+
+        self._hole_found_flag = False
+        self._curr_rotate_y = 0
 
     def run(self):
         logging.info("Loading please wait...")
@@ -103,9 +108,9 @@ class FullAuto(IEngine):
 
         self.window = Window(color=cv2.COLOR_RGB2GRAY)
         self.window.crop = get_crop_coods(self.window)
-        self.tesseract_dir = self.config.get("tesseract_dir", None)
+        self._tesseract_dir = self.config.get("tesseract_dir", None)
 
-        if self.tesseract_dir is None:
+        if self._tesseract_dir is None:
             logging.warning("Can't start without Tesseract Directory")
             self.gui.bot_started(False)
             self.toggle_start()
@@ -124,26 +129,26 @@ class FullAuto(IEngine):
         unassign_keys()
 
     def get_coods(self):
-        return get_values_from_image(self.window.processed_image(func=image_pre_process), self.tesseract_dir)
+        return get_values_from_image(self.window.processed_image(func=image_pre_process), self._tesseract_dir)
 
     def move_to(self, target):
         if target is None:
             logging.error("set target first")
             return
 
-        if self.factors is None:
+        if self._factors is None:
             logging.error("you need to callibrate first")
             return
 
         current = self.get_coods()
-        print(f"Moving from {(current[0], current[1])} to {self.target}")
+        print(f"Moving from {(current[0], current[1])} to {self._target}")
         move_vec = target[0] - current[0], target[1] - current[1]
         target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0]))
         from_angle = current[2]
 
         self.rotate_to(target_angle, from_angle)
 
-        walking_time = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2) / self.factors[0]
+        walking_time = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2) / self._factors[0]
         print(f"walking for {walking_time}")
         kb.press('w')
         time.sleep(walking_time)
@@ -166,7 +171,7 @@ class FullAuto(IEngine):
         if abs(angle_diff) > 180:
             angle_diff = (360 - abs(angle_diff)) * sign(angle_diff) * -1
 
-        rotate_times = int(angle_diff / self.factors[1]) * -1
+        rotate_times = int(angle_diff / self._factors[1]) * -1
 
         print(f"rotate_times: {rotate_times}")
 
@@ -174,17 +179,43 @@ class FullAuto(IEngine):
             mse.move(sign(rotate_times) * FullAuto.rotate_by * -1, 0)
             time.sleep(0.05)
 
+    def look_for_hole(self):
+        self._hole_found_flag = False
+
+        def found_hole(e):
+            if e == "look":
+                self._hole_found_flag = True
+
+        fishing_event.subscribers.append(found_hole)
+
+        t = 0
+        while not self._hole_found_flag or t <= self._factors[2]/2:
+            mse.move(0, FullAuto.rotate_by)
+            time.sleep(0.05)
+            t += 0.05
+        while not self._hole_found_flag or t > 0:
+            mse.move(0, -FullAuto.rotate_by)
+            time.sleep(0.05)
+            t -= 0.05
+
+        self._curr_rotate_y = t
+        fishing_event.subscribers.remove(found_hole)
+        return self._hole_found_flag
+
     def initalize_keys(self):
-        hotkey.set_hotkey(Key.LEFT, lambda: logging.info(self.get_coods()))
+        # hotkey.set_hotkey(Key.LEFT, lambda: logging.info(self.get_coods()))
         hotkey.set_hotkey(Key.UP, lambda: callibrate(self))
 
-        def down():
-            t = self.get_coods()[:-1]
-            self.config.set("target", t)
-            print(f"target_coods are {t}")
-        hotkey.set_hotkey(Key.DOWN, down)
+        # def down():
+        #     t = self.get_coods()[:-1]
+        #     self.config.set("target", t)
+        #     print(f"target_coods are {t}")
+        # hotkey.set_hotkey(Key.DOWN, down)
 
-        hotkey.set_hotkey(Key.RIGHT, lambda: self.move_to(self.config.get("target", None)))
+        # hotkey.set_hotkey(Key.RIGHT, lambda: self.move_to(self.config.get("target", None)))
+
+        hotkey.set_hotkey(Key.LEFT, lambda: Recorder(self).start)
+        hotkey.set_hotkey(Key.DOWN, lambda: Player(self).start)
 
 
 if __name__ == '__main__':
