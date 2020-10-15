@@ -7,12 +7,9 @@ import numpy as np
 import pywintypes
 import pytesseract
 
-from fishy.engine.fullautofisher.player import Player
-from fishy.engine.fullautofisher.recorder import Recorder
 from fishy.engine.semifisher import fishing_event
 
 from fishy.engine.IEngine import IEngine
-from fishy.engine.fullautofisher.calibrate import callibrate
 from fishy.engine.window import Window
 from pynput import keyboard, mouse
 
@@ -29,7 +26,7 @@ kb = keyboard.Controller()
 def sign(x):
     return -1 if x < 0 else 1
 
-
+offset = 10
 def get_crop_coods(window):
     Window.loop()
     img = window.get_capture()
@@ -47,7 +44,7 @@ def get_crop_coods(window):
             mask = np.zeros_like(img)
             cv2.drawContours(mask, cnt, i, 255, -1)
             x, y, w, h = cv2.boundingRect(cnt[i])
-            return x, y, x + w, y + h
+            return x, y + offset, x + w, y + h - offset
 
 
 def image_pre_process(img):
@@ -85,11 +82,11 @@ class FullAuto(IEngine):
 
     def __init__(self, config, gui_ref):
         super().__init__(config, gui_ref)
-        self._factors = self.config.get("full_auto_factors", None)
+        self.factors = self.config.get("full_auto_factors", None)
         self._tesseract_dir = None
         self._target = None
 
-        if self._factors is None:
+        if self.factors is None:
             logging.warning("Please callibrate first")
 
         self._hole_found_flag = False
@@ -119,11 +116,10 @@ class FullAuto(IEngine):
         if self.get_gui is not None:
             self.gui.bot_started(True)
 
-        logging.info("Controlls:\nUP: Callibrate\nLEFT: Print Coordinates\nDOWN: Set target\nRIGHT: Move to target")
         while self.start:
             Window.loop()
 
-            # self.window.show("test", func=image_pre_process)
+            self.window.show("test", func=image_pre_process)
             Window.loop_end()
         self.gui.bot_started(False)
         unassign_keys()
@@ -136,7 +132,7 @@ class FullAuto(IEngine):
             logging.error("set target first")
             return
 
-        if self._factors is None:
+        if self.factors is None:
             logging.error("you need to callibrate first")
             return
 
@@ -148,7 +144,7 @@ class FullAuto(IEngine):
 
         self.rotate_to(target_angle, from_angle)
 
-        walking_time = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2) / self._factors[0]
+        walking_time = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2) / self.factors[0]
         print(f"walking for {walking_time}")
         kb.press('w')
         time.sleep(walking_time)
@@ -171,7 +167,7 @@ class FullAuto(IEngine):
         if abs(angle_diff) > 180:
             angle_diff = (360 - abs(angle_diff)) * sign(angle_diff) * -1
 
-        rotate_times = int(angle_diff / self._factors[1]) * -1
+        rotate_times = int(angle_diff / self.factors[1]) * -1
 
         print(f"rotate_times: {rotate_times}")
 
@@ -189,7 +185,7 @@ class FullAuto(IEngine):
         fishing_event.subscribers.append(found_hole)
 
         t = 0
-        while not self._hole_found_flag or t <= self._factors[2]/2:
+        while not self._hole_found_flag or t <= self.factors[2]/2:
             mse.move(0, FullAuto.rotate_by)
             time.sleep(0.05)
             t += 0.05
@@ -203,8 +199,10 @@ class FullAuto(IEngine):
         return self._hole_found_flag
 
     def initalize_keys(self):
-        # hotkey.set_hotkey(Key.LEFT, lambda: logging.info(self.get_coods()))
-        hotkey.set_hotkey(Key.UP, lambda: callibrate(self))
+        hotkey.set_hotkey(Key.RIGHT, lambda: logging.info(self.get_coods()))
+
+        from fishy.engine.fullautofisher.calibrate import Calibrate
+        hotkey.set_hotkey(Key.UP, Calibrate(self).start)
 
         # def down():
         #     t = self.get_coods()[:-1]
@@ -213,9 +211,11 @@ class FullAuto(IEngine):
         # hotkey.set_hotkey(Key.DOWN, down)
 
         # hotkey.set_hotkey(Key.RIGHT, lambda: self.move_to(self.config.get("target", None)))
-
-        hotkey.set_hotkey(Key.LEFT, lambda: Recorder(self).start)
-        hotkey.set_hotkey(Key.DOWN, lambda: Player(self).start)
+        from fishy.engine.fullautofisher.recorder import Recorder
+        from fishy.engine.fullautofisher.player import Player
+        hotkey.set_hotkey(Key.LEFT, Recorder(self).start)
+        hotkey.set_hotkey(Key.DOWN, Player(self).start)
+        logging.info("STARTED")
 
 
 if __name__ == '__main__':

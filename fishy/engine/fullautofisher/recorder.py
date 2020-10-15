@@ -1,5 +1,6 @@
 import json
 import logging
+import pickle
 import time
 from threading import Thread
 from tkinter.filedialog import asksaveasfile
@@ -38,7 +39,9 @@ class Recorder:
 
         while self.recording:
             start_time = time.time()
-            coods = self.engine.get_coods()
+            coods = None
+            while not coods:
+                coods = self.engine.get_coods()
             self.timeline.append(("move_to", (coods[0], coods[1])))
 
             time_took = time.time() - start_time
@@ -52,6 +55,7 @@ class Recorder:
         while not file:
             file = asksaveasfile(mode='wb', filetypes=files, defaultextension=files)
         data = {"full_auto_path": self.timeline}
-        json.dump(data, file)
+        print(data)
+        pickle.dump(data, file)
         file.close()
 
