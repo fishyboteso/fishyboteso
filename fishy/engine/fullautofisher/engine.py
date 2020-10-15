@@ -8,15 +8,18 @@ import pywintypes
 import pytesseract
 
 from fishy.engine.IEngine import IEngine
+from fishy.engine.fullautofisher.calibrate import callibrate
 from fishy.engine.window import Window
 from pynput import keyboard, mouse
 
 from fishy.helper import Config, hotkey
+from fishy.helper.helper import wait_until
+from fishy.helper.hotkey import Key
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
 
-rotate_by = 30
+
 
 
 def sign(x):
@@ -68,17 +71,21 @@ def get_values_from_image(img, tesseract_dir):
 
 
 def unassign_keys():
-    keys = ["up", "down", "left", "right"]
+    keys = [Key.UP, Key.RIGHT, Key.LEFT, Key.RIGHT]
     for k in keys:
         hotkey.free_key(k)
 
 
 class FullAuto(IEngine):
+    rotate_by = 30
+
     def __init__(self, config, gui_ref):
         super().__init__(config, gui_ref)
         self.factors = self.config.get("full_auto_factors", None)
         self.tesseract_dir = None
         self.target = None
+
+        self.callibrate_state = -1
 
         if self.factors is None:
             logging.warning("Please callibrate first")
@@ -119,45 +126,6 @@ class FullAuto(IEngine):
     def get_coods(self):
         return get_values_from_image(self.window.processed_image(func=image_pre_process), self.tesseract_dir)
 
-    def callibrate(self):
-        logging.debug("Callibrating...")
-        walking_time = 3
-        rotate_times = 50
-
-        coods = self.get_coods()
-        if coods is None:
-            return
-
-        x1, y1, rot1 = coods
-
-        kb.press('w')
-        time.sleep(walking_time)
-        kb.release('w')
-        time.sleep(0.5)
-
-        coods = self.get_coods()
-        if coods is None:
-            return
-        x2, y2, rot2 = coods
-
-        for _ in range(rotate_times):
-            mse.move(rotate_by, 0)
-            time.sleep(0.05)
-
-        coods = self.get_coods()
-        if coods is None:
-            return
-        x3, y3, rot3 = coods
-
-        if rot3 > rot2:
-            rot3 -= 360
-
-        rot_factor = (rot3 - rot2) / rotate_times
-        move_factor = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / walking_time
-        self.config.set("full_auto_factors", (move_factor, rot_factor))
-        self.factors = move_factor, rot_factor
-        logging.info(self.factors)
-
     def move_to(self, target):
         if target is None:
             logging.error("set target first")
@@ -171,43 +139,52 @@ class FullAuto(IEngine):
         print(f"Moving from {(current[0], current[1])} to {self.target}")
         move_vec = target[0] - current[0], target[1] - current[1]
         target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0]))
-        if target_angle < 0:
-            target_angle = 360 + target_angle
-        target_angle += 90
-        while target_angle > 360:
-            target_angle -= 360
-        print(f"Rotating from {current[2]} to {target_angle}")
+        from_angle = current[2]
 
-        angle_diff = target_angle - current[2]
+        self.rotate_to(target_angle, from_angle)
 
-        if abs(angle_diff) > 180:
-            angle_diff = (360 - abs(angle_diff)) * sign(angle_diff) * -1
-
-        rotate_times = int(angle_diff / self.factors[1]) * -1
         walking_time = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2) / self.factors[0]
-
-        print(f"Rotating by {angle_diff}\nrotate_times {rotate_times}\nwalking_time {walking_time}")
-
-        for _ in range(abs(rotate_times)):
-            mse.move(sign(rotate_times) * rotate_by * -1, 0)
-            time.sleep(0.05)
-
+        print(f"walking for {walking_time}")
         kb.press('w')
         time.sleep(walking_time)
         kb.release('w')
         print("done")
 
+    def rotate_to(self, target_angle, from_angle=None):
+        if target_angle is None:
+            _, _, from_angle = self.get_coods()
+
+        if target_angle < 0:
+            target_angle = 360 + target_angle
+        target_angle += 90
+        while target_angle > 360:
+            target_angle -= 360
+        print(f"Rotating from {from_angle} to {target_angle}")
+
+        angle_diff = target_angle - from_angle
+
+        if abs(angle_diff) > 180:
+            angle_diff = (360 - abs(angle_diff)) * sign(angle_diff) * -1
+
+        rotate_times = int(angle_diff / self.factors[1]) * -1
+
+        print(f"rotate_times: {rotate_times}")
+
+        for _ in range(abs(rotate_times)):
+            mse.move(sign(rotate_times) * FullAuto.rotate_by * -1, 0)
+            time.sleep(0.05)
+
     def initalize_keys(self):
-        hotkey.set_hotkey("left", lambda: logging.info(self.get_coods()))
-        hotkey.set_hotkey("up", lambda: self.callibrate())
+        hotkey.set_hotkey(Key.LEFT, lambda: logging.info(self.get_coods()))
+        hotkey.set_hotkey(Key.UP, lambda: callibrate(self))
 
         def down():
             t = self.get_coods()[:-1]
             self.config.set("target", t)
             print(f"target_coods are {t}")
-        hotkey.set_hotkey("down", down)
+        hotkey.set_hotkey(Key.DOWN, down)
 
-        hotkey.set_hotkey("right", lambda: self.move_to(self.config.get("target", None)))
+        hotkey.set_hotkey(Key.RIGHT, lambda: self.move_to(self.config.get("target", None)))
 
 
 if __name__ == '__main__':

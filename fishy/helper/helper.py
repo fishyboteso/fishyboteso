@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 import threading
+import time
 import traceback
 import webbrowser
 from threading import Thread
@@ -25,6 +26,11 @@ def not_implemented():
 
 def empty_function():
     pass
+
+
+def wait_until(func):
+    while not func():
+        time.sleep(0.1)
 
 
 def open_web(website):
