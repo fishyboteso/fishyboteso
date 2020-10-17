@@ -12,6 +12,7 @@ from win32api import GetSystemMetrics
 import numpy as np
 from PIL import ImageGrab
 
+from fishy.helper.config import config
 
 
 class Status(Enum):
@@ -31,7 +32,7 @@ class WindowServer:
     status = Status.STOPPED
 
 
-def init(borderless: bool):
+def init():
     """
     Executed once before the main loop,
     Finds the game window, and calculates the offset to remove the title bar
@@ -42,7 +43,7 @@ def init(borderless: bool):
         client_rect = win32gui.GetClientRect(WindowServer.hwnd)
         WindowServer.windowOffset = math.floor(((rect[2] - rect[0]) - client_rect[2]) / 2)
         WindowServer.titleOffset = ((rect[3] - rect[1]) - client_rect[3]) - WindowServer.windowOffset
-        if borderless:
+        if config.get("borderless"):
             WindowServer.titleOffset = 0
         WindowServer.status = Status.RUNNING
     except pywintypes.error:
@@ -93,7 +94,7 @@ def start():
     if WindowServer.status == Status.RUNNING:
         return
 
-    init(False)
+    init()
     if WindowServer.status == Status.RUNNING:
         Thread(target=run).start()
 

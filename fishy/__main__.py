@@ -10,7 +10,8 @@ import fishy
 from fishy import web, helper, gui
 from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui import GUI, splash
-from fishy.helper import Config, hotkey
+from fishy.helper import hotkey
+from fishy.helper.config import config
 
 
 def check_window_name(title):
@@ -22,11 +23,11 @@ def check_window_name(title):
 
 
 # noinspection PyBroadException
-def initialize(c: Config, window_to_hide):
-    helper.create_shortcut_first(c)
-    helper.initialize_uid(c)
+def initialize(window_to_hide):
+    helper.create_shortcut_first()
+    helper.initialize_uid()
 
-    new_session = web.get_session(c)
+    new_session = web.get_session()
     if new_session is None:
         logging.error("Couldn't create a session, some features might not work")
     print(f"created session {new_session}")
@@ -44,14 +45,14 @@ def initialize(c: Config, window_to_hide):
     except Exception:
         logging.error(traceback.format_exc())
 
-    if not c.get("debug", False) and check_window_name(win32gui.GetWindowText(window_to_hide)):
+    if not config.get("debug", False) and check_window_name(win32gui.GetWindowText(window_to_hide)):
         win32gui.ShowWindow(window_to_hide, win32con.SW_HIDE)
         helper.install_thread_excepthook()
         sys.excepthook = helper.unhandled_exception_logging
 
     helper.check_addon("ProvisionsChalutier")
 
-    if c.get("debug", False):
+    if config.get("debug", False):
         helper.check_addon("FooAddon")
 
 
@@ -63,20 +64,19 @@ def main():
     pil_logger.setLevel(logging.INFO)
 
     window_to_hide = win32gui.GetForegroundWindow()
-    c = Config()
 
-    if not gui.check_eula(c):
+    if not gui.check_eula():
         return
 
-    bot = EngineEventHandler(c, lambda: gui_window)
-    gui_window = GUI(c, lambda: bot)
+    bot = EngineEventHandler(lambda: gui_window)
+    gui_window = GUI(lambda: bot)
 
     hotkey.initalize()
 
     gui_window.start()
 
     logging.info(f"Fishybot v{fishy.__version__}")
-    initialize(c, window_to_hide)
+    initialize(window_to_hide)
 
     bot.start_event_handler()
 

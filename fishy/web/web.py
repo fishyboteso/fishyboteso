@@ -5,6 +5,7 @@ from whatsmyip.providers import GoogleDnsProvider
 from fishy import helper
 from . import urls
 from .decorators import fallback, uses_session
+from ..helper.config import config
 
 _is_subbed = None
 _session_id = None
@@ -79,7 +80,7 @@ def unsub(uid):
 
 
 @fallback(None)
-def get_session(config, lazy=True):
+def get_session(lazy=True):
     global _session_id
 
     if lazy and _session_id is not None:

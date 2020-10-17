@@ -10,6 +10,7 @@ from fishy import helper
 import typing
 
 from fishy.helper import hotkey
+from ..helper.config import config
 from ..helper.hotkey import Key
 
 if typing.TYPE_CHECKING:
@@ -17,7 +18,7 @@ if typing.TYPE_CHECKING:
 
 
 def _apply_theme(gui: 'GUI'):
-    dark = gui._config.get("dark_mode", True)
+    dark = config.get("dark_mode", True)
     gui._root["theme"] = "equilux" if dark else "breeze"
     gui._console["background"] = "#707070" if dark else "#ffffff"
     gui._console["fg"] = "#ffffff" if dark else "#000000"
@@ -39,11 +40,11 @@ def _create(gui: 'GUI'):
     filemenu.add_command(label="Create Anti-Ghost Shortcut", command=lambda: helper.create_shortcut(True))
 
     def _toggle_mode():
-        gui._config.set("dark_mode", not gui._config.get("dark_mode", True))
+        config.set("dark_mode", not config.get("dark_mode", True))
         gui._start_restart = True
 
     dark_mode_var = IntVar()
-    dark_mode_var.set(int(gui._config.get('dark_mode', True)))
+    dark_mode_var.set(int(config.get('dark_mode', True)))
     filemenu.add_checkbutton(label="Dark Mode", command=_toggle_mode,
                              variable=dark_mode_var)
 
@@ -54,10 +55,10 @@ def _create(gui: 'GUI'):
                            command=lambda: gui.engine.check_pixel_val())
 
     debug_var = IntVar()
-    debug_var.set(int(gui._config.get('debug', False)))
+    debug_var.set(int(config.get('debug', False)))
 
     def keep_console():
-        gui._config.set("debug", bool(debug_var.get()))
+        config.set("debug", bool(debug_var.get()))
         logging.debug("Restart to update the changes")
 
     debug_menu.add_checkbutton(label="Keep Console", command=keep_console, variable=debug_var)
@@ -84,7 +85,7 @@ def _create(gui: 'GUI'):
 
     gui._engine_var = StringVar(start_frame)
     labels = list(engines.keys())
-    last_started = gui._config.get("last_started", labels[0])
+    last_started = config.get("last_started", labels[0])
     gui._engine_select = OptionMenu(start_frame, gui._engine_var, last_started, *labels)
     gui._engine_select.pack(side=LEFT)
 

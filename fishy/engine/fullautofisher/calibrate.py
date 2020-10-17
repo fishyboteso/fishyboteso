@@ -1,12 +1,12 @@
 import math
 import logging
 import time
-from threading import Thread
 
 from fishy.engine.fullautofisher.engine import FullAuto
 from pynput import keyboard, mouse
 
 from fishy.helper import hotkey
+from fishy.helper.config import config
 from fishy.helper.helper import wait_until
 from fishy.helper.hotkey import Key
 
@@ -85,7 +85,7 @@ class Calibrate():
         time_to_reach_bottom = time.time() - y_cal_start_time
 
         self.engine.factors = move_factor, rot_factor, time_to_reach_bottom
-        self.engine.config.set("full_auto_factors", self.engine.factors)
+        config.set("full_auto_factors", self.engine.factors)
         logging.info(self.engine.factors)
 
         hotkey.free_key(Key.F8)

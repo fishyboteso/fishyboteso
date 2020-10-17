@@ -1,5 +1,4 @@
 import logging
-from enum import Enum
 from typing import List
 
 import cv2
@@ -82,7 +81,6 @@ class WindowClient:
         """
         Displays the processed image for debugging purposes
         :param ready_img: send ready image, just show the `ready_img` directly
-        :param name: unique name for the image, used to create a new window
         :param resize: scale the image to make small images more visible
         :param func: function to process the image
         """

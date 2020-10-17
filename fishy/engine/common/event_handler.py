@@ -4,12 +4,12 @@ from fishy.engine.fullautofisher.engine import FullAuto
 
 
 class EngineEventHandler:
-    def __init__(self, config, gui_ref):
+    def __init__(self, gui_ref):
         self.event_handler_running = True
         self.event = []
 
-        self.semi_fisher_engine = SemiFisherEngine(config, gui_ref)
-        self.full_fisher_engine = FullAuto(config, gui_ref)
+        self.semi_fisher_engine = SemiFisherEngine(gui_ref)
+        self.full_fisher_engine = FullAuto(gui_ref)
 
     def start_event_handler(self):
         while self.event_handler_running:

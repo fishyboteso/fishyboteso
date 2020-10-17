@@ -14,6 +14,8 @@ from fishy.engine.semifisher.fishing_mode import State
 from fishy.helper import helper
 import keyboard
 
+from fishy.helper.config import config
+
 
 class FishEvent:
     fishCaught = 0
@@ -34,6 +36,9 @@ class FishEvent:
 def init():
     # todo load config
     fishing_mode.subscribers.append(fisher_callback)
+    FishEvent.action_key = config.get("action_key", 'e')
+    FishEvent.uid = config.get("uid")
+    FishEvent.sound = config.get("sound_notification", False)
 
 
 def destroy():

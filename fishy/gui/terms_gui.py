@@ -5,20 +5,20 @@ from tkinter.ttk import *
 from PIL import Image, ImageTk
 
 from fishy import helper, web
-from fishy.helper import Config
+from fishy.helper.config import config
 
-hyperlinkPattern = re.compile(r'\[(?P<title>.*?)\]\((?P<address>.*?)\)')
+hyperlinkPattern = re.compile(r'\[(?P<title>.*?)\]\((?P<address>.*?)\)')                                                        
 
 
-def check_eula(config):
+def check_eula():
     if not config.get("eula", False):
-        _run_terms_window(config)
+        _run_terms_window()
         return config.get("eula", False)
 
     return config.get("eula", False)
 
 
-def _run_terms_window(config: Config):
+def _run_terms_window():
     def accept():
         config.set("eula", True)
         root.destroy()

@@ -7,6 +7,7 @@ from fishy import web
 import typing
 
 from fishy.libs.tkhtmlview import HTMLLabel
+from ..helper.config import config
 
 if typing.TYPE_CHECKING:
     from . import GUI
@@ -14,8 +15,8 @@ if typing.TYPE_CHECKING:
 
 # noinspection PyProtectedMember
 def _give_notification_link(gui: 'GUI'):
-    if web.is_subbed(gui._config.get("uid"))[0]:
-        web.unsub(gui._config.get("uid"))
+    if web.is_subbed(config.get("uid"))[0]:
+        web.unsub(config.get("uid"))
         return
 
     # set notification checkbutton
@@ -26,8 +27,8 @@ def _give_notification_link(gui: 'GUI'):
         top_running[0] = False
 
     def check():
-        if web.sub(gui._config.get("uid"), discord_name.get()):
-            if web.is_subbed(gui._config.get("uid"), False)[0]:
+        if web.sub(config.get("uid"), discord_name.get()):
+            if web.is_subbed(config.get("uid"), False)[0]:
                 gui._notify.set(1)
                 messagebox.showinfo("Note!", "Notification configured successfully!")
                 quit_top()

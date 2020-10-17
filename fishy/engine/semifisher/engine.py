@@ -20,8 +20,8 @@ if typing.TYPE_CHECKING:
 
 
 class SemiFisherEngine(IEngine):
-    def __init__(self, config, gui_ref: 'Callable[[], GUI]'):
-        super().__init__(config, gui_ref)
+    def __init__(self, gui_ref: 'Callable[[], GUI]'):
+        super().__init__(gui_ref)
         self.fishPixWindow = None
 
     def run(self):
@@ -76,6 +76,6 @@ class SemiFisherEngine(IEngine):
 if __name__ == '__main__':
     logging.getLogger("").setLevel(logging.DEBUG)
     # noinspection PyTypeChecker
-    fisher = SemiFisherEngine(None, None)
+    fisher = SemiFisherEngine(None)
     fisher.toggle_start()
 

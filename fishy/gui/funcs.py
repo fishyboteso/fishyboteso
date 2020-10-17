@@ -1,6 +1,9 @@
 from tkinter import messagebox
 
 import typing
+
+from fishy.helper.config import config
+
 if typing.TYPE_CHECKING:
     from fishy.gui import GUI
 
@@ -47,6 +50,6 @@ class GUIFuncs:
 
     def start_engine(self):
         def start_engine():
-            self.gui._config.set("last_started", self.gui._engine_var.get())
+            config.set("last_started", self.gui._engine_var.get())
             self.gui.engines[self.gui._engine_var.get()][1]()
         self.gui.call_in_thread(start_engine)

@@ -54,3 +54,5 @@ class Config:
         with open(filename, 'w') as f:
             f.write(json.dumps(self.config_dict))
 
+
+config = Config()

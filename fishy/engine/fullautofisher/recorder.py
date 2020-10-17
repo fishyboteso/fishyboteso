@@ -1,8 +1,6 @@
-import json
 import logging
 import pickle
 import time
-from threading import Thread
 from tkinter.filedialog import asksaveasfile
 
 from fishy.engine.fullautofisher.engine import FullAuto

@@ -18,6 +18,7 @@ import winshell
 
 from fishy import web
 from . import Config
+from .config import config
 
 
 def not_implemented():
@@ -43,7 +44,7 @@ def open_web(website):
     Thread(target=lambda: webbrowser.open(website, new=2)).start()
 
 
-def initialize_uid(config: Config):
+def initialize_uid():
     if config.get("uid") is not None:
         return
 
@@ -100,10 +101,10 @@ def manifest_file(rel_path):
     return os.path.join(os.path.dirname(fishy.__file__), rel_path)
 
 
-def create_shortcut_first(c):
-    if not c.get("shortcut_created", False):
+def create_shortcut_first():
+    if not config.get("shortcut_created", False):
         create_shortcut(False)
-        c.set("shortcut_created", True)
+        config.set("shortcut_created", True)
 
 
 # noinspection PyBroadException

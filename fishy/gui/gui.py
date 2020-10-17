@@ -1,6 +1,6 @@
 import logging
 from tkinter import OptionMenu, Button
-from typing import List, Callable
+from typing import List, Callable, Optional
 import threading
 
 from ttkthemes import ThemedTk
@@ -10,18 +10,15 @@ from fishy.gui import config_top
 from fishy.gui.funcs import GUIFuncs
 from . import main_gui
 from .log_config import GUIStreamHandler
-from fishy.helper import Config
+from ..helper.config import config
 
 
 class GUI:
-    def __init__(self, config: Config, get_engine: Callable[[], EngineEventHandler]):
-        """
-        :param config: used to get and set configuration settings
-        """
+    def __init__(self, get_engine: Callable[[], EngineEventHandler]):
         self.funcs = GUIFuncs(self)
         self.get_engine = get_engine
 
-        self._config = config
+        self.config = config
         self._start_restart = False
         self._destroyed = True
         self._log_strings = []
@@ -29,13 +26,13 @@ class GUI:
         self._bot_running = False
 
         # UI items
-        self._root: ThemedTk
+        self._root: Optional[ThemedTk] = None
         self._console = None
         self._start_button = None
         self._notify = None
         self._notify_check = None
-        self._engine_select: OptionMenu
-        self._config_button: Button
+        self._engine_select: Optional[OptionMenu] = None
+        self._config_button: Optional[Button] = None
         self._engine_var = None
 
         self._thread = threading.Thread(target=self.create, args=())
@@ -56,7 +53,7 @@ class GUI:
             "Semi Fisher": [lambda: config_top.start_semifisher_config(self), self.engine.toggle_semifisher],
         }
 
-        if self._config.get('debug', False):
+        if config.get('debug', False):
             engines["Full-Auto Fisher"] = [lambda: config_top.start_fullfisher_config(self),
                                            self.engine.toggle_fullfisher]
         return engines

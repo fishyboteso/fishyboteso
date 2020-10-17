@@ -5,17 +5,17 @@ import logging
 import time
 
 import numpy as np
-import pywintypes
 import pytesseract
 
 from fishy.engine import SemiFisherEngine
 from fishy.engine.common.window import WindowClient
-from fishy.engine.semifisher import fishing_event, fishing_mode
+from fishy.engine.semifisher import fishing_mode
 
 from fishy.engine.common.IEngine import IEngine
 from pynput import keyboard, mouse
 
-from fishy.helper import Config, hotkey
+from fishy.helper import hotkey
+from fishy.helper.config import config
 from fishy.helper.hotkey import Key
 
 mse = mouse.Controller()
@@ -78,9 +78,9 @@ def unassign_keys():
 class FullAuto(IEngine):
     rotate_by = 30
 
-    def __init__(self, config, gui_ref):
-        super().__init__(config, gui_ref)
-        self.factors = self.config.get("full_auto_factors", None)
+    def __init__(self, gui_ref):
+        super().__init__(gui_ref)
+        self.factors = config.get("full_auto_factors", None)
         self._tesseract_dir = None
         self._target = None
 
@@ -96,7 +96,7 @@ class FullAuto(IEngine):
 
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
         self.window.crop = get_crop_coods(self.window)
-        self._tesseract_dir = self.config.get("tesseract_dir", None)
+        self._tesseract_dir = config.get("tesseract_dir", None)
 
         if self._tesseract_dir is None:
             logging.warning("Can't start without Tesseract Directory")
@@ -189,7 +189,7 @@ class FullAuto(IEngine):
 
     def set_target(self):
         t = self.get_coods()[:-1]
-        self.config.set("target", t)
+        config.set("target", t)
         print(f"target_coods are {t}")
 
     def initalize_keys(self):
@@ -213,9 +213,8 @@ class FullAuto(IEngine):
 if __name__ == '__main__':
     logging.getLogger("").setLevel(logging.DEBUG)
     # noinspection PyTypeChecker
-    c = Config()
-    bot = FullAuto(c, None)
-    fisher = SemiFisherEngine(c, None)
+    bot = FullAuto(None)
+    fisher = SemiFisherEngine(None)
     hotkey.initalize()
     fisher.toggle_start()
     bot.toggle_start()

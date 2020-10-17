@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from threading import Thread
 from typing import Callable
 
-from fishy.gui.funcs import GUIFuncs, GUIFuncsMock
+from fishy.gui.funcs import GUIFuncsMock
 
 if typing.TYPE_CHECKING:
     from fishy.gui import GUI
@@ -11,12 +11,11 @@ if typing.TYPE_CHECKING:
 
 class IEngine(ABC):
 
-    def __init__(self, config, gui_ref: 'Callable[[], GUI]'):
+    def __init__(self, gui_ref: 'Callable[[], GUI]'):
         self.get_gui = gui_ref
         self.start = False
         self.window = None
         self.thread = None
-        self.config = config
 
     @property
     def gui(self):
