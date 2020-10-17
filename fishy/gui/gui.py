@@ -5,7 +5,7 @@ import threading
 
 from ttkthemes import ThemedTk
 
-from fishy.engine.event_handler import EngineEventHandler
+from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui import config_top
 from fishy.gui.funcs import GUIFuncs
 from . import main_gui

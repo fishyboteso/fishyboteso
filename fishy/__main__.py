@@ -8,7 +8,7 @@ import win32gui
 
 import fishy
 from fishy import web, helper, gui
-from fishy.engine.event_handler import EngineEventHandler
+from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui import GUI, splash
 from fishy.helper import Config, hotkey
 

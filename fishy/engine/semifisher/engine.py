@@ -8,12 +8,12 @@ import logging
 
 import pywintypes
 
-from fishy.engine.IEngine import IEngine
+from fishy.engine.common.IEngine import IEngine
 from fishy.engine.semifisher import fishing_event
 from .fishing_event import HookEvent, StickEvent, LookEvent, IdleEvent
 from .fishing_mode import FishingMode
 from .pixel_loc import PixelLoc
-from fishy.engine.window import Window
+from ..common.window import WindowClient
 
 if typing.TYPE_CHECKING:
     from fishy.gui import GUI
@@ -31,16 +31,6 @@ class SemiFisherEngine(IEngine):
         """
 
         action_key = self.config.get("action_key", "e")
-        borderless = self.config.get("borderless", False)
-
-        # initialize widow
-        # noinspection PyUnresolvedReferences
-        try:
-            Window.init(borderless)
-        except pywintypes.error:
-            logging.info("Game window not found")
-            self.start = False
-            return
 
         # initializes fishing modes and their callbacks
         FishingMode("hook", 0, HookEvent(action_key, False))
@@ -48,27 +38,24 @@ class SemiFisherEngine(IEngine):
         FishingMode("look", 2, LookEvent(action_key))
         FishingMode("idle", 3, IdleEvent(self.config.get("uid"), self.config.get("sound_notification")))
 
-        self.fishPixWindow = Window(color=cv2.COLOR_RGB2HSV)
+        self.fishPixWindow = WindowClient(color=cv2.COLOR_RGB2HSV)
 
         # check for game window and stuff
         self.gui.bot_started(True)
         logging.info("Starting the bot engine, look at the fishing hole to start fishing")
         Thread(target=self._wait_and_check).start()
         while self.start:
-            # Services to be ran in the start of the main loop
-            success = Window.loop()
+            capture = self.fishPixWindow.get_capture()
 
-            if not success:
+            if capture is None:
+                # if window server crashed
                 self.gui.bot_started(False)
                 self.toggle_start()
                 continue
 
-            # get the PixelLoc and find the color values, to give it to `FishingMode.Loop`
             self.fishPixWindow.crop = PixelLoc.val
-            hue_value = self.fishPixWindow.get_capture()[0][0][0]
+            hue_value = capture[0][0][0]
             FishingMode.loop(hue_value)
-            # Services to be ran in the end of the main loop
-            Window.loop_end()
         logging.info("Fishing engine stopped")
         self.gui.bot_started(False)
 

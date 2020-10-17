@@ -1,5 +1,4 @@
 import math
-from threading import Thread
 
 import cv2
 import logging
@@ -10,31 +9,27 @@ import pywintypes
 import pytesseract
 
 from fishy.engine import SemiFisherEngine
+from fishy.engine.common.window import WindowClient
 from fishy.engine.semifisher import fishing_event
 
-from fishy.engine.IEngine import IEngine
-from fishy.engine.window import Window
+from fishy.engine.common.IEngine import IEngine
 from pynput import keyboard, mouse
 
 from fishy.helper import Config, hotkey
-from fishy.helper.helper import wait_until
 from fishy.helper.hotkey import Key
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
-
-
+offset = 10
 
 
 def sign(x):
     return -1 if x < 0 else 1
 
-offset = 10
+
 def get_crop_coods(window):
-    Window.loop()
     img = window.get_capture()
     img = cv2.inRange(img, 0, 1)
-    Window.loop_end()
 
     cnt, h = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -99,14 +94,7 @@ class FullAuto(IEngine):
         logging.info("Loading please wait...")
         self.initalize_keys()
 
-        try:
-            Window.init(False)
-        except pywintypes.error:
-            logging.info("Game window not found")
-            self.toggle_start()
-            return
-
-        self.window = Window(color=cv2.COLOR_RGB2GRAY)
+        self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
         self.window.crop = get_crop_coods(self.window)
         self._tesseract_dir = self.config.get("tesseract_dir", None)
 
@@ -119,12 +107,11 @@ class FullAuto(IEngine):
         self.gui.bot_started(True)
 
         while self.start:
-            Window.loop()
-
-            self.window.show("test", func=image_pre_process)
-            Window.loop_end()
+            self.window.show(func=image_pre_process)
+            cv2.waitKey(25)
         self.gui.bot_started(False)
         unassign_keys()
+        logging.info("Quit")
 
     def get_coods(self):
         return get_values_from_image(self.window.processed_image(func=image_pre_process), self._tesseract_dir)
@@ -187,7 +174,7 @@ class FullAuto(IEngine):
         fishing_event.subscribers.append(found_hole)
 
         t = 0
-        while not self._hole_found_flag and t <= self.factors[2]/2:
+        while not self._hole_found_flag and t <= self.factors[2] / 2:
             mse.move(0, FullAuto.rotate_by)
             time.sleep(0.05)
             t += 0.05
@@ -230,5 +217,5 @@ if __name__ == '__main__':
     bot = FullAuto(c, None)
     fisher = SemiFisherEngine(c, None)
     hotkey.initalize()
-    # fisher.toggle_start()
+    fisher.toggle_start()
     bot.toggle_start()
