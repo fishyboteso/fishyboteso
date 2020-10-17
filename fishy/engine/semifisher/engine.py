@@ -1,19 +1,19 @@
 import time
 import typing
-from collections import Callable
 from threading import Thread
+from typing import Callable
 
 import cv2
 import logging
 
-import pywintypes
+from fishy.engine.semifisher.fishing_event import FishEvent
+
+from fishy.engine.common.window import WindowClient
+from fishy.engine.semifisher.fishing_mode import FishingMode
 
 from fishy.engine.common.IEngine import IEngine
-from fishy.engine.semifisher import fishing_event
-from .fishing_event import HookEvent, StickEvent, LookEvent, IdleEvent
-from .fishing_mode import FishingMode
-from .pixel_loc import PixelLoc
-from ..common.window import WindowClient
+from fishy.engine.semifisher import fishing_mode, fishing_event
+from fishy.engine.semifisher.pixel_loc import PixelLoc
 
 if typing.TYPE_CHECKING:
     from fishy.gui import GUI
@@ -29,15 +29,7 @@ class SemiFisherEngine(IEngine):
         Starts the fishing
         code explained in comments in detail
         """
-
-        action_key = self.config.get("action_key", "e")
-
-        # initializes fishing modes and their callbacks
-        FishingMode("hook", 0, HookEvent(action_key, False))
-        FishingMode("stick", 1, StickEvent())
-        FishingMode("look", 2, LookEvent(action_key))
-        FishingMode("idle", 3, IdleEvent(self.config.get("uid"), self.config.get("sound_notification")))
-
+        fishing_event.init()
         self.fishPixWindow = WindowClient(color=cv2.COLOR_RGB2HSV)
 
         # check for game window and stuff
@@ -55,13 +47,15 @@ class SemiFisherEngine(IEngine):
 
             self.fishPixWindow.crop = PixelLoc.val
             hue_value = capture[0][0][0]
-            FishingMode.loop(hue_value)
+            fishing_mode.loop(hue_value)
+
         logging.info("Fishing engine stopped")
         self.gui.bot_started(False)
+        fishing_event.destroy()
 
     def _wait_and_check(self):
         time.sleep(10)
-        if not fishing_event._FishingStarted and self.start:
+        if not FishEvent.FishingStarted and self.start:
             self.gui.show_error("Doesn't look like fishing has started\n\n"
                                 "Check out #read-me-first on our discord channel to troubleshoot the issue")
 
@@ -79,4 +73,9 @@ class SemiFisherEngine(IEngine):
         Thread(target=show, args=()).start()
 
 
+if __name__ == '__main__':
+    logging.getLogger("").setLevel(logging.DEBUG)
+    # noinspection PyTypeChecker
+    fisher = SemiFisherEngine(None, None)
+    fisher.toggle_start()
 

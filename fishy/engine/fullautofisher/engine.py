@@ -10,7 +10,7 @@ import pytesseract
 
 from fishy.engine import SemiFisherEngine
 from fishy.engine.common.window import WindowClient
-from fishy.engine.semifisher import fishing_event
+from fishy.engine.semifisher import fishing_event, fishing_mode
 
 from fishy.engine.common.IEngine import IEngine
 from pynput import keyboard, mouse
@@ -171,7 +171,7 @@ class FullAuto(IEngine):
             if e == "look":
                 self._hole_found_flag = True
 
-        fishing_event.subscribers.append(found_hole)
+        fishing_mode.subscribers.append(found_hole)
 
         t = 0
         while not self._hole_found_flag and t <= self.factors[2] / 2:
@@ -184,7 +184,7 @@ class FullAuto(IEngine):
             t -= 0.05
 
         self._curr_rotate_y = t
-        fishing_event.subscribers.remove(found_hole)
+        fishing_mode.subscribers.remove(found_hole)
         return self._hole_found_flag
 
     def set_target(self):
