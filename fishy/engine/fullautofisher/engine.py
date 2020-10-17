@@ -1,4 +1,6 @@
 import math
+from threading import Thread
+
 import cv2
 import logging
 import time
@@ -7,6 +9,7 @@ import numpy as np
 import pywintypes
 import pytesseract
 
+from fishy.engine import SemiFisherEngine
 from fishy.engine.semifisher import fishing_event
 
 from fishy.engine.IEngine import IEngine
@@ -113,8 +116,7 @@ class FullAuto(IEngine):
             self.toggle_start()
             return
 
-        if self.get_gui is not None:
-            self.gui.bot_started(True)
+        self.gui.bot_started(True)
 
         while self.start:
             Window.loop()
@@ -185,11 +187,11 @@ class FullAuto(IEngine):
         fishing_event.subscribers.append(found_hole)
 
         t = 0
-        while not self._hole_found_flag or t <= self.factors[2]/2:
+        while not self._hole_found_flag and t <= self.factors[2]/2:
             mse.move(0, FullAuto.rotate_by)
             time.sleep(0.05)
             t += 0.05
-        while not self._hole_found_flag or t > 0:
+        while not self._hole_found_flag and t > 0:
             mse.move(0, -FullAuto.rotate_by)
             time.sleep(0.05)
             t -= 0.05
@@ -198,29 +200,35 @@ class FullAuto(IEngine):
         fishing_event.subscribers.remove(found_hole)
         return self._hole_found_flag
 
+    def set_target(self):
+        t = self.get_coods()[:-1]
+        self.config.set("target", t)
+        print(f"target_coods are {t}")
+
     def initalize_keys(self):
+
         hotkey.set_hotkey(Key.RIGHT, lambda: logging.info(self.get_coods()))
-
         from fishy.engine.fullautofisher.calibrate import Calibrate
-        hotkey.set_hotkey(Key.UP, Calibrate(self).start)
+        hotkey.set_hotkey(Key.UP, Calibrate(self).callibrate)
 
-        # def down():
-        #     t = self.get_coods()[:-1]
-        #     self.config.set("target", t)
-        #     print(f"target_coods are {t}")
-        # hotkey.set_hotkey(Key.DOWN, down)
+        hotkey.set_hotkey(Key.F9, lambda: print(self.look_for_hole()))
 
+        # hotkey.set_hotkey(Key.DOWN, self.set_target)
         # hotkey.set_hotkey(Key.RIGHT, lambda: self.move_to(self.config.get("target", None)))
+
         from fishy.engine.fullautofisher.recorder import Recorder
         from fishy.engine.fullautofisher.player import Player
-        hotkey.set_hotkey(Key.LEFT, Recorder(self).start)
-        hotkey.set_hotkey(Key.DOWN, Player(self).start)
+        hotkey.set_hotkey(Key.LEFT, Recorder(self).start_recording)
+        hotkey.set_hotkey(Key.DOWN, Player(self).start_route)
         logging.info("STARTED")
 
 
 if __name__ == '__main__':
     logging.getLogger("").setLevel(logging.DEBUG)
     # noinspection PyTypeChecker
-    bot = FullAuto(Config(), None)
+    c = Config()
+    bot = FullAuto(c, None)
+    fisher = SemiFisherEngine(c, None)
     hotkey.initalize()
+    # fisher.toggle_start()
     bot.toggle_start()

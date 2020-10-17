@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from threading import Thread
 from typing import Callable
 
+from fishy.gui.funcs import GUIFuncs, GUIFuncsMock
+
 if typing.TYPE_CHECKING:
     from fishy.gui import GUI
 
@@ -18,6 +20,9 @@ class IEngine(ABC):
 
     @property
     def gui(self):
+        if self.get_gui is None:
+            return GUIFuncsMock()
+
         return self.get_gui().funcs
 
     def toggle_start(self):

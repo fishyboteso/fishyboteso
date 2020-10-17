@@ -1,4 +1,5 @@
 from enum import Enum
+from threading import Thread
 from typing import Dict, Callable
 
 import keyboard
@@ -20,7 +21,7 @@ _hotkeys: Dict[Key, Callable] = {}
 
 
 def _run_callback(k):
-    return lambda: _hotkeys[k]()
+    return lambda: Thread(target=_hotkeys[k]).start()
 
 
 def initalize():

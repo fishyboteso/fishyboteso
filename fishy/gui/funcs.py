@@ -5,6 +5,23 @@ if typing.TYPE_CHECKING:
     from fishy.gui import GUI
 
 
+class GUIFuncsMock:
+    def __init__(self):
+        ...
+
+    def show_error(self, error):
+        ...
+
+    def bot_started(self, started):
+       ...
+
+    def quit(self):
+        ...
+
+    def start_engine(self):
+        ...
+
+
 # noinspection PyProtectedMember
 class GUIFuncs:
     def __init__(self, gui: 'GUI'):

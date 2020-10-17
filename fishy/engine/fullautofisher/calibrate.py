@@ -29,9 +29,6 @@ class Calibrate():
     def f8_pressed(self):
         self._callibrate_state += 1
 
-    def start(self):
-        Thread(target=self.callibrate).start()
-
     def callibrate(self):
         logging.debug("Callibrating...")
         _callibrate_state = -1

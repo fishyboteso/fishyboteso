@@ -33,9 +33,6 @@ class Player:
         if e == "idle":
             self.hole_complete_flag = True
 
-    def start(self):
-        Thread(target=self.start_route).start()
-
     def start_route(self):
         file = askopenfile(mode='rb', filetypes=[('Python Files', '*.fishy')])
         if not file:

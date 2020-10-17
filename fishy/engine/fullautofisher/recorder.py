@@ -26,9 +26,6 @@ class Recorder:
     def _stop_recording(self):
         self.recording = False
 
-    def start(self):
-        Thread(target=self.start_recording).start()
-
     def start_recording(self):
         logging.info("f7 for marking hole, f8 to stop recording")
         hotkey.set_hotkey(Key.F7, self._mark_hole)
