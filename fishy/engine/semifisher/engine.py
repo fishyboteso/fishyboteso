@@ -37,7 +37,7 @@ class SemiFisherEngine(IEngine):
         self.gui.bot_started(True)
         logging.info("Starting the bot engine, look at the fishing hole to start fishing")
         Thread(target=self._wait_and_check).start()
-        while self.start:
+        while self.start and WindowClient.running():
             capture = self.fishPixWindow.get_capture()
 
             if capture is None:
@@ -53,6 +53,7 @@ class SemiFisherEngine(IEngine):
         logging.info("Fishing engine stopped")
         self.gui.bot_started(False)
         fishing_event.unsubscribe()
+        self.fishPixWindow.destory()
 
     def _wait_and_check(self):
         time.sleep(10)

@@ -77,11 +77,6 @@ def loop():
 def loop_end():
     cv2.waitKey(25)
 
-    from fishy.engine.common.window import WindowClient
-    for c in WindowClient.clients:
-        if not c.showing:
-            cv2.destroyWindow(c.show_name)
-
 
 def run():
     # todo use config

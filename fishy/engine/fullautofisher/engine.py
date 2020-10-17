@@ -92,7 +92,16 @@ class FullAuto(IEngine):
         self.fisher = SemiFisherEngine(None)
         self.controls = Controls(self.get_controls())
 
+    @property
+    def show(self):
+        return config.get("show_window_full_auto", False)
+
+    @show.setter
+    def show(self, x):
+        config.set("show_window_full_auto", x)
+
     def update_crop(self):
+        self.show = True
         self.crop = get_crop_coods(self.window)
         config.set("full_auto_crop", self.crop)
         self.window.crop = self.crop
@@ -118,12 +127,16 @@ class FullAuto(IEngine):
         self.gui.bot_started(True)
 
         while self.start and WindowClient.running():
-            self.window.show(func=image_pre_process)
-            cv2.waitKey(25)
+            self.window.show(self.show, func=image_pre_process)
+            if not self.show:
+                time.sleep(0.1)
 
         self.gui.bot_started(False)
         self.controls.unassign_keys()
+        self.window.show(False)
         logging.info("Quit")
+        self.window.destory()
+        self.fisher.toggle_start()
 
     def get_coods(self):
         return get_values_from_image(self.window.processed_image(func=image_pre_process), self._tesseract_dir)
@@ -162,7 +175,6 @@ class FullAuto(IEngine):
     def rotate_to(self, target_angle, from_angle=None):
         if from_angle is None:
             _, _, from_angle = self.get_coods()
-
 
         if target_angle < 0:
             target_angle = 360 + target_angle
@@ -234,31 +246,35 @@ class FullAuto(IEngine):
         def move_to_target():
             self.move_to(config.get("target"))
 
-        def rotate_to():
+        def rotate_to_90():
             self.rotate_to(90)
 
+        def toggle_show():
+            self.show = not self.show
+
         controls = [
-            {
+            ("MAIN", {
                 Key.RIGHT: Player(self).start_route,
                 Key.UP: Calibrate(self).callibrate,
-                Key.LEFT: self.update_crop,
+                Key.LEFT: Recorder(self).start_recording,
                 Key.DOWN: change_state
-            },
-            {
+            }),
+            ("COODS", {
                 Key.RIGHT: print_coods,
-                Key.UP: Recorder(self).start_recording,
-                Key.LEFT: helper.empty_function,
+                Key.UP: self.update_crop,
+                Key.LEFT: toggle_show,
                 Key.DOWN: change_state
-            },
-            {
+            }),
+            ("TEST1", {
                 Key.RIGHT: set_target,
-                Key.UP: rotate_to,
+                Key.UP: rotate_to_90,
                 Key.LEFT: move_to_target,
                 Key.DOWN: change_state
-            }
+            })
         ]
 
         return controls
+
 
 class Controls:
     def __init__(self, controls, first=0):
@@ -270,8 +286,8 @@ class Controls:
         if self.current_menu == len(self.controls):
             self.current_menu = 0
 
-        help_str = "CONTROLS"
-        for key, func in self.controls[self.current_menu].items():
+        help_str = F"CONTROLS: {self.controls[self.current_menu][0]}"
+        for key, func in self.controls[self.current_menu][1].items():
             hotkey.set_hotkey(key, func)
             help_str += f"\n{key.value}: {func.__name__}"
         logging.info(help_str)
@@ -279,7 +295,7 @@ class Controls:
     def unassign_keys(self):
         keys = []
         for c in self.controls:
-            for k in c.keys():
+            for k in c[1].keys():
                 if k not in keys:
                     hotkey.free_key(k)
 

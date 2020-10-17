@@ -23,16 +23,16 @@ class WindowClient:
         self.crop = crop
         self.scale = scale
         self.show_name = show_name
-        self.showing = False
 
         if len(WindowClient.clients) == 0:
             window_server.start()
         WindowClient.clients.append(self)
 
-    def __del__(self):
+    def destory(self):
         WindowClient.clients.remove(self)
         if len(WindowClient.clients) == 0:
             window_server.stop()
+            logging.info("window server stopped")
 
     @staticmethod
     def running():
@@ -86,7 +86,7 @@ class WindowClient:
         else:
             return func(img)
 
-    def show(self, resize=None, func=None):
+    def show(self, to_show, resize=None, func=None):
         """
         Displays the processed image for debugging purposes
         :param ready_img: send ready image, just show the `ready_img` directly
@@ -100,6 +100,10 @@ class WindowClient:
             logging.warning("You need to assign a name first")
             return
 
+        if not to_show:
+            cv2.destroyWindow(self.show_name)
+            return
+
         img = self.processed_image(func)
 
         if img is None:
@@ -108,5 +112,4 @@ class WindowClient:
         if resize is not None:
             img = imutils.resize(img, width=resize)
         cv2.imshow(self.show_name, img)
-
-        self.showing = True
+        cv2.waitKey(25)
