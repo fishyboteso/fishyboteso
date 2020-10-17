@@ -10,7 +10,7 @@ from fishy.engine.semifisher import fishing_mode
 from playsound import playsound
 
 from fishy import web
-from fishy.engine.semifisher.fishing_mode import State
+from fishy.engine.semifisher.fishing_mode import State, FishingMode
 from fishy.helper import helper
 import keyboard
 
@@ -48,6 +48,7 @@ def unsubscribe():
 def subscribe():
     if fisher_callback not in fishing_mode.subscribers:
         fishing_mode.subscribers.append(fisher_callback)
+        fisher_callback(FishingMode.CurrentMode)
 
 
 def fisher_callback(event: State):

@@ -1,4 +1,5 @@
 import math
+import uuid
 
 import cv2
 import logging
@@ -15,13 +16,13 @@ from fishy.engine.semifisher import fishing_mode, fishing_event
 from fishy.engine.common.IEngine import IEngine
 from pynput import keyboard, mouse
 
-from fishy.helper import hotkey
+from fishy.helper import hotkey, helper
 from fishy.helper.config import config
 from fishy.helper.hotkey import Key
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
-offset = 10
+offset = 0
 
 
 def sign(x):
@@ -63,10 +64,12 @@ def get_values_from_image(img, tesseract_dir):
         tessdata_dir_config = f'--tessdata-dir "{tesseract_dir}" -c tessedit_char_whitelist=0123456789.'
 
         text = pytesseract.image_to_string(img, lang="eng", config=tessdata_dir_config)
+        text = text.replace(" ", "")
         vals = text.split(":")
         return float(vals[0]), float(vals[1]), float(vals[2])
     except Exception:
         logging.error("Couldn't read coods")
+        cv2.imwrite(f"fail_{str(uuid.uuid4())[:8]}", img)
         return None
 
 
@@ -136,14 +139,21 @@ class FullAuto(IEngine):
             return
 
         current = self.get_coods()
-        print(f"Moving from {(current[0], current[1])} to {self._target}")
+        print(f"Moving from {(current[0], current[1])} to {target}")
         move_vec = target[0] - current[0], target[1] - current[1]
-        target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0]))
+
+        dist = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2)
+        print(f"distance: {dist}")
+        if dist < 5e-05:
+            print("distance very small skipping")
+            return
+
+        target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0])) + 90
         from_angle = current[2]
 
         self.rotate_to(target_angle, from_angle)
 
-        walking_time = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2) / self.factors[0]
+        walking_time = dist / self.factors[0]
         print(f"walking for {walking_time}")
         kb.press('w')
         time.sleep(walking_time)
@@ -154,9 +164,9 @@ class FullAuto(IEngine):
         if from_angle is None:
             _, _, from_angle = self.get_coods()
 
+
         if target_angle < 0:
             target_angle = 360 + target_angle
-        target_angle += 90
         while target_angle > 360:
             target_angle -= 360
         print(f"Rotating from {from_angle} to {target_angle}")
@@ -187,7 +197,7 @@ class FullAuto(IEngine):
         fishing_mode.subscribers.append(found_hole)
 
         t = 0
-        while not self._hole_found_flag and t <= self.factors[2] / 2:
+        while not self._hole_found_flag and t <= self.factors[2] / 3:
             mse.move(0, FullAuto.rotate_by)
             time.sleep(0.05)
             t += 0.05
@@ -206,29 +216,67 @@ class FullAuto(IEngine):
             time.sleep(0.05)
             self._curr_rotate_y -= 0.05
 
-    def set_target(self):
-        t = self.get_coods()[:-1]
-        config.set("target", t)
-        print(f"target_coods are {t}")
-
     def initalize_keys(self):
-
-        hotkey.set_hotkey(Key.RIGHT, lambda: logging.info(self.get_coods()))
         from fishy.engine.fullautofisher.calibrate import Calibrate
-        hotkey.set_hotkey(Key.UP, Calibrate(self).callibrate)
-
-        hotkey.set_hotkey(Key.F9, lambda: print(self.look_for_hole()))
-
-        hotkey.set_hotkey(Key.F10, self.update_crop)
-
-        # hotkey.set_hotkey(Key.DOWN, self.set_target)
-        # hotkey.set_hotkey(Key.RIGHT, lambda: self.move_to(self.config.get("target", None)))
-
         from fishy.engine.fullautofisher.recorder import Recorder
         from fishy.engine.fullautofisher.player import Player
-        hotkey.set_hotkey(Key.LEFT, Recorder(self).start_recording)
-        hotkey.set_hotkey(Key.DOWN, Player(self).start_route)
-        logging.info("STARTED")
+
+        def change_state():
+            c.change_state()
+
+        def print_coods():
+            logging.info(self.get_coods())
+
+        def set_target():
+            t = self.get_coods()[:-1]
+            config.set("target", t)
+            print(f"target_coods are {t}")
+
+        def move_to_target():
+            self.move_to(config.get("target"))
+
+        def rotate_to():
+            self.rotate_to(90)
+
+        controls = [
+            {
+                Key.RIGHT: Player(self).start_route,
+                Key.UP: Calibrate(self).callibrate,
+                Key.LEFT: self.update_crop,
+                Key.DOWN: change_state
+            },
+            {
+                Key.RIGHT: print_coods,
+                Key.UP: Recorder(self).start_recording,
+                Key.LEFT: helper.empty_function,
+                Key.DOWN: change_state
+            },
+            {
+                Key.RIGHT: set_target,
+                Key.UP: rotate_to,
+                Key.LEFT: move_to_target,
+                Key.DOWN: change_state
+            }
+        ]
+        c = Controls(controls, 0)
+        c.change_state()
+
+
+class Controls:
+    def __init__(self, controls, first=0):
+        self.current_menu = first - 1
+        self.controls = controls
+
+    def change_state(self):
+        self.current_menu += 1
+        if self.current_menu == len(self.controls):
+            self.current_menu = 0
+
+        help_str = "CONTROLS"
+        for key, func in self.controls[self.current_menu].items():
+            hotkey.set_hotkey(key, func)
+            help_str += f"\n{key.value}: {func.__name__}"
+        logging.info(help_str)
 
 
 if __name__ == '__main__':

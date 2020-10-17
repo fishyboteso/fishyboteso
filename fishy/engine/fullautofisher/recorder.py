@@ -21,6 +21,7 @@ class Recorder:
     def _mark_hole(self):
         coods = self.engine.get_coods()
         self.timeline.append(("check_fish", coods))
+        logging.info("check_fish")
 
     def _stop_recording(self):
         self.recording = False
