@@ -6,10 +6,11 @@ import time
 
 import numpy as np
 import pytesseract
+from fishy.engine.semifisher.fishing_mode import FishingMode
 
 from fishy.engine import SemiFisherEngine
 from fishy.engine.common.window import WindowClient
-from fishy.engine.semifisher import fishing_mode
+from fishy.engine.semifisher import fishing_mode, fishing_event
 
 from fishy.engine.common.IEngine import IEngine
 from pynput import keyboard, mouse
@@ -83,6 +84,7 @@ class FullAuto(IEngine):
         self.factors = config.get("full_auto_factors", None)
         self._tesseract_dir = None
         self._target = None
+        self.crop = config.get("full_auto_crop")
 
         if self.factors is None:
             logging.warning("Please callibrate first")
@@ -90,14 +92,21 @@ class FullAuto(IEngine):
         self._hole_found_flag = False
         self._curr_rotate_y = 0
 
+    def update_crop(self):
+        self.crop = get_crop_coods(self.window)
+        config.set("full_auto_crop", self.crop)
+        self.window.crop = self.crop
+
     def run(self):
         logging.info("Loading please wait...")
         self.initalize_keys()
 
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
-        self.window.crop = get_crop_coods(self.window)
-        self._tesseract_dir = config.get("tesseract_dir", None)
+        if self.crop is None:
+            self.update_crop()
+        self.window.crop = self.crop
 
+        self._tesseract_dir = config.get("tesseract_dir", None)
         if self._tesseract_dir is None:
             logging.warning("Can't start without Tesseract Directory")
             self.gui.bot_started(False)
@@ -109,6 +118,7 @@ class FullAuto(IEngine):
         while self.start:
             self.window.show(func=image_pre_process)
             cv2.waitKey(25)
+
         self.gui.bot_started(False)
         unassign_keys()
         logging.info("Quit")
@@ -141,7 +151,7 @@ class FullAuto(IEngine):
         print("done")
 
     def rotate_to(self, target_angle, from_angle=None):
-        if target_angle is None:
+        if from_angle is None:
             _, _, from_angle = self.get_coods()
 
         if target_angle < 0:
@@ -167,8 +177,11 @@ class FullAuto(IEngine):
     def look_for_hole(self):
         self._hole_found_flag = False
 
+        if FishingMode.CurrentMode == fishing_mode.State.LOOK:
+            return True
+
         def found_hole(e):
-            if e == "look":
+            if e == fishing_mode.State.LOOK:
                 self._hole_found_flag = True
 
         fishing_mode.subscribers.append(found_hole)
@@ -187,6 +200,12 @@ class FullAuto(IEngine):
         fishing_mode.subscribers.remove(found_hole)
         return self._hole_found_flag
 
+    def rotate_back(self):
+        while self._curr_rotate_y > 0.01:
+            mse.move(0, -FullAuto.rotate_by)
+            time.sleep(0.05)
+            self._curr_rotate_y -= 0.05
+
     def set_target(self):
         t = self.get_coods()[:-1]
         config.set("target", t)
@@ -199,6 +218,8 @@ class FullAuto(IEngine):
         hotkey.set_hotkey(Key.UP, Calibrate(self).callibrate)
 
         hotkey.set_hotkey(Key.F9, lambda: print(self.look_for_hole()))
+
+        hotkey.set_hotkey(Key.F10, self.update_crop)
 
         # hotkey.set_hotkey(Key.DOWN, self.set_target)
         # hotkey.set_hotkey(Key.RIGHT, lambda: self.move_to(self.config.get("target", None)))
@@ -216,5 +237,8 @@ if __name__ == '__main__':
     bot = FullAuto(None)
     fisher = SemiFisherEngine(None)
     hotkey.initalize()
+
+    fishing_event.unsubscribe()
+
     fisher.toggle_start()
     bot.toggle_start()

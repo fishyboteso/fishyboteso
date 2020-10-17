@@ -1,6 +1,7 @@
 import logging
 import pickle
 import time
+from pprint import pprint
 from tkinter.filedialog import asksaveasfile
 
 from fishy.engine.fullautofisher.engine import FullAuto
@@ -50,7 +51,7 @@ class Recorder:
         while not file:
             file = asksaveasfile(mode='wb', filetypes=files, defaultextension=files)
         data = {"full_auto_path": self.timeline}
-        print(data)
+        pprint(data)
         pickle.dump(data, file)
         file.close()
 

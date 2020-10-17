@@ -1,6 +1,9 @@
 import logging
 import pickle
+from pprint import pprint
 from tkinter.filedialog import askopenfile
+
+from fishy.engine.semifisher import fishing_event
 
 from fishy.engine.fullautofisher.engine import FullAuto
 
@@ -31,13 +34,15 @@ class Player:
             self.hole_complete_flag = True
 
     def start_route(self):
-        file = askopenfile(mode='rb', filetypes=[('Python Files', '*.fishy')])
-        if not file:
-            logging.error("file not selected")
-            return
+        # file = askopenfile(mode='rb', filetypes=[('Python Files', '*.fishy')])
+        # if not file:
+        #     logging.error("file not selected")
+        #     return
+
+        file = open(r"C:\Users\adam_\Desktop\test3.fishy", 'rb')
         data = pickle.load(file)
         file.close()
-        print(data)
+        pprint(data)
         if "full_auto_path" not in data:
             logging.error("incorrect file")
             return
@@ -45,18 +50,21 @@ class Player:
 
         # wait until f8 is pressed
         logging.info("press f8 to start")
+
         self.start_moving_flag = False
         hotkey.set_hotkey(Key.F8, self._start_moving)
         helper.wait_until(lambda: self.start_moving_flag)
 
         logging.info("starting")
         for action in self.timeline:
+            fishing_event.unsubscribe()
             if action[0] == "move_to":
                 self.engine.move_to(action[1])
                 logging.info("moved")
             elif action[0] == "check_fish":
                 self.engine.move_to(action[1])
                 self.engine.rotate_to(action[1][2])
+                fishing_event.subscribe()
                 # scan for fish hole
                 logging.info("scanning")
                 if self.engine.look_for_hole():

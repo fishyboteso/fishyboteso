@@ -9,6 +9,7 @@ from fishy.helper import helper
 
 class Key(Enum):
     F9 = "f9",
+    F10 = "f10"
     F8 = "f8"
     F7 = "f7"
     UP = "up",

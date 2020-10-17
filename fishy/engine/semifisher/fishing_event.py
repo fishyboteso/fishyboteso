@@ -34,15 +34,20 @@ class FishEvent:
 
 
 def init():
-    # todo load config
-    fishing_mode.subscribers.append(fisher_callback)
+    subscribe()
     FishEvent.action_key = config.get("action_key", 'e')
     FishEvent.uid = config.get("uid")
     FishEvent.sound = config.get("sound_notification", False)
 
 
-def destroy():
-    fishing_mode.subscribers.remove(fisher_callback)
+def unsubscribe():
+    if fisher_callback in fishing_mode.subscribers:
+        fishing_mode.subscribers.remove(fisher_callback)
+
+
+def subscribe():
+    if fisher_callback not in fishing_mode.subscribers:
+        fishing_mode.subscribers.append(fisher_callback)
 
 
 def fisher_callback(event: State):

@@ -2,6 +2,7 @@ import time
 import typing
 from threading import Thread
 from typing import Callable
+from typing import Optional
 
 import cv2
 import logging
@@ -20,16 +21,16 @@ if typing.TYPE_CHECKING:
 
 
 class SemiFisherEngine(IEngine):
-    def __init__(self, gui_ref: 'Callable[[], GUI]'):
+    def __init__(self, gui_ref: Optional['Callable[[], GUI]']):
         super().__init__(gui_ref)
         self.fishPixWindow = None
+        fishing_event.init()
 
     def run(self):
         """
         Starts the fishing
         code explained in comments in detail
         """
-        fishing_event.init()
         self.fishPixWindow = WindowClient(color=cv2.COLOR_RGB2HSV)
 
         # check for game window and stuff
@@ -51,7 +52,7 @@ class SemiFisherEngine(IEngine):
 
         logging.info("Fishing engine stopped")
         self.gui.bot_started(False)
-        fishing_event.destroy()
+        fishing_event.unsubscribe()
 
     def _wait_and_check(self):
         time.sleep(10)
