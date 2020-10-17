@@ -62,7 +62,6 @@ class Player:
 
             if action[0] == "move_to":
                 self.engine.move_to(action[1])
-                logging.info("moved")
             elif action[0] == "check_fish":
                 self.engine.move_to(action[1])
                 self.engine.rotate_to(action[1][2])

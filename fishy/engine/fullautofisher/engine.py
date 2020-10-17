@@ -73,12 +73,6 @@ def get_values_from_image(img, tesseract_dir):
         return None
 
 
-def unassign_keys():
-    keys = [Key.UP, Key.RIGHT, Key.LEFT, Key.RIGHT]
-    for k in keys:
-        hotkey.free_key(k)
-
-
 class FullAuto(IEngine):
     rotate_by = 30
 
@@ -95,6 +89,9 @@ class FullAuto(IEngine):
         self._hole_found_flag = False
         self._curr_rotate_y = 0
 
+        self.fisher = SemiFisherEngine(None)
+        self.controls = Controls(self.get_controls())
+
     def update_crop(self):
         self.crop = get_crop_coods(self.window)
         config.set("full_auto_crop", self.crop)
@@ -102,7 +99,9 @@ class FullAuto(IEngine):
 
     def run(self):
         logging.info("Loading please wait...")
-        self.initalize_keys()
+        fishing_event.unsubscribe()
+        self.fisher.toggle_start()
+        self.controls.change_state()
 
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
         if self.crop is None:
@@ -118,12 +117,12 @@ class FullAuto(IEngine):
 
         self.gui.bot_started(True)
 
-        while self.start:
+        while self.start and WindowClient.running():
             self.window.show(func=image_pre_process)
             cv2.waitKey(25)
 
         self.gui.bot_started(False)
-        unassign_keys()
+        self.controls.unassign_keys()
         logging.info("Quit")
 
     def get_coods(self):
@@ -216,13 +215,13 @@ class FullAuto(IEngine):
             time.sleep(0.05)
             self._curr_rotate_y -= 0.05
 
-    def initalize_keys(self):
+    def get_controls(self):
         from fishy.engine.fullautofisher.calibrate import Calibrate
         from fishy.engine.fullautofisher.recorder import Recorder
         from fishy.engine.fullautofisher.player import Player
 
         def change_state():
-            c.change_state()
+            self.controls.change_state()
 
         def print_coods():
             logging.info(self.get_coods())
@@ -258,9 +257,8 @@ class FullAuto(IEngine):
                 Key.DOWN: change_state
             }
         ]
-        c = Controls(controls, 0)
-        c.change_state()
 
+        return controls
 
 class Controls:
     def __init__(self, controls, first=0):
@@ -278,15 +276,17 @@ class Controls:
             help_str += f"\n{key.value}: {func.__name__}"
         logging.info(help_str)
 
+    def unassign_keys(self):
+        keys = []
+        for c in self.controls:
+            for k in c.keys():
+                if k not in keys:
+                    hotkey.free_key(k)
+
 
 if __name__ == '__main__':
     logging.getLogger("").setLevel(logging.DEBUG)
+    hotkey.initalize()
     # noinspection PyTypeChecker
     bot = FullAuto(None)
-    fisher = SemiFisherEngine(None)
-    hotkey.initalize()
-
-    fishing_event.unsubscribe()
-
-    fisher.toggle_start()
     bot.toggle_start()

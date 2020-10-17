@@ -34,6 +34,10 @@ class WindowClient:
         if len(WindowClient.clients) == 0:
             window_server.stop()
 
+    @staticmethod
+    def running():
+        return WindowServer.status == Status.RUNNING
+
     def get_capture(self):
         """
         copies the recorded screen and then pre processes its
@@ -43,13 +47,13 @@ class WindowClient:
             return None
 
         if not window_server.screen_ready():
-            logging.info("waiting fors screen...")
+            logging.info("waiting for screen...")
             helper.wait_until(window_server.screen_ready)
             logging.info("screen ready, continuing...")
 
         temp_img = WindowServer.Screen
 
-        if temp_img is None:
+        if temp_img is None or temp_img.size == 0:
             return None
 
         if self.color is not None:
@@ -72,12 +76,17 @@ class WindowClient:
         if WindowServer.status == Status.CRASHED:
             return None
 
-        if func is None:
-            return self.get_capture()
-        else:
-            return func(self.get_capture())
+        img = self.get_capture()
 
-    def show(self, resize=None, func=None, ready_img=None):
+        if img is None:
+            return None
+
+        if func is None:
+            return img
+        else:
+            return func(img)
+
+    def show(self, resize=None, func=None):
         """
         Displays the processed image for debugging purposes
         :param ready_img: send ready image, just show the `ready_img` directly
@@ -91,13 +100,13 @@ class WindowClient:
             logging.warning("You need to assign a name first")
             return
 
-        if ready_img is None:
-            img = self.processed_image(func)
+        img = self.processed_image(func)
 
-            if resize is not None:
-                img = imutils.resize(img, width=resize)
-        else:
-            img = ready_img
+        if img is None:
+            return
+
+        if resize is not None:
+            img = imutils.resize(img, width=resize)
         cv2.imshow(self.show_name, img)
 
         self.showing = True

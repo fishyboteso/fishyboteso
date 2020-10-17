@@ -16,8 +16,8 @@ from fishy.helper.config import config
 
 
 class Status(Enum):
-    CRASHED = -1,
-    STOPPED = 0,
+    CRASHED = -1
+    STOPPED = 0
     RUNNING = 1
 
 
