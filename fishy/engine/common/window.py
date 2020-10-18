@@ -47,9 +47,9 @@ class WindowClient:
             return None
 
         if not window_server.screen_ready():
-            logging.info("waiting for screen...")
+            print("waiting for screen...")
             helper.wait_until(window_server.screen_ready)
-            logging.info("screen ready, continuing...")
+            print("screen ready, continuing...")
 
         temp_img = WindowServer.Screen
 

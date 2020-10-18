@@ -1,5 +1,8 @@
 import math
+import os
+import tempfile
 import uuid
+from zipfile import ZipFile
 
 import cv2
 import logging
@@ -18,11 +21,32 @@ from pynput import keyboard, mouse
 
 from fishy.helper import hotkey, helper
 from fishy.helper.config import config
+from fishy.helper.downloader import download_file_from_google_drive
 from fishy.helper.hotkey import Key
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
 offset = 0
+
+
+def downlaoad_and_extract_tesseract():
+    logging.info("Tesseract-OCR downlaoding, Please wait...")
+
+    f = tempfile.NamedTemporaryFile(delete=False)
+    download_file_from_google_drive("16llzcBlaCsG9fm-rY2dD4Gvopnhm3XoE", f)
+    f.close()
+
+    logging.info("Tesseract-OCR downloaded, now installing")
+
+    addon_dir = os.path.join(os.environ["APPDATA"], "Tesseract-OCR")
+    with ZipFile(f.name, 'r') as z:
+        z.extractall(path=addon_dir)
+
+    logging.info("Tesseract-OCR installed")
+
+
+def is_tesseract_installed():
+    return os.path.exists(os.path.join(os.environ["APPDATA"], "Tesseract-OCR"))
 
 
 def sign(x):
@@ -108,24 +132,21 @@ class FullAuto(IEngine):
 
     def run(self):
         logging.info("Loading please wait...")
+        self.gui.bot_started(True)
         fishing_event.unsubscribe()
         self.fisher.toggle_start()
-        self.controls.change_state()
 
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
         if self.crop is None:
             self.update_crop()
         self.window.crop = self.crop
 
-        self._tesseract_dir = config.get("tesseract_dir", None)
-        if self._tesseract_dir is None:
-            logging.warning("Can't start without Tesseract Directory")
-            self.gui.bot_started(False)
-            self.toggle_start()
-            return
+        self._tesseract_dir = os.path.join(os.environ["APPDATA"], "Tesseract-OCR")
+        if not is_tesseract_installed():
+            logging.info("tesseract not found")
+            downlaoad_and_extract_tesseract()
 
-        self.gui.bot_started(True)
-
+        self.controls.change_state()
         while self.start and WindowClient.running():
             self.window.show(self.show, func=image_pre_process)
             if not self.show:
