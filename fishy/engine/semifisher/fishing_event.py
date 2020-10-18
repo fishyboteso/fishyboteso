@@ -48,7 +48,9 @@ def unsubscribe():
 def subscribe():
     if fisher_callback not in fishing_mode.subscribers:
         fishing_mode.subscribers.append(fisher_callback)
-        fisher_callback(FishingMode.CurrentMode)
+
+        if FishingMode.CurrentMode == State.LOOK:
+            fisher_callback(FishingMode.CurrentMode)
 
 
 def fisher_callback(event: State):
@@ -90,13 +92,14 @@ def on_idle():
         web.send_hole_deplete(FishEvent.uid, FishEvent.fishCaught, time.time() - FishEvent.hole_start_time,
                               FishEvent.fish_times)
         FishEvent.fishCaught = 0
-        if FishEvent.sound:
-            playsound(helper.manifest_file("sound.mp3"), False)
 
     if FishEvent.previousState == State.HOOK:
         logging.info("HOLE DEPLETED")
     else:
         logging.info("FISHING INTERRUPTED")
+
+    if FishEvent.sound:
+        playsound(helper.manifest_file("sound.mp3"), False)
 
 
 def on_stick():
