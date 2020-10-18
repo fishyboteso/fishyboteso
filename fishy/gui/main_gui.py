@@ -24,6 +24,7 @@ def _apply_theme(gui: 'GUI'):
     gui._console["fg"] = "#ffffff" if dark else "#000000"
 
 
+# noinspection PyProtectedMember
 def _create(gui: 'GUI'):
     engines = gui.engines
 
@@ -105,8 +106,12 @@ def _create(gui: 'GUI'):
 
     hotkey.set_hotkey(Key.F9, gui.funcs.start_engine)
 
+    # noinspection PyProtectedMember
     def set_destroy():
-        gui._destroyed = True
+        if gui._bot_running:
+            logging.info("Turn off the bot engine first")
+        else:
+            gui._destroyed = True
 
     gui._root.protocol("WM_DELETE_WINDOW", set_destroy)
     gui._destroyed = False

@@ -29,7 +29,8 @@ class WindowClient:
         WindowClient.clients.append(self)
 
     def destory(self):
-        WindowClient.clients.remove(self)
+        if self in WindowClient.clients:
+            WindowClient.clients.remove(self)
         if len(WindowClient.clients) == 0:
             window_server.stop()
             logging.info("window server stopped")
