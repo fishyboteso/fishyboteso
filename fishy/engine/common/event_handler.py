@@ -1,4 +1,6 @@
 import logging
+import time
+
 from fishy.engine import SemiFisherEngine
 from fishy.engine.fullautofisher.engine import FullAuto
 
@@ -16,6 +18,7 @@ class EngineEventHandler:
             while len(self.event) > 0:
                 event = self.event.pop(0)
                 event()
+            time.sleep(0.1)
 
     def toggle_semifisher(self):
         self.event.append(self.semi_fisher_engine.toggle_start)
