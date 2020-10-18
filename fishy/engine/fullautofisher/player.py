@@ -7,6 +7,7 @@ from fishy.engine.semifisher import fishing_event, fishing_mode
 from fishy.engine.fullautofisher.engine import FullAuto
 
 from fishy.helper import hotkey, helper
+from fishy.helper.config import config
 from fishy.helper.hotkey import Key
 
 
@@ -33,17 +34,18 @@ class Player:
             self.hole_complete_flag = True
 
     def start_route(self):
-        # file = askopenfile(mode='rb', filetypes=[('Python Files', '*.fishy')])
-        # if not file:
-        #     logging.error("file not selected")
-        #     return
+        file = config.get("full_auto_rec_file")
 
-        file = open(r"C:\Users\adam_\Desktop\test3.fishy", 'rb')
+        if not file:
+            logging.error("Please select a fishy file first from config")
+            return
+
+        file = open(file, 'rb')
         data = pickle.load(file)
         file.close()
         pprint(data)
         if "full_auto_path" not in data:
-            logging.error("incorrect file")
+            logging.error("invalid file")
             return
         self.timeline = data["full_auto_path"]
 
