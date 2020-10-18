@@ -1,10 +1,6 @@
-import logging
-import os
-import tempfile
 import typing
-from zipfile import ZipFile
 
-from google.auth.transport import requests
+from fishy.helper import helper
 
 from fishy import web
 from fishy.gui.notification import _give_notification_link
@@ -13,7 +9,6 @@ from tkinter import *
 from tkinter.ttk import *
 
 from fishy.helper.config import config
-from fishy.helper.downloader import download_file_from_google_drive
 from fishy.helper.popup import PopUp
 
 if typing.TYPE_CHECKING:
@@ -21,18 +16,11 @@ if typing.TYPE_CHECKING:
 
 
 def start_fullfisher_config(gui: 'GUI'):
-    def save():
-        gui.config.set("tesseract_dir", tesseract_entry.get(), False)
-        gui.config.save_config()
-
-    top = PopUp(save, gui._root, background=gui._root["background"])
+    top = PopUp(helper.empty_function, gui._root, background=gui._root["background"])
     controls_frame = Frame(top)
     top.title("Config")
 
-    Label(controls_frame, text="Tesseract Directory:").grid(row=0, column=0)
-    tesseract_entry = Entry(controls_frame, justify=CENTER)
-    tesseract_entry.insert(0, config.get("tesseract_dir", ""))
-    tesseract_entry.grid(row=0, column=1)
+    Label(controls_frame, text="Use semi-fisher engine config").grid(row=0, column=0)
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()
