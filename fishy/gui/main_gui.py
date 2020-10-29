@@ -3,6 +3,7 @@ import time
 from tkinter import *
 from tkinter.ttk import *
 
+from fishy.web import web
 from ttkthemes import ThemedTk
 
 from fishy import helper
@@ -39,7 +40,11 @@ def _create(gui: 'GUI'):
 
     filemenu = Menu(menubar, tearoff=0)
 
-    filemenu.add_checkbutton(label="Login", command=lambda: discord_login(gui), variable=gui.login)
+    login = web.is_logged_in(config.get('uid'))
+    gui.login = IntVar()
+    gui.login.set(1 if login > 0 else 0)
+    state = DISABLED if login == -1 else ACTIVE
+    filemenu.add_checkbutton(label="Login", command=lambda: discord_login(gui), variable=gui.login, state=state)
     filemenu.add_command(label="Create Shortcut", command=lambda: helper.create_shortcut(False))
     # filemenu.add_command(label="Create Anti-Ghost Shortcut", command=lambda: helper.create_shortcut(True))
 

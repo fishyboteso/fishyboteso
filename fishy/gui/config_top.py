@@ -61,7 +61,7 @@ def start_semifisher_config(gui: 'GUI'):
     gui._notify_check = Checkbutton(controls_frame, command=toggle_sub, variable=gui._notify)
     gui._notify_check.grid(row=0, column=1)
     gui._notify_check['state'] = DISABLED
-    is_subbed = web.is_subbed(config.get('uid'), lazy=False)
+    is_subbed = web.is_subbed(config.get('uid'))
     if is_subbed[1]:
         gui._notify_check['state'] = NORMAL
         gui._notify.set(is_subbed[0])

@@ -3,8 +3,9 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter.ttk import *
 
-from fishy import web
 import typing
+
+from fishy.web import web
 
 from fishy.libs.tkhtmlview import HTMLLabel
 from ..helper.config import config
@@ -15,25 +16,26 @@ if typing.TYPE_CHECKING:
 
 # noinspection PyProtectedMember
 def discord_login(gui: 'GUI'):
-    if web.is_subbed(config.get("uid"))[0]:
-        web.unsub(config.get("uid"))
+    if web.is_logged_in(config.get("uid")):
+        if web.logout(config.get("uid")):
+            gui.login.set(0)
         return
 
     # set notification checkbutton
-    gui._notify.set(0)
+    gui.login.set(0)
 
     def quit_top():
         top.destroy()
         top_running[0] = False
 
     def check():
-        if web.sub(config.get("uid"), discord_name.get()):
-            if web.is_subbed(config.get("uid"), False)[0]:
-                gui._notify.set(1)
-                messagebox.showinfo("Note!", "Notification configured successfully!")
-                quit_top()
+        code = int(login_code.get()) if login_code.get().isdigit() else 0
+        if web.login(config.get("uid"), code):
+            gui.login.set(1)
+            messagebox.showinfo("Note!", "Logged in successfuly!")
+            quit_top()
         else:
-            messagebox.showerror("Error", "Subscription wasn't successful")
+            messagebox.showerror("Error", "Logged wasn't successful")
 
     top_running = [True]
 
@@ -54,8 +56,8 @@ def discord_login(gui: 'GUI'):
     html_label.pack(pady=(20, 5))
     html_label.fit_height()
 
-    discord_name = Entry(top, justify=CENTER, font="Calibri 15")
-    discord_name.pack(padx=(15, 15), expand=True, fill=BOTH)
+    login_code = Entry(top, justify=CENTER, font="Calibri 15")
+    login_code.pack(padx=(15, 15), expand=True, fill=BOTH)
 
     html_label = HTMLLabel(top,
                            html=f'<div style="color: {gui._console["fg"]}; text-align: center">'

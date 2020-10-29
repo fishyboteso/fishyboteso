@@ -13,6 +13,7 @@ subscription = domain + "/api/notify_semifish"
 hole_depleted = domain + "/api/hole_depleted"
 session = domain + "/api/session"
 terms = domain + "/terms.html"
+discord = domain + "/api/discord"
 
 
 def get_notification_page(uid):

@@ -10,6 +10,38 @@ from ..helper.config import config
 _session_id = None
 
 
+@fallback(-1)
+def is_logged_in(uid):
+    if uid is None:
+        return -1
+
+    body = {"uid": uid}
+    response = requests.get(urls.discord, params=body)
+    logged_in = response.json()["discord_login"]
+    return 1 if logged_in else 0
+
+
+@fallback(False)
+def login(uid, login_code):
+    body = {
+        "uid": uid,
+        "login_code": login_code
+    }
+    reponse = requests.post(urls.discord, json=body)
+    result = reponse.json()
+    return result["success"]
+
+
+@fallback(False)
+def logout(uid):
+    body = {
+        "uid": uid,
+    }
+    reponse = requests.delete(urls.discord, json=body)
+    result = reponse.json()
+    return result["success"]
+
+
 @fallback(False)
 def register_user(uid):
     ip = get_ip(GoogleDnsProvider)
@@ -62,6 +94,10 @@ def is_subbed(uid):
 
     body = {"uid": uid}
     response = requests.get(urls.subscription, params=body)
+
+    if response.status_code != 200:
+        return False, False
+
     is_subbed = response.json()["subbed"]
     return is_subbed, True
 
