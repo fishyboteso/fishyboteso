@@ -9,7 +9,7 @@ else:
 
 user = domain + "/api/user"
 notify = domain + "/api/notify"
-subscription = domain + "/api/subscription/"
+subscription = domain + "/api/notify_semifish"
 hole_depleted = domain + "/api/hole_depleted"
 session = domain + "/api/session"
 terms = domain + "/terms.html"

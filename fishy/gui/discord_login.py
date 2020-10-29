@@ -14,7 +14,7 @@ if typing.TYPE_CHECKING:
 
 
 # noinspection PyProtectedMember
-def _give_notification_link(gui: 'GUI'):
+def discord_login(gui: 'GUI'):
     if web.is_subbed(config.get("uid"))[0]:
         web.unsub(config.get("uid"))
         return
@@ -46,7 +46,9 @@ def _give_notification_link(gui: 'GUI'):
                                 f'<p><span style="font-size:20px">Step 1.</span><br/>'
                                 f'Join <a href="https://discord.definex.in/">Discord server</a></p>'
                                 f'<p><span style="font-size:20px">Step 2.</span><br/>'
-                                f'Enter username (ex. Fishy#1234)'
+                                f'run !login command in #bot-spam channel'
+                                f'<p><span style="font-size:20px">Step 3.</span><br/>'
+                                f'enter login code'
                                 f'</div>', background=gui._root["background"])
 
     html_label.pack(pady=(20, 5))
@@ -57,8 +59,6 @@ def _give_notification_link(gui: 'GUI'):
 
     html_label = HTMLLabel(top,
                            html=f'<div style="color: {gui._console["fg"]}; text-align: center">'
-                                f'<p><span style="font-size:20px">Step 3.</span><br/>'
-                                f'Install Discord App on your phone</p>'
                                 f'<p><span style="font-size:20px">Step 4.</span><br/></p>'
                                 f'</div>', background=gui._root["background"])
 

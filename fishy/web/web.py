@@ -7,7 +7,6 @@ from . import urls
 from .decorators import fallback, uses_session
 from ..helper.config import config
 
-_is_subbed = None
 _session_id = None
 
 
@@ -43,40 +42,36 @@ def send_hole_deplete(uid, fish_caught, hole_time, fish_times):
 
 
 @fallback(False)
-def sub(uid, name):
-    body = {"uid": uid, "discord_name": name}
+def sub(uid):
+    body = {"uid": uid}
     response = requests.post(urls.subscription, json=body)
-    return response.json()["success"]
+    result = response.json()
+    return result["success"]
 
 
 @fallback((False, False))
-def is_subbed(uid, lazy=True):
+def is_subbed(uid):
     """
     :param uid:
     :param lazy:
     :return: Tuple[is_subbed, success]
     """
-    global _is_subbed
-
-    if lazy and _is_subbed is not None:
-        return _is_subbed, True
 
     if uid is None:
         return False, False
 
     body = {"uid": uid}
     response = requests.get(urls.subscription, params=body)
-    _is_subbed = response.json()["subbed"]
-    return _is_subbed, True
+    is_subbed = response.json()["subbed"]
+    return is_subbed, True
 
 
 @fallback(None)
 def unsub(uid):
-    global _is_subbed
-
-    _is_subbed = False
     body = {"uid": uid}
-    requests.delete(urls.subscription, json=body)
+    response = requests.delete(urls.subscription, json=body)
+    result = response.json()
+    return result["success"]
 
 
 @fallback(None)

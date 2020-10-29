@@ -1,5 +1,5 @@
 import logging
-from tkinter import OptionMenu, Button
+from tkinter import OptionMenu, Button, IntVar
 from typing import List, Callable, Optional
 import threading
 
@@ -29,13 +29,15 @@ class GUI:
         self._root: Optional[ThemedTk] = None
         self._console = None
         self._start_button = None
-        self._notify = None
         self._notify_check = None
         self._engine_select: Optional[OptionMenu] = None
         self._config_button: Optional[Button] = None
         self._engine_var = None
 
         self._thread = threading.Thread(target=self.create, args=())
+
+        self._notify = None
+        self.login = None
 
         root_logger = logging.getLogger('')
         root_logger.setLevel(logging.DEBUG)

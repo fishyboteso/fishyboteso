@@ -10,6 +10,7 @@ from fishy import helper
 import typing
 
 from fishy.helper import hotkey
+from .discord_login import discord_login
 from ..helper.config import config
 from ..helper.hotkey import Key
 
@@ -37,8 +38,10 @@ def _create(gui: 'GUI'):
     menubar = Menu(gui._root)
 
     filemenu = Menu(menubar, tearoff=0)
+
+    filemenu.add_checkbutton(label="Login", command=lambda: discord_login(gui), variable=gui.login)
     filemenu.add_command(label="Create Shortcut", command=lambda: helper.create_shortcut(False))
-    filemenu.add_command(label="Create Anti-Ghost Shortcut", command=lambda: helper.create_shortcut(True))
+    # filemenu.add_command(label="Create Anti-Ghost Shortcut", command=lambda: helper.create_shortcut(True))
 
     def _toggle_mode():
         config.set("dark_mode", not config.get("dark_mode", True))
@@ -49,7 +52,7 @@ def _create(gui: 'GUI'):
     filemenu.add_checkbutton(label="Dark Mode", command=_toggle_mode,
                              variable=dark_mode_var)
 
-    menubar.add_cascade(label="File", menu=filemenu)
+    menubar.add_cascade(label="Options", menu=filemenu)
 
     debug_menu = Menu(menubar, tearoff=0)
     debug_menu.add_command(label="Check PixelVal",

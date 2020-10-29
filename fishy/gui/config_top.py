@@ -5,7 +5,6 @@ from tkinter.filedialog import askopenfilename
 from fishy.helper import helper
 
 from fishy import web
-from fishy.gui.notification import _give_notification_link
 
 from tkinter import *
 from tkinter.ttk import *
@@ -44,6 +43,14 @@ def start_semifisher_config(gui: 'GUI'):
         gui.config.set("sound_notification", sound.instate(['selected']), False)
         gui.config.save_config()
 
+    def toggle_sub():
+        if web.is_subbed(config.get("uid"))[0]:
+            if web.unsub(config.get("uid")):
+                gui._notify.set(0)
+        else:
+            if web.sub(config.get("uid")):
+                gui._notify.set(1)
+
     top = PopUp(save, gui._root, background=gui._root["background"])
     controls_frame = Frame(top)
     top.title("Config")
@@ -51,11 +58,10 @@ def start_semifisher_config(gui: 'GUI'):
     Label(controls_frame, text="Notification:").grid(row=0, column=0)
 
     gui._notify = IntVar(0)
-    gui._notify_check = Checkbutton(controls_frame, command=lambda: _give_notification_link(gui),
-                                    variable=gui._notify)
+    gui._notify_check = Checkbutton(controls_frame, command=toggle_sub, variable=gui._notify)
     gui._notify_check.grid(row=0, column=1)
     gui._notify_check['state'] = DISABLED
-    is_subbed = web.is_subbed(config.get('uid'))
+    is_subbed = web.is_subbed(config.get('uid'), lazy=False)
     if is_subbed[1]:
         gui._notify_check['state'] = NORMAL
         gui._notify.set(is_subbed[0])
