@@ -3,6 +3,7 @@ from tkinter import OptionMenu, Button, IntVar
 from typing import List, Callable, Optional
 import threading
 
+from fishy.web import web
 from ttkthemes import ThemedTk
 
 from fishy.engine.common.event_handler import EngineEventHandler
@@ -52,10 +53,11 @@ class GUI:
     @property
     def engines(self):
         engines = {
-            "Semi Fisher": [lambda: config_top.start_semifisher_config(self), self.engine.toggle_semifisher],
+            "Semi Fisher": [lambda: config_top.start_semifisher_config(self),  # start config function
+                            self.engine.toggle_semifisher],  # start engine function
         }
 
-        if config.get('debug', False):
+        if web.has_beta():
             engines["Full-Auto Fisher"] = [lambda: config_top.start_fullfisher_config(self),
                                            self.engine.toggle_fullfisher]
         return engines

@@ -127,3 +127,15 @@ def get_session(lazy=True):
 
     _session_id = response.json()["session_id"]
     return _session_id
+
+
+@fallback(False)
+def has_beta():
+    body = {'uid': config.get("uid")}
+    response = requests.get(urls.beta, params=body)
+    result = response.json()
+
+    if not result["success"]:
+        return False
+
+    return response.json()["beta"]

@@ -14,6 +14,7 @@ hole_depleted = domain + "/api/hole_depleted"
 session = domain + "/api/session"
 terms = domain + "/terms.html"
 discord = domain + "/api/discord"
+beta = domain + "/api/beta"
 
 
 def get_notification_page(uid):
