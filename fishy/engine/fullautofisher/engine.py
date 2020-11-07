@@ -10,6 +10,9 @@ import time
 
 import numpy as np
 import pytesseract
+
+from fishy.engine.fullautofisher.tesseract import is_tesseract_installed, downlaoad_and_extract_tesseract, \
+    get_values_from_image
 from fishy.engine.semifisher.fishing_mode import FishingMode
 
 from fishy.engine import SemiFisherEngine
@@ -22,53 +25,11 @@ from pynput import keyboard, mouse
 from fishy.helper import hotkey, helper
 from fishy.helper.config import config
 from fishy.helper.downloader import download_file_from_google_drive
+from fishy.helper.helper import sign
 from fishy.helper.hotkey import Key
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
-offset = 0
-
-
-def downlaoad_and_extract_tesseract():
-    logging.info("Tesseract-OCR downlaoding, Please wait...")
-
-    f = tempfile.NamedTemporaryFile(delete=False)
-    download_file_from_google_drive("16llzcBlaCsG9fm-rY2dD4Gvopnhm3XoE", f)
-    f.close()
-
-    logging.info("Tesseract-OCR downloaded, now installing")
-
-    addon_dir = os.path.join(os.environ["APPDATA"], "Tesseract-OCR")
-    with ZipFile(f.name, 'r') as z:
-        z.extractall(path=addon_dir)
-
-    logging.info("Tesseract-OCR installed")
-
-
-def is_tesseract_installed():
-    return os.path.exists(os.path.join(os.environ["APPDATA"], "Tesseract-OCR"))
-
-
-def sign(x):
-    return -1 if x < 0 else 1
-
-
-def get_crop_coods(window):
-    img = window.get_capture()
-    img = cv2.inRange(img, 0, 1)
-
-    cnt, h = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    """
-    code from https://stackoverflow.com/a/45770227/4512396
-    """
-    for i in range(len(cnt)):
-        area = cv2.contourArea(cnt[i])
-        if 5000 < area < 100000:
-            mask = np.zeros_like(img)
-            cv2.drawContours(mask, cnt, i, 255, -1)
-            x, y, w, h = cv2.boundingRect(cnt[i])
-            return x, y + offset, x + w, y + h - offset
 
 
 def image_pre_process(img):
@@ -81,54 +42,31 @@ def image_pre_process(img):
     return img
 
 
-# noinspection PyBroadException
-def get_values_from_image(img, tesseract_dir):
-    try:
-        pytesseract.pytesseract.tesseract_cmd = tesseract_dir + '/tesseract.exe'
-        tessdata_dir_config = f'--tessdata-dir "{tesseract_dir}" -c tessedit_char_whitelist=0123456789.'
-
-        text = pytesseract.image_to_string(img, lang="eng", config=tessdata_dir_config)
-        text = text.replace(" ", "")
-        vals = text.split(":")
-        return float(vals[0]), float(vals[1]), float(vals[2])
-    except Exception:
-        logging.error("Couldn't read coods")
-        cv2.imwrite(f"fail_{str(uuid.uuid4())[:8]}", img)
-        return None
-
-
 class FullAuto(IEngine):
     rotate_by = 30
 
     def __init__(self, gui_ref):
+        from fishy.engine.fullautofisher.controls import Controls
+        from fishy.engine.fullautofisher import controls
+        from fishy.engine.fullautofisher.calibrate import Calibrate
+        from fishy.engine.fullautofisher.test import Test
+
         super().__init__(gui_ref)
-        self.factors = config.get("full_auto_factors", None)
-        self._tesseract_dir = None
-        self._target = None
-        self.crop = config.get("full_auto_crop")
-
-        if self.factors is None:
-            logging.warning("Please callibrate first")
-
         self._hole_found_flag = False
         self._curr_rotate_y = 0
 
         self.fisher = SemiFisherEngine(None)
-        self.controls = Controls(self.get_controls())
+        self.controls = Controls(controls.get_controls(self))
+        self.calibrate = Calibrate(self)
+        self.test = Test(self)
 
     @property
-    def show(self):
+    def show_crop(self):
         return config.get("show_window_full_auto", False)
 
-    @show.setter
-    def show(self, x):
+    @show_crop.setter
+    def show_crop(self, x):
         config.set("show_window_full_auto", x)
-
-    def update_crop(self):
-        self.show = True
-        self.crop = get_crop_coods(self.window)
-        config.set("full_auto_crop", self.crop)
-        self.window.crop = self.crop
 
     def run(self):
         logging.info("Loading please wait...")
@@ -137,19 +75,18 @@ class FullAuto(IEngine):
         self.fisher.toggle_start()
 
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
-        if self.crop is None:
-            self.update_crop()
-        self.window.crop = self.crop
+        if self.calibrate.crop is None:
+            self.calibrate.update_crop(enable_crop=False)
+        self.window.crop = self.calibrate.crop
 
-        self._tesseract_dir = os.path.join(os.environ["APPDATA"], "Tesseract-OCR")
         if not is_tesseract_installed():
             logging.info("tesseract not found")
             downlaoad_and_extract_tesseract()
 
         self.controls.change_state()
         while self.start and WindowClient.running():
-            self.window.show(self.show, func=image_pre_process)
-            if not self.show:
+            self.window.show(self.show_crop, func=image_pre_process)
+            if not self.show_crop:
                 time.sleep(0.1)
 
         self.gui.bot_started(False)
@@ -160,14 +97,15 @@ class FullAuto(IEngine):
         self.fisher.toggle_start()
 
     def get_coods(self):
-        return get_values_from_image(self.window.processed_image(func=image_pre_process), self._tesseract_dir)
+        img = self.window.processed_image(func=image_pre_process)
+        return get_values_from_image(img)
 
     def move_to(self, target):
         if target is None:
             logging.error("set target first")
             return
 
-        if self.factors is None:
+        if not self.calibrate.all_callibrated():
             logging.error("you need to callibrate first")
             return
 
@@ -186,7 +124,7 @@ class FullAuto(IEngine):
 
         self.rotate_to(target_angle, from_angle)
 
-        walking_time = dist / self.factors[0]
+        walking_time = dist / self.calibrate.move_factor
         print(f"walking for {walking_time}")
         kb.press('w')
         time.sleep(walking_time)
@@ -208,7 +146,7 @@ class FullAuto(IEngine):
         if abs(angle_diff) > 180:
             angle_diff = (360 - abs(angle_diff)) * sign(angle_diff) * -1
 
-        rotate_times = int(angle_diff / self.factors[1]) * -1
+        rotate_times = int(angle_diff / self.calibrate.rot_factor) * -1
 
         print(f"rotate_times: {rotate_times}")
 
@@ -229,7 +167,7 @@ class FullAuto(IEngine):
         fishing_mode.subscribers.append(found_hole)
 
         t = 0
-        while not self._hole_found_flag and t <= self.factors[2] / 3:
+        while not self._hole_found_flag and t <= self.calibrate.time_to_reach_bottom / 3:
             mse.move(0, FullAuto.rotate_by)
             time.sleep(0.05)
             t += 0.05
@@ -247,78 +185,6 @@ class FullAuto(IEngine):
             mse.move(0, -FullAuto.rotate_by)
             time.sleep(0.05)
             self._curr_rotate_y -= 0.05
-
-    def get_controls(self):
-        from fishy.engine.fullautofisher.calibrate import Calibrate
-        from fishy.engine.fullautofisher.recorder import Recorder
-        from fishy.engine.fullautofisher.player import Player
-
-        def change_state():
-            self.controls.change_state()
-
-        def print_coods():
-            logging.info(self.get_coods())
-
-        def set_target():
-            t = self.get_coods()[:-1]
-            config.set("target", t)
-            print(f"target_coods are {t}")
-
-        def move_to_target():
-            self.move_to(config.get("target"))
-
-        def rotate_to_90():
-            self.rotate_to(90)
-
-        def toggle_show():
-            self.show = not self.show
-
-        controls = [
-            ("MAIN", {
-                Key.RIGHT: Player(self).start_route,
-                Key.UP: Calibrate(self).callibrate,
-                Key.LEFT: Recorder(self).start_recording,
-                Key.DOWN: change_state
-            }),
-            ("COODS", {
-                Key.RIGHT: print_coods,
-                Key.UP: self.update_crop,
-                Key.LEFT: toggle_show,
-                Key.DOWN: change_state
-            }),
-            ("TEST1", {
-                Key.RIGHT: set_target,
-                Key.UP: rotate_to_90,
-                Key.LEFT: move_to_target,
-                Key.DOWN: change_state
-            })
-        ]
-
-        return controls
-
-
-class Controls:
-    def __init__(self, controls, first=0):
-        self.current_menu = first - 1
-        self.controls = controls
-
-    def change_state(self):
-        self.current_menu += 1
-        if self.current_menu == len(self.controls):
-            self.current_menu = 0
-
-        help_str = F"CONTROLS: {self.controls[self.current_menu][0]}"
-        for key, func in self.controls[self.current_menu][1].items():
-            hotkey.set_hotkey(key, func)
-            help_str += f"\n{key.value}: {func.__name__}"
-        logging.info(help_str)
-
-    def unassign_keys(self):
-        keys = []
-        for c in self.controls:
-            for k in c[1].keys():
-                if k not in keys:
-                    hotkey.free_key(k)
 
 
 if __name__ == '__main__':

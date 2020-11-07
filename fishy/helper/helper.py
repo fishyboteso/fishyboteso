@@ -34,6 +34,10 @@ def wait_until(func):
         time.sleep(0.1)
 
 
+def sign(x):
+    return -1 if x < 0 else 1
+
+
 def open_web(website):
     """
     Opens a website on browser,

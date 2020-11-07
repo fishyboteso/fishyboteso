@@ -75,6 +75,7 @@ class Player:
                     logging.info("starting fishing")
                     self.hole_complete_flag = False
                     helper.wait_until(lambda: self.hole_complete_flag or not self.start_moving_flag)
+                    self.engine.rotate_back()
                 else:
                     logging.info("no hole found")
                 # if found start fishing and wait for hole to complete
