@@ -4,63 +4,59 @@ from pprint import pprint
 
 from fishy.engine.semifisher import fishing_event, fishing_mode
 
-from fishy.engine.fullautofisher.engine import FullAuto
+from fishy.engine.fullautofisher.engine import FullAuto, State
 
-from fishy.helper import hotkey, helper
+from fishy.helper import helper
 from fishy.helper.config import config
-from fishy.helper.hotkey import Key
+
+
+def _get_rec_file():
+    file = config.get("full_auto_rec_file")
+
+    if not file:
+        logging.error("Please select a fishy file first from config")
+        return None
+
+    file = open(file, 'rb')
+    data = pickle.load(file)
+    file.close()
+    pprint(data)
+    if "full_auto_path" not in data:
+        logging.error("invalid file")
+        return None
+    return data["full_auto_path"]
 
 
 class Player:
     def __init__(self, engine: 'FullAuto'):
         self.recording = False
         self.engine = engine
-        self.timeline = []
         self.hole_complete_flag = False
         self.start_moving_flag = False
 
-    def _mark_hole(self):
-        coods = self.engine.get_coods()
-        self.timeline.append(("check_fish", coods))
+    def toggle_move(self):
+        if FullAuto.state != State.PLAYING and FullAuto.state != State.NONE:
+            return
 
-    def _start_moving(self):
         self.start_moving_flag = not self.start_moving_flag
-
-    def _stop_recording(self):
-        self.recording = False
+        if self.start_moving_flag:
+            self._start_route()
 
     def _hole_complete_callback(self, e):
         if e == fishing_event.State.IDLE:
             self.hole_complete_flag = True
 
-    def start_route(self):
-        file = config.get("full_auto_rec_file")
-
-        if not file:
-            logging.error("Please select a fishy file first from config")
+    def _start_route(self):
+        FullAuto.state = State.PLAYING
+        timeline = _get_rec_file()
+        if not timeline:
             return
-
-        file = open(file, 'rb')
-        data = pickle.load(file)
-        file.close()
-        pprint(data)
-        if "full_auto_path" not in data:
-            logging.error("invalid file")
-            return
-        self.timeline = data["full_auto_path"]
-
-        # wait until f8 is pressed
-        logging.info("press f8 to start")
-
-        self.start_moving_flag = False
-        hotkey.set_hotkey(Key.F8, self._start_moving)
-        helper.wait_until(lambda: self.start_moving_flag)
 
         logging.info("starting, press f8 to stop")
         forward = True
         i = 0
         while self.start_moving_flag:
-            action = self.timeline[i]
+            action = timeline[i]
 
             if action[0] == "move_to":
                 self.engine.move_to(action[1])
@@ -84,11 +80,12 @@ class Player:
                 fishing_mode.subscribers.remove(self._hole_complete_callback)
 
             i += 1 if forward else -1
-            if i >= len(self.timeline):
+            if i >= len(timeline):
                 forward = False
-                i = len(self.timeline) - 1
+                i = len(timeline) - 1
             elif i < 0:
                 forward = True
                 i = 0
 
         logging.info("stopped")
+        FullAuto.state = State.NONE

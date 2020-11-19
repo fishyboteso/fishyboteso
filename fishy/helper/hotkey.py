@@ -1,8 +1,9 @@
 from enum import Enum
 from threading import Thread
-from typing import Dict, Callable
+from typing import Dict, Callable, Optional
 
 import keyboard
+from playsound import playsound
 
 from fishy.helper import helper
 
@@ -18,22 +19,28 @@ class Key(Enum):
     RIGHT = "right"
 
 
-_hotkeys: Dict[Key, Callable] = {}
+_hotkeys: Dict[Key, Optional[Callable]] = {}
 
 
-def _run_callback(k):
-    return lambda: Thread(target=_hotkeys[k]).start()
+def _get_callback(k):
+    def callback():
+        if not _hotkeys[k]:
+            return
+
+        playsound(helper.manifest_file("beep.wav"), False)
+        Thread(target=_hotkeys[k]).start()
+    return callback
 
 
 def initalize():
     for k in Key:
-        _hotkeys[k] = helper.empty_function
-        keyboard.add_hotkey(k.value, _run_callback(k))
+        _hotkeys[k] = None
+        keyboard.add_hotkey(k.value, _get_callback(k))
 
 
-def set_hotkey(key: Key, func: Callable):
+def set_hotkey(key: Key, func: Optional[Callable]):
     _hotkeys[key] = func
 
 
 def free_key(k: Key):
-    set_hotkey(k, helper.empty_function)
+    set_hotkey(k, None)

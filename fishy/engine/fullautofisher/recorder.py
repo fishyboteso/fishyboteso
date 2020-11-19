@@ -4,7 +4,7 @@ import time
 from pprint import pprint
 from tkinter.filedialog import asksaveasfile
 
-from fishy.engine.fullautofisher.engine import FullAuto
+from fishy.engine.fullautofisher.engine import FullAuto, State
 
 from fishy.helper import hotkey
 from fishy.helper.hotkey import Key
@@ -12,6 +12,7 @@ from fishy.helper.hotkey import Key
 
 class Recorder:
     recording_fps = 1
+    mark_hole_key = Key.F8
 
     def __init__(self, engine: FullAuto):
         self.recording = False
@@ -23,15 +24,19 @@ class Recorder:
         self.timeline.append(("check_fish", coods))
         logging.info("check_fish")
 
-    def _stop_recording(self):
-        self.recording = False
+    def toggle_recording(self):
+        if FullAuto.state != State.RECORDING and FullAuto.state != State.NONE:
+            return
 
-    def start_recording(self):
-        logging.info("f7 for marking hole, f8 to stop recording")
-        hotkey.set_hotkey(Key.F7, self._mark_hole)
-        hotkey.set_hotkey(Key.F8, self._stop_recording)
+        self.recording = not self.recording
+        if self.recording:
+            self._start_recording()
 
-        self.recording = True
+    def _start_recording(self):
+        FullAuto.state = State.RECORDING
+        logging.info("f8 to stop recording")
+        hotkey.set_hotkey(Recorder.mark_hole_key, self._mark_hole)
+
         self.timeline = []
 
         while self.recording:
@@ -47,6 +52,8 @@ class Recorder:
             else:
                 logging.warning("Took too much time to record")
 
+        hotkey.free_key(Recorder.mark_hole_key)
+
         files = [('Fishy File', '*.fishy')]
         file = None
         while not file:
@@ -55,4 +62,5 @@ class Recorder:
         pprint(data)
         pickle.dump(data, file)
         file.close()
+        FullAuto.state = State.NONE
 

@@ -1,7 +1,9 @@
 import math
 import os
 import tempfile
+import traceback
 import uuid
+from enum import Enum
 from zipfile import ZipFile
 
 import cv2
@@ -42,8 +44,16 @@ def image_pre_process(img):
     return img
 
 
+class State(Enum):
+    NONE = 0
+    PLAYING = 1
+    RECORDING = 2
+    OTHER = 3
+
+
 class FullAuto(IEngine):
     rotate_by = 30
+    state = State.NONE
 
     def __init__(self, gui_ref):
         from fishy.engine.fullautofisher.controls import Controls
@@ -56,9 +66,9 @@ class FullAuto(IEngine):
         self._curr_rotate_y = 0
 
         self.fisher = SemiFisherEngine(None)
-        self.controls = Controls(controls.get_controls(self))
         self.calibrate = Calibrate(self)
         self.test = Test(self)
+        self.controls = Controls(controls.get_controls(self))
 
     @property
     def show_crop(self):
@@ -75,24 +85,31 @@ class FullAuto(IEngine):
         self.fisher.toggle_start()
 
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
-        if self.calibrate.crop is None:
-            self.calibrate.update_crop(enable_crop=False)
-        self.window.crop = self.calibrate.crop
 
-        if not is_tesseract_installed():
-            logging.info("tesseract not found")
-            downlaoad_and_extract_tesseract()
+        try:
+            if self.calibrate.crop is None:
+                self.calibrate.update_crop(enable_crop=False)
+            self.window.crop = self.calibrate.crop
 
-        self.controls.change_state()
-        while self.start and WindowClient.running():
-            self.window.show(self.show_crop, func=image_pre_process)
-            if not self.show_crop:
-                time.sleep(0.1)
+            if not is_tesseract_installed():
+                logging.info("tesseract not found")
+                downlaoad_and_extract_tesseract()
+
+            self.controls.initialize()
+            while self.start and WindowClient.running():
+                self.window.show(self.show_crop, func=image_pre_process)
+                if not self.show_crop:
+                    time.sleep(0.1)
+        except:
+            traceback.print_exc()
+
+            if not self.window.get_capture():
+                logging.error("Game window not found")
 
         self.gui.bot_started(False)
         self.controls.unassign_keys()
         self.window.show(False)
-        logging.info("Quit")
+        logging.info("Quitting")
         self.window.destory()
         self.fisher.toggle_start()
 
