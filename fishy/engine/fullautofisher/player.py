@@ -41,6 +41,8 @@ class Player:
         self.start_moving_flag = not self.start_moving_flag
         if self.start_moving_flag:
             self._start_route()
+        else:
+            logging.info("Waiting for the last action to finish...")
 
     def _hole_complete_callback(self, e):
         if e == fishing_event.State.IDLE:
@@ -52,7 +54,6 @@ class Player:
         if not timeline:
             return
 
-        logging.info("starting, press f8 to stop")
         forward = True
         i = 0
         while self.start_moving_flag:

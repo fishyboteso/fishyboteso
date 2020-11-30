@@ -4,6 +4,7 @@ import tempfile
 import traceback
 import uuid
 from enum import Enum
+from threading import Thread
 from zipfile import ZipFile
 
 import cv2
@@ -69,17 +70,12 @@ class FullAuto(IEngine):
         self.calibrate = Calibrate(self)
         self.test = Test(self)
         self.controls = Controls(controls.get_controls(self))
-
-    @property
-    def show_crop(self):
-        return config.get("show_window_full_auto", False)
-
-    @show_crop.setter
-    def show_crop(self, x):
-        config.set("show_window_full_auto", x)
+        self.show_crop = False
 
     def run(self):
-        logging.info("Loading please wait...")
+        self.show_crop = False
+        FullAuto.state = State.NONE
+
         self.gui.bot_started(True)
         fishing_event.unsubscribe()
         self.fisher.toggle_start()
@@ -95,6 +91,9 @@ class FullAuto(IEngine):
                 logging.info("tesseract not found")
                 downlaoad_and_extract_tesseract()
 
+            if not self.calibrate.all_callibrated():
+                logging.error("you need to callibrate first")
+
             self.controls.initialize()
             while self.start and WindowClient.running():
                 self.window.show(self.show_crop, func=image_pre_process)
@@ -103,7 +102,7 @@ class FullAuto(IEngine):
         except:
             traceback.print_exc()
 
-            if not self.window.get_capture():
+            if self.window.get_capture() is None:
                 logging.error("Game window not found")
 
         self.gui.bot_started(False)
@@ -202,6 +201,16 @@ class FullAuto(IEngine):
             mse.move(0, -FullAuto.rotate_by)
             time.sleep(0.05)
             self._curr_rotate_y -= 0.05
+
+    def toggle_start(self):
+        if self.start and FullAuto.state != State.NONE:
+            logging.info("Please turn off RECORDING/PLAYING first")
+            return
+
+        self.start = not self.start
+        if self.start:
+            self.thread = Thread(target=self.run)
+            self.thread.start()
 
 
 if __name__ == '__main__':

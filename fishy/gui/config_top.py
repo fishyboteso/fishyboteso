@@ -1,4 +1,5 @@
 import logging
+import os
 import typing
 from tkinter.filedialog import askopenfilename
 
@@ -21,6 +22,12 @@ def start_fullfisher_config(gui: 'GUI'):
     controls_frame = Frame(top)
     top.title("Config")
 
+    def file_name():
+        file = config.get("full_auto_rec_file", None)
+        if file is None:
+            return "Not Selected"
+        return os.path.basename(file)
+
     def select_file():
         file = askopenfilename(filetypes=[('Python Files', '*.fishy')])
         if not file:
@@ -29,8 +36,12 @@ def start_fullfisher_config(gui: 'GUI'):
             config.set("full_auto_rec_file", file)
             logging.info(f"loaded {file}")
 
-    Button(controls_frame, text="Select fishy file", command=select_file).grid(row=0, column=0)
-    Label(controls_frame, text="Use semi-fisher config for rest").grid(row=2, column=0)
+        file_name_label.set(file_name())
+
+    file_name_label = StringVar(value=file_name())
+    Label(controls_frame, textvariable=file_name_label).grid(row=0, column=0)
+    Button(controls_frame, text="Select fishy file", command=select_file).grid(row=0, column=1)
+    Label(controls_frame, text="Use semi-fisher config for rest").grid(row=2, column=0, columnspan=2)
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()

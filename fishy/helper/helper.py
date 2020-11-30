@@ -12,13 +12,12 @@ from uuid import uuid1
 from hashlib import md5
 
 from win32com.client import Dispatch
+from win32comext.shell import shell, shellcon
 
 import fishy
 import winshell
 
 from fishy import web
-from . import Config
-from .config import config
 
 
 def not_implemented():
@@ -49,6 +48,8 @@ def open_web(website):
 
 
 def initialize_uid():
+    from .config import config
+
     if config.get("uid") is not None:
         return
 
@@ -106,6 +107,8 @@ def manifest_file(rel_path):
 
 
 def create_shortcut_first():
+    from .config import config
+
     if not config.get("shortcut_created", False):
         create_shortcut(False)
         config.set("shortcut_created", True)
@@ -157,6 +160,10 @@ def check_addon(name):
             logging.info("Please make sure you enable \"Allow outdated addons\" in-game")
     except Exception:
         logging.error("couldn't install addon, try doing it manually")
+
+
+def get_documents():
+    return shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
 
 
 def restart():

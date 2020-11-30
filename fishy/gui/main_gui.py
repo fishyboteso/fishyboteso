@@ -32,7 +32,6 @@ def _create(gui: 'GUI'):
 
     gui._root = ThemedTk(theme="equilux", background=True)
     gui._root.title("Fishybot for Elder Scrolls Online")
-
     gui._root.iconbitmap(helper.manifest_file('icon.ico'))
 
     # region menu
@@ -111,6 +110,8 @@ def _create(gui: 'GUI'):
     _apply_theme(gui)
     gui._root.update()
     gui._root.minsize(gui._root.winfo_width() + 10, gui._root.winfo_height() + 10)
+    if config.get("win_loc") is not None:
+        gui._root.geometry(config.get("win_loc"))
 
     hotkey.set_hotkey(Key.F9, gui.funcs.start_engine)
 
@@ -118,8 +119,10 @@ def _create(gui: 'GUI'):
     def set_destroy():
         if gui._bot_running:
             logging.info("Turn off the bot engine first")
-        else:
-            gui._destroyed = True
+            return
+
+        config.set("win_loc", gui._root.geometry())
+        gui._destroyed = True
 
     gui._root.protocol("WM_DELETE_WINDOW", set_destroy)
     gui._destroyed = False

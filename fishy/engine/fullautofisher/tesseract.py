@@ -2,6 +2,7 @@ import logging
 import os
 import tempfile
 import uuid
+from datetime import datetime
 from zipfile import ZipFile
 
 import cv2
@@ -9,6 +10,7 @@ import cv2
 import pytesseract
 
 from fishy.helper.downloader import download_file_from_google_drive
+from fishy.helper.helper import get_documents
 
 directory = os.path.join(os.environ["APPDATA"], "Tesseract-OCR")
 
@@ -44,5 +46,5 @@ def get_values_from_image(img):
         return float(vals[0]), float(vals[1]), float(vals[2])
     except Exception:
         logging.error("Couldn't read coods, make sure 'crop' calibration is correct")
-        cv2.imwrite(f"fail_{str(uuid.uuid4())[:8]}", img)
+        cv2.imwrite(os.path.join(get_documents(), "fishy_failed_reads", f"{datetime.now()}.jpg"), img)
         return None

@@ -2,20 +2,19 @@ import logging
 
 from fishy.helper import hotkey, helper
 
-from fishy.engine.fullautofisher.engine import FullAuto
+from fishy.engine.fullautofisher.engine import FullAuto, State
 from fishy.helper.hotkey import Key
 
 
 def get_controls(engine: FullAuto):
     from fishy.engine.fullautofisher.recorder import Recorder
     from fishy.engine.fullautofisher.player import Player
-
     controls = [
         ("MODE_SELECT", {
             Key.RIGHT: (lambda: engine.controls.select_mode("CALIBRATE"), "calibrate mode"),
-            Key.UP: (lambda: engine.controls.select_mode("PLAY"), "play mode"),
-            Key.LEFT: (lambda: engine.controls.select_mode("RECORD"), "record mode"),
-            Key.DOWN: (lambda: engine.controls.select_mode("TEST"), "test mode")
+            Key.UP: (lambda: engine.controls.select_mode("TEST1"), "test mode"),
+            Key.LEFT: (Player(engine).toggle_move, "start/stop play"),
+            Key.DOWN: (Recorder(engine).toggle_recording, "start/stop record"),
         }),
         ("CALIBRATE", {
             Key.RIGHT: (engine.calibrate.update_crop, "cropping"),
@@ -23,16 +22,10 @@ def get_controls(engine: FullAuto):
             Key.LEFT: (engine.calibrate.rotate_calibrate, "rotation"),
             Key.DOWN: (engine.calibrate.time_to_reach_bottom_callibrate, "look up down")
         }),
-        ("PLAY/RECORD", {
-            Key.RIGHT: (Player(engine).toggle_move, "start/stop play"),
-            Key.UP: (Recorder(engine).toggle_recording, "start/stop record"),
-            Key.LEFT: (None, "not implemented"),
-            Key.DOWN: (None, "not implemented")
-        }),
         ("TEST1", {
             Key.RIGHT: (engine.test.print_coods, "print coordinates"),
             Key.UP: (engine.test.look_for_hole, "look for hole up down"),
-            Key.LEFT: (None, "not implemented"),
+            Key.LEFT: (None, ""),
             Key.DOWN: (lambda: engine.controls.select_mode("TEST2"), "show next")
         }),
         ("TEST2", {
@@ -52,20 +45,27 @@ class Controls:
         self.controls = controls
 
     def initialize(self):
-        self.select_mode("MODE_SELECT")
+        self.select_mode(self.controls[0][0])
+
+    def log_help(self):
+        help_str = f"\nCONTROLS: {self.controls[self.current_menu][0]}"
+        for key, meta in self.controls[self.current_menu][1].items():
+            func, name = meta
+            if func:
+                hotkey.set_hotkey(key, func)
+                help_str += f"\n{key.value}: {name}"
+        logging.info(help_str)
 
     def select_mode(self, mode):
+        if FullAuto.state != State.NONE:
+            self.log_help()
+            return
+
         self.current_menu = 0
         for i, control in enumerate(self.controls):
             if mode == control[0]:
                 self.current_menu = i
-
-        help_str = F"CONTROLS: {self.controls[self.current_menu][0]}"
-        for key, meta in self.controls[self.current_menu][1].items():
-            func, name = meta
-            hotkey.set_hotkey(key, func)
-            help_str += f"\n{key.value}: {name}"
-        logging.info(help_str)
+        self.log_help()
 
     def unassign_keys(self):
         keys = []

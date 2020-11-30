@@ -44,7 +44,7 @@ def _update_factor(key, value):
 
 
 def _get_factor(key):
-    config.get("full_auto_factors", {}).get(key)
+    return config.get("full_auto_factors", {}).get(key)
 
 
 class Calibrate:
@@ -72,7 +72,7 @@ class Calibrate:
     # endregion
 
     def all_callibrated(self):
-        return self.crop and self.move_factor and self.rot_factor
+        return self.crop is not None and self.move_factor is not None and self.rot_factor is not None
 
     def toggle_show(self):
         self.engine.show_crop = not self.engine.show_crop
@@ -81,8 +81,8 @@ class Calibrate:
         if enable_crop:
             self.engine.show_crop = True
         crop = get_crop_coods(self.engine.window)
-        self.engine.window.crop = self.engine.crop
         _update_factor("crop", crop)
+        self.engine.window.crop = crop
 
     def walk_calibrate(self):
         walking_time = 3
@@ -105,6 +105,7 @@ class Calibrate:
 
         move_factor = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / walking_time
         _update_factor("move_factor", move_factor)
+        logging.info("done")
 
     def rotate_calibrate(self):
         rotate_times = 50
@@ -128,6 +129,7 @@ class Calibrate:
 
         rot_factor = (rot3 - rot2) / rotate_times
         _update_factor("rot_factor", rot_factor)
+        logging.info("done")
 
     def time_to_reach_bottom_callibrate(self):
         self._callibrate_state = 0
@@ -135,12 +137,12 @@ class Calibrate:
         def _f8_pressed():
             self._callibrate_state += 1
 
-        logging.info("Now loop up and press f8")
+        logging.info("look straight up and press f8")
         hotkey.set_hotkey(Key.F8, _f8_pressed)
 
         wait_until(lambda: self._callibrate_state == 1)
 
-        logging.info("looking down now, as soon as you look on the floor, press f8 again")
+        logging.info("as soon as you look on the floor, press f8 again")
 
         y_cal_start_time = time.time()
         while self._callibrate_state == 1:
@@ -150,3 +152,4 @@ class Calibrate:
 
         time_to_reach_bottom = time.time() - y_cal_start_time
         _update_factor("time_to_reach_bottom", time_to_reach_bottom)
+        logging.info("done")

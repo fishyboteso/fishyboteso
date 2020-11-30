@@ -24,11 +24,9 @@ class IEngine(ABC):
 
         return self.get_gui().funcs
 
+    @abstractmethod
     def toggle_start(self):
-        self.start = not self.start
-        if self.start:
-            self.thread = Thread(target=self.run)
-            self.thread.start()
+        ...
 
     @abstractmethod
     def run(self):

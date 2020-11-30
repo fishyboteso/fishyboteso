@@ -34,7 +34,7 @@ class Recorder:
 
     def _start_recording(self):
         FullAuto.state = State.RECORDING
-        logging.info("f8 to stop recording")
+        logging.info("starting, press f8 to mark hole")
         hotkey.set_hotkey(Recorder.mark_hole_key, self._mark_hole)
 
         self.timeline = []
@@ -54,10 +54,15 @@ class Recorder:
 
         hotkey.free_key(Recorder.mark_hole_key)
 
-        files = [('Fishy File', '*.fishy')]
-        file = None
-        while not file:
-            file = asksaveasfile(mode='wb', filetypes=files, defaultextension=files)
+        def func():
+            _file = None
+            files = [('Fishy File', '*.fishy')]
+            while not _file:
+                _file = asksaveasfile(mode='wb', filetypes=files, defaultextension=files)
+
+            return _file
+
+        file = self.engine.get_gui().call_in_thread(func, block=True)
         data = {"full_auto_path": self.timeline}
         pprint(data)
         pickle.dump(data, file)

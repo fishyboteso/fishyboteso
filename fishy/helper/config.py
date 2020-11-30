@@ -6,7 +6,16 @@ import json
 import os
 
 # path to save the configuration file
-filename = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"], "Documents", "fishy_config.json")
+
+
+def filename():
+    from fishy.helper.helper import get_documents
+    name = "fishy_config.json"
+    _filename = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"], "Documents", name)
+    if os.path.exists(_filename):
+        return _filename
+
+    return os.path.join(get_documents(), name)
 
 
 class Config:
@@ -16,7 +25,7 @@ class Config:
         cache the configuration in a dict for faster access,
         if file is not found initialize the dict
         """
-        self.config_dict = json.loads(open(filename).read()) if os.path.exists(filename) else dict()
+        self.config_dict = json.loads(open(filename()).read()) if os.path.exists(filename()) else dict()
 
     def get(self, key, default=None):
         """
@@ -51,7 +60,7 @@ class Config:
         """
         save the cache to the file
         """
-        with open(filename, 'w') as f:
+        with open(filename(), 'w') as f:
             f.write(json.dumps(self.config_dict))
 
 

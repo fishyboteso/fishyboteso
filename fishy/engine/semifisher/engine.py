@@ -35,7 +35,9 @@ class SemiFisherEngine(IEngine):
 
         # check for game window and stuff
         self.gui.bot_started(True)
-        logging.info("Starting the bot engine, look at the fishing hole to start fishing")
+
+        if self.get_gui:
+            logging.info("Starting the bot engine, look at the fishing hole to start fishing")
         Thread(target=self._wait_and_check).start()
         while self.start and WindowClient.running():
             capture = self.fishPixWindow.get_capture()
@@ -73,6 +75,12 @@ class SemiFisherEngine(IEngine):
         logging.debug("Will display pixel values for 10 seconds")
         time.sleep(5)
         Thread(target=show, args=()).start()
+
+    def toggle_start(self):
+        self.start = not self.start
+        if self.start:
+            self.thread = Thread(target=self.run)
+            self.thread.start()
 
 
 if __name__ == '__main__':
