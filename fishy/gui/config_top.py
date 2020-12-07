@@ -50,6 +50,8 @@ def start_fullfisher_config(gui: 'GUI'):
 def start_semifisher_config(gui: 'GUI'):
     def save():
         gui.config.set("action_key", action_key_entry.get(), False)
+        gui.config.set("collect_key", collect_key_entry.get(), False)
+        gui.config.set("collect_allow_auto", collect_allow_auto.instate(['selected']), False)
         gui.config.set("borderless", borderless.instate(['selected']), False)
         gui.config.set("sound_notification", sound.instate(['selected']), False)
         gui.config.save_config()
@@ -86,9 +88,18 @@ def start_semifisher_config(gui: 'GUI'):
     action_key_entry.grid(row=2, column=1)
     action_key_entry.insert(0, config.get("action_key", "e"))
 
-    Label(controls_frame, text="Sound Notification: ").grid(row=3, column=0, pady=(5, 5))
+    Label(controls_frame, text="Auto-Looting: ").grid(row=3, column=0, pady=(5, 5))
+    collect_allow_auto = Checkbutton(controls_frame, var=BooleanVar(value=config.get("collect_allow_auto")))
+    collect_allow_auto.grid(row=3, column=1)
+    
+    Label(controls_frame, text="Looting Key:").grid(row=4, column=0)
+    collect_key_entry = Entry(controls_frame, justify=CENTER)
+    collect_key_entry.grid(row=4, column=1)
+    collect_key_entry.insert(0, config.get("collect_key", "r"))
+
+    Label(controls_frame, text="Sound Notification: ").grid(row=5, column=0, pady=(5, 5))
     sound = Checkbutton(controls_frame, var=BooleanVar(value=config.get("sound_notification")))
-    sound.grid(row=3, column=1)
+    sound.grid(row=5, column=1)
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()

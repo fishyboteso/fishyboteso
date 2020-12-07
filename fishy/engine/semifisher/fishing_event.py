@@ -28,7 +28,7 @@ class FishEvent:
 
     # initialize these
     action_key = 'e'
-    collect_r = False
+    collect_allow_auto = False
     uid = None
     sound = False
 
@@ -36,6 +36,8 @@ class FishEvent:
 def init():
     subscribe()
     FishEvent.action_key = config.get("action_key", 'e')
+    FishEvent.collect_key = config.get("collect_key", 'r')
+    FishEvent.collect_allow_auto = config.get("collect_allow_auto", False)
     FishEvent.uid = config.get("uid")
     FishEvent.sound = config.get("sound_notification", False)
 
@@ -74,9 +76,10 @@ def on_hook():
 
     keyboard.press_and_release(FishEvent.action_key)
 
-    if FishEvent.collect_r:
+    if FishEvent.collect_allow_auto:
         time.sleep(0.1)
         keyboard.press_and_release('r')
+        logging.info("AUTO-LOOT")
         time.sleep(0.1)
 
 
