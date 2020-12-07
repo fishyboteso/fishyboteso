@@ -25,14 +25,8 @@ def get_controls(engine: FullAuto):
         ("TEST1", {
             Key.RIGHT: (engine.test.print_coods, "print coordinates"),
             Key.UP: (engine.test.look_for_hole, "look for hole up down"),
-            Key.LEFT: (None, ""),
-            Key.DOWN: (lambda: engine.controls.select_mode("TEST2"), "show next")
-        }),
-        ("TEST2", {
-            Key.RIGHT: (engine.test.set_target, "set target"),
-            Key.UP: (engine.test.move_to_target, "move to target"),
-            Key.LEFT: (engine.test.rotate_to_target, "rotate to target"),
-            Key.DOWN: (lambda: engine.controls.select_mode("TEST1"), "show previous")
+            Key.LEFT: (engine.test.set_target, "set target"),
+            Key.DOWN: (engine.test.move_to_target, "move to target")
         })
     ]
 
