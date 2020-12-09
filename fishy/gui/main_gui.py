@@ -1,7 +1,7 @@
 import logging
 import time
-from tkinter import *
-from tkinter.ttk import *
+from tkinter import Menu, IntVar, DISABLED, ACTIVE, Text, BOTH, INSERT, StringVar, LEFT, Button, RIGHT, X
+from tkinter.ttk import Frame, OptionMenu
 
 from fishy.web import web
 from ttkthemes import ThemedTk

@@ -1,6 +1,6 @@
 import time
 from multiprocessing import Process
-from tkinter import *
+from tkinter import Tk, Canvas, NW
 from PIL import Image, ImageTk
 
 from fishy.helper import helper

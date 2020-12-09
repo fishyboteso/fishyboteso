@@ -7,8 +7,8 @@ from fishy.helper import helper
 
 from fishy import web
 
-from tkinter import *
-from tkinter.ttk import *
+from tkinter import StringVar, IntVar, BooleanVar, DISABLED, NORMAL, CENTER
+from tkinter.ttk import Frame, Label, Button, Checkbutton, Entry
 
 from fishy.helper.config import config
 from fishy.helper.popup import PopUp

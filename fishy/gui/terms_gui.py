@@ -1,6 +1,6 @@
 import webbrowser
-from tkinter import *
-from tkinter.ttk import *
+from tkinter import NORMAL, DISABLED, Tk, Canvas, IntVar, Checkbutton, Text, LEFT, re, NW
+from tkinter.ttk import Frame, Button
 
 from PIL import Image, ImageTk
 

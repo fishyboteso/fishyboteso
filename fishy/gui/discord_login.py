@@ -1,7 +1,6 @@
 import time
-from tkinter import *
-from tkinter import messagebox
-from tkinter.ttk import *
+from tkinter import Toplevel, CENTER, BOTH, messagebox
+from tkinter.ttk import Entry, Button
 
 import typing
 
