@@ -1,6 +1,5 @@
 import typing
 from abc import ABC, abstractmethod
-from threading import Thread
 from typing import Callable
 
 from fishy.gui.funcs import GUIFuncsMock

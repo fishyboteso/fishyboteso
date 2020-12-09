@@ -1,7 +1,7 @@
 import logging
 import uuid
-from tkinter import OptionMenu, Button, IntVar
-from typing import List, Callable, Optional, Dict, Any
+from tkinter import OptionMenu, Button
+from typing import Callable, Optional, Dict, Any
 import threading
 
 from fishy.web import web
