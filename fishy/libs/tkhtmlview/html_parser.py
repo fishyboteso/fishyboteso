@@ -31,7 +31,7 @@ class Defs:
 class HTML:
     # ----------------------------------------------------------------------------------------------
     """
-    List of supported HTML tags and attrs 
+    List of supported HTML tags and attrs
     """
 
     class Tag():

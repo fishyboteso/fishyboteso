@@ -88,4 +88,3 @@ if __name__ == '__main__':
     # noinspection PyTypeChecker
     fisher = SemiFisherEngine(None)
     fisher.toggle_start()
-

@@ -7,7 +7,7 @@ from PIL import Image, ImageTk
 from fishy import helper, web
 from fishy.helper.config import config
 
-hyperlinkPattern = re.compile(r'\[(?P<title>.*?)\]\((?P<address>.*?)\)')                                                        
+hyperlinkPattern = re.compile(r'\[(?P<title>.*?)\]\((?P<address>.*?)\)')
 
 
 def check_eula():
