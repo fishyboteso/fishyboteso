@@ -34,11 +34,12 @@ class FishEvent:
     uid = None
     sound = False
 
-def _fishing_sleep(waittime, lower_limit = 16, upper_limit = 58):
+def _fishing_sleep(waittime, lower_limit_ms = 16, upper_limit_ms = 2500):
     reaction = 0.0
-    if (FishEvent.jitter):
-        reaction = float( random.randrange(lower_limit, upper_limit) )/100.0
-    time.sleep(waittime+reaction)
+    if (FishEvent.jitter and (upper_limit_ms > lower_limit_ms)):
+        reaction = float( random.randrange(lower_limit_ms, upper_limit_ms) )/1000.0
+    max_wait_t = waittime+reaction if (waittime+reaction <= 2.5) else 2.5
+    time.sleep(max_wait_t)
 
 
 def init():
@@ -82,14 +83,14 @@ def on_hook():
     FishEvent.fish_times.append(time_to_hook)
     logging.info("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(FishEvent.fishCaught) + " caught " + "in " + str(
         round(time_to_hook, 2)) + " secs.  " + "Total: " + str(FishEvent.totalFishCaught))
-    _fishing_sleep(0.0)
+
     keyboard.press_and_release(FishEvent.action_key)
 
     if FishEvent.collect_allow_auto:
         _fishing_sleep(0.1)
         keyboard.press_and_release('r')
         _fishing_sleep(0.1)
-    _fishing_sleep(0.0, upper_limit=48)
+    _fishing_sleep(0.0)
 
 
 def on_look():

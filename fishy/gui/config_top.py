@@ -108,9 +108,9 @@ def start_semifisher_config(gui: 'GUI'):
     sound = Checkbutton(controls_frame, var=BooleanVar(value=config.get("sound_notification")))
     sound.grid(row=5, column=1)
 
-    Label(controls_frame, text="Human-Like Delay: ").grid(row=4, column=0, pady=(5, 5))
+    Label(controls_frame, text="Human-Like Delay: ").grid(row=6, column=0, pady=(5, 5))
     jitter = Checkbutton(controls_frame, var=BooleanVar(value=config.get("jitter")))
-    jitter.grid(row=4, column=1)
+    jitter.grid(row=6, column=1)
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()
