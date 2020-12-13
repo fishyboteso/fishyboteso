@@ -24,13 +24,13 @@ class SemiFisherEngine(IEngine):
     def __init__(self, gui_ref: Optional['Callable[[], GUI]']):
         super().__init__(gui_ref)
         self.fishPixWindow = None
-        fishing_event.init()
 
     def run(self):
         """
         Starts the fishing
         code explained in comments in detail
         """
+        fishing_event.init()
         self.fishPixWindow = WindowClient(color=cv2.COLOR_RGB2HSV)
 
         # check for game window and stuff
