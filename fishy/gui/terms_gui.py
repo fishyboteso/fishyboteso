@@ -1,6 +1,7 @@
 import webbrowser
 from tkinter import *
 from tkinter.ttk import *
+import re
 
 from PIL import Image, ImageTk
 
