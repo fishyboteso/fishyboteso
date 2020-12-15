@@ -64,7 +64,7 @@ def start_semifisher_config(gui: 'GUI'):
         else:
             if web.sub(config.get("uid")):
                 gui._notify.set(1)
-                
+
     def toggle_collect():
         gui.config.set("collect_allow_auto", collect_allow_auto.instate(['selected']), False)
         collect_key_entry['state'] = NORMAL if config.get("collect_allow_auto") else DISABLED
@@ -88,21 +88,30 @@ def start_semifisher_config(gui: 'GUI'):
     borderless = Checkbutton(controls_frame, var=BooleanVar(value=config.get("borderless")))
     borderless.grid(row=1, column=1)
 
+    def del_action_key(event):
+        action_key_entry.delete(0,"end")
+        action_key_entry.insert(0, str(event.char))
+
     Label(controls_frame, text="Action Key:").grid(row=2, column=0)
     action_key_entry = Entry(controls_frame, justify=CENTER)
     action_key_entry.grid(row=2, column=1)
     action_key_entry.insert(0, config.get("action_key", "e"))
-
+    action_key_entry.bind("<KeyRelease>", del_action_key)
 
     Label(controls_frame, text="Auto-Looting: ").grid(row=3, column=0, pady=(15, 0))
     collect_allow_auto = Checkbutton(controls_frame, command=toggle_collect, var=BooleanVar(value=config.get("collect_allow_auto")))
     collect_allow_auto.grid(row=3, column=1, pady=(15, 0))
-    
+
+    def del_collect_key(event):
+        collect_key_entry.delete(0,"end")
+        collect_key_entry.insert(0, str(event.char))
+
     Label(controls_frame, text="Looting Key:").grid(row=4, column=0, pady=(0, 15))
     collect_key_entry = Entry(controls_frame, justify=CENTER)
     collect_key_entry.grid(row=4, column=1, pady=(0, 15))
     collect_key_entry.insert(0, config.get("collect_key", "r"))
     collect_key_entry['state'] = NORMAL if config.get("collect_allow_auto") else DISABLED
+    collect_key_entry.bind("<KeyRelease>", del_collect_key)
 
     Label(controls_frame, text="Sound Notification: ").grid(row=5, column=0, pady=(5, 5))
     sound = Checkbutton(controls_frame, var=BooleanVar(value=config.get("sound_notification")))
