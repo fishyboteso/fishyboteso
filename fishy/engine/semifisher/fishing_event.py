@@ -87,7 +87,7 @@ def on_hook():
     keyboard.press_and_release(FishEvent.action_key)
 
     if FishEvent.collect_allow_auto:
-        _fishing_sleep(0.1)
+        _fishing_sleep(0.15)
         keyboard.press_and_release('r')
         _fishing_sleep(0.1)
     _fishing_sleep(0.0)
