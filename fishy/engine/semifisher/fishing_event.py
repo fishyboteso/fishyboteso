@@ -16,6 +16,7 @@ import keyboard
 
 from fishy.helper.config import config
 
+import random
 
 class FishEvent:
     fishCaught = 0
@@ -24,6 +25,7 @@ class FishEvent:
     fish_times = []
     hole_start_time = 0
     FishingStarted = False
+    jitter = False
     previousState = State.IDLE
 
     # initialize these
@@ -32,9 +34,17 @@ class FishEvent:
     uid = None
     sound = False
 
+def _fishing_sleep(waittime, lower_limit_ms = 16, upper_limit_ms = 2500):
+    reaction = 0.0
+    if FishEvent.jitter and upper_limit_ms > lower_limit_ms:
+        reaction = float( random.randrange(lower_limit_ms, upper_limit_ms) )/1000.0
+    max_wait_t = waittime+reaction if waittime+reaction <= 2.5 else 2.5
+    time.sleep(max_wait_t)
+
 
 def init():
     subscribe()
+    FishEvent.jitter = config.get("jitter", False)
     FishEvent.action_key = config.get("action_key", 'e')
     FishEvent.collect_key = config.get("collect_key", 'r')
     FishEvent.collect_allow_auto = config.get("collect_allow_auto", False)
@@ -77,9 +87,10 @@ def on_hook():
     keyboard.press_and_release(FishEvent.action_key)
 
     if FishEvent.collect_allow_auto:
-        time.sleep(0.1)
+        _fishing_sleep(0.1)
         keyboard.press_and_release('r')
-        time.sleep(0.1)
+        _fishing_sleep(0.1)
+    _fishing_sleep(0.0)
 
 
 def on_look():

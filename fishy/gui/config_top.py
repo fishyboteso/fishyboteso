@@ -53,6 +53,7 @@ def start_semifisher_config(gui: 'GUI'):
         gui.config.set("collect_key", collect_key_entry.get(), False)
         gui.config.set("collect_allow_auto", collect_allow_auto.instate(['selected']), False)
         gui.config.set("borderless", borderless.instate(['selected']), False)
+        gui.config.set("jitter", jitter.instate(['selected']), False)
         gui.config.set("sound_notification", sound.instate(['selected']), False)
         gui.config.save_config()
 
@@ -106,6 +107,10 @@ def start_semifisher_config(gui: 'GUI'):
     Label(controls_frame, text="Sound Notification: ").grid(row=5, column=0, pady=(5, 5))
     sound = Checkbutton(controls_frame, var=BooleanVar(value=config.get("sound_notification")))
     sound.grid(row=5, column=1)
+
+    Label(controls_frame, text="Human-Like Delay: ").grid(row=6, column=0, pady=(5, 5))
+    jitter = Checkbutton(controls_frame, var=BooleanVar(value=config.get("jitter")))
+    jitter.grid(row=6, column=1)
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()
