@@ -13,6 +13,7 @@ from fishy import web
 from fishy.engine.semifisher.fishing_mode import State, FishingMode
 from fishy.helper import helper
 import keyboard
+from win32gui import GetWindowText, GetForegroundWindow
 
 from fishy.helper.config import config
 
@@ -34,12 +35,20 @@ class FishEvent:
     uid = None
     sound = False
 
+
 def _fishing_sleep(waittime, lower_limit_ms = 16, upper_limit_ms = 2500):
     reaction = 0.0
     if FishEvent.jitter and upper_limit_ms > lower_limit_ms:
         reaction = float( random.randrange(lower_limit_ms, upper_limit_ms) )/1000.0
     max_wait_t = waittime+reaction if waittime+reaction <= 2.5 else 2.5
     time.sleep(max_wait_t)
+
+
+def _eso_is_focused():
+    if GetWindowText(GetForegroundWindow()) == "Elder Scrolls Online":
+        return True
+    logging.warning("ESO window is not focused")
+    return False
 
 
 def init():
@@ -77,6 +86,9 @@ def on_hook():
     increases the `fishCaught`  and `totalFishCaught`, calculates the time it took to catch
     presses e to catch the fish
     """
+    if not _eso_is_focused():
+        return
+
     FishEvent.fishCaught += 1
     FishEvent.totalFishCaught += 1
     time_to_hook = time.time() - FishEvent.stickInitTime
@@ -88,7 +100,7 @@ def on_hook():
 
     if FishEvent.collect_allow_auto:
         _fishing_sleep(0.15)
-        keyboard.press_and_release('r')
+        keyboard.press_and_release(FishEvent.collect_key)
         _fishing_sleep(0.1)
     _fishing_sleep(0.0)
 
@@ -97,6 +109,9 @@ def on_look():
     """
     presses e to throw the fishing rod
     """
+    if not _eso_is_focused():
+        return
+
     keyboard.press_and_release(FishEvent.action_key)
 
 
