@@ -19,6 +19,7 @@ from fishy.helper.config import config
 
 import random
 
+
 class FishEvent:
     fishCaught = 0
     totalFishCaught = 0
@@ -44,11 +45,13 @@ def _fishing_sleep(waittime, lower_limit_ms = 16, upper_limit_ms = 2500):
     time.sleep(max_wait_t)
 
 
-def _eso_is_focused():
-    if GetWindowText(GetForegroundWindow()) == "Elder Scrolls Online":
-        return True
-    logging.warning("ESO window is not focused")
-    return False
+def if_eso_is_focused(func):
+    def wrapper():
+        if GetWindowText(GetForegroundWindow()) != "Elder Scrolls Online":
+            logging.warning("ESO window is not focused")
+            return
+        func()
+    return wrapper
 
 
 def init():
@@ -80,14 +83,13 @@ def fisher_callback(event: State):
     FishEvent.previousState = event
 
 
+@if_eso_is_focused
 def on_hook():
     """
     called when the fish hook is detected
     increases the `fishCaught`  and `totalFishCaught`, calculates the time it took to catch
     presses e to catch the fish
     """
-    if not _eso_is_focused():
-        return
 
     FishEvent.fishCaught += 1
     FishEvent.totalFishCaught += 1
@@ -105,13 +107,11 @@ def on_hook():
     _fishing_sleep(0.0)
 
 
+@if_eso_is_focused
 def on_look():
     """
     presses e to throw the fishing rod
     """
-    if not _eso_is_focused():
-        return
-
     keyboard.press_and_release(FishEvent.action_key)
 
 
