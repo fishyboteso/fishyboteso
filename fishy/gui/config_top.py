@@ -64,10 +64,14 @@ def start_semifisher_config(gui: 'GUI'):
         else:
             if web.sub(config.get("uid")):
                 gui._notify.set(1)
-                
+
     def toggle_collect():
         gui.config.set("collect_allow_auto", collect_allow_auto.instate(['selected']), False)
         collect_key_entry['state'] = NORMAL if config.get("collect_allow_auto") else DISABLED
+
+    def del_entry_key(event):
+        event.widget.delete(0,"end")
+        event.widget.insert(0, str(event.char))
 
     top = PopUp(save, gui._root, background=gui._root["background"])
     controls_frame = Frame(top)
@@ -92,17 +96,18 @@ def start_semifisher_config(gui: 'GUI'):
     action_key_entry = Entry(controls_frame, justify=CENTER)
     action_key_entry.grid(row=2, column=1)
     action_key_entry.insert(0, config.get("action_key", "e"))
-
+    action_key_entry.bind("<KeyRelease>", del_entry_key)
 
     Label(controls_frame, text="Auto-Looting: ").grid(row=3, column=0, pady=(15, 0))
     collect_allow_auto = Checkbutton(controls_frame, command=toggle_collect, var=BooleanVar(value=config.get("collect_allow_auto")))
     collect_allow_auto.grid(row=3, column=1, pady=(15, 0))
-    
+
     Label(controls_frame, text="Looting Key:").grid(row=4, column=0, pady=(0, 15))
     collect_key_entry = Entry(controls_frame, justify=CENTER)
     collect_key_entry.grid(row=4, column=1, pady=(0, 15))
     collect_key_entry.insert(0, config.get("collect_key", "r"))
     collect_key_entry['state'] = NORMAL if config.get("collect_allow_auto") else DISABLED
+    collect_key_entry.bind("<KeyRelease>", del_entry_key)
 
     Label(controls_frame, text="Sound Notification: ").grid(row=5, column=0, pady=(5, 5))
     sound = Checkbutton(controls_frame, var=BooleanVar(value=config.get("sound_notification")))
