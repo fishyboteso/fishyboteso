@@ -7,7 +7,7 @@ class State(Enum):
     HOOK = 60,
     STICK = 18,
     LOOK = 100,
-    IDLE = -1
+    IDLE = 0
 
 
 def _notify(event):
