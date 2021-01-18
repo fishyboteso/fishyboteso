@@ -23,7 +23,7 @@ import random
 class FishEvent:
     fishCaught = 0
     totalFishCaught = 0
-    stickInitTime = 0
+    fishingInitTime = 0
     fish_times = []
     hole_start_time = 0
     FishingStarted = False
@@ -73,30 +73,30 @@ def subscribe():
     if fisher_callback not in fishing_mode.subscribers:
         fishing_mode.subscribers.append(fisher_callback)
 
-        if FishingMode.CurrentMode == State.LOOK:
+        if FishingMode.CurrentMode == State.LOOKING:
             fisher_callback(FishingMode.CurrentMode)
 
 
 def fisher_callback(event: State):
-    callbacks_map = {State.HOOK: on_hook, State.LOOK: on_look, State.IDLE: on_idle, State.STICK: on_stick}
+    callbacks_map = {State.REELIN: on_reelin, State.LOOKING: on_looking, State.IDLE: on_idle, State.FISHING: on_fishing}
     callbacks_map[event]()
     FishEvent.previousState = event
 
 
 @if_eso_is_focused
-def on_hook():
+def on_reelin():
     """
-    called when the fish hook is detected
+    called when the fish hook is detected to reel in
     increases the `fishCaught`  and `totalFishCaught`, calculates the time it took to catch
     presses e to catch the fish
     """
 
     FishEvent.fishCaught += 1
     FishEvent.totalFishCaught += 1
-    time_to_hook = time.time() - FishEvent.stickInitTime
-    FishEvent.fish_times.append(time_to_hook)
+    time_to_reelin = time.time() - FishEvent.fishingInitTime
+    FishEvent.fish_times.append(time_to_reelin)
     logging.info("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(FishEvent.fishCaught) + " caught " + "in " + str(
-        round(time_to_hook, 2)) + " secs.  " + "Total: " + str(FishEvent.totalFishCaught))
+        round(time_to_reelin, 2)) + " secs.  " + "Total: " + str(FishEvent.totalFishCaught))
 
     keyboard.press_and_release(FishEvent.action_key)
 
@@ -108,7 +108,7 @@ def on_hook():
 
 
 @if_eso_is_focused
-def on_look():
+def on_looking():
     """
     presses e to throw the fishing rod
     """
@@ -121,7 +121,7 @@ def on_idle():
                               FishEvent.fish_times)
         FishEvent.fishCaught = 0
 
-    if FishEvent.previousState == State.HOOK:
+    if FishEvent.previousState == State.REELIN:
         logging.info("HOLE DEPLETED")
     else:
         logging.info("FISHING INTERRUPTED")
@@ -130,8 +130,8 @@ def on_idle():
         playsound(helper.manifest_file("sound.mp3"), False)
 
 
-def on_stick():
-    FishEvent.stickInitTime = time.time()
+def on_fishing():
+    FishEvent.fishingInitTime = time.time()
     FishEvent.FishingStarted = True
 
     if FishEvent.fishCaught == 0:

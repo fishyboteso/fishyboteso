@@ -4,10 +4,16 @@ subscribers = []
 
 
 class State(Enum):
-    HOOK = 60,
-    STICK = 18,
-    LOOK = 100,
-    IDLE = -1
+    IDLE      = 0  #Running around, neither looking at an interactable nor fighting
+    LOOKAWAY  = 1  #Looking at an interactable which is NOT a fishing hole
+    LOOKING   = 2  #Looking at a fishing hole
+    NOBAIT    = 5  #Looking at a fishing hole, with NO bait equipped
+    FISHING   = 6  #Fishing
+    REELIN    = 7  #Reel in!
+    LOOT      = 8  #Lootscreen open, only right after Reel in!
+    INVFULL   = 9  #No free inventory slots
+    FIGHT     = 14 #Fighting / Enemys taunted
+    DEAD      = 15 #Dead
 
 
 def _notify(event):
@@ -20,16 +26,16 @@ class FishingMode:
     PrevMode = State.IDLE
 
 
-def loop(hue_values):
+def loop(state):
     """
     Executed in the start of the main loop in fishy.py
     Changes modes, calls mode events (callbacks) when mode is changed
 
-    :param hue_values: hue_values read by the bot
+    :param state: state read by the bot from qr code
     """
     FishingMode.CurrentMode = State.IDLE
     for s in State:
-        if hue_values == s.value:
+        if state == s.value:
             FishingMode.CurrentMode = s
 
     if FishingMode.CurrentMode != FishingMode.PrevMode:
