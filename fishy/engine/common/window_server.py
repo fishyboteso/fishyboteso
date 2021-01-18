@@ -26,7 +26,6 @@ class WindowServer:
     """
     Records the game window, and allows to create instance to process it
     """
-    Screen = None
     windowOffset = None
     titleOffset = None
     hwnd = None
@@ -123,10 +122,6 @@ def start():
 
 def qrcontent_ready():
     return WindowServer.qrcontent is not None or WindowServer.status == Status.CRASHED
-
-
-def screen_ready():
-    return WindowServer.Screen is not None or WindowServer.status == Status.CRASHED
 
 
 def stop():

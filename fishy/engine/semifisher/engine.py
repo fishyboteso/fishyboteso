@@ -14,7 +14,6 @@ from fishy.engine.semifisher.fishing_mode import FishingMode, State
 
 from fishy.engine.common.IEngine import IEngine
 from fishy.engine.semifisher import fishing_mode, fishing_event
-from fishy.engine.semifisher.pixel_loc import PixelLoc
 
 if typing.TYPE_CHECKING:
     from fishy.gui import GUI
@@ -72,10 +71,10 @@ class SemiFisherEngine(IEngine):
             t = 0
             while t < 10.0:
                 t += freq
-                logging.debug(str(FishingMode.CurrentMode.label) + ":" + str(self.fishPixWindow.get_capture()[0][0]))
+                logging.debug(str(FishingMode.CurrentMode.label) + ":" + str(self.fishPixWindow.get_qrcontent()))
                 time.sleep(freq)
 
-        logging.debug("Will display pixel values for 10 seconds")
+        logging.debug("Will display qrcontent for 10 seconds")
         time.sleep(5)
         Thread(target=show, args=()).start()
 
