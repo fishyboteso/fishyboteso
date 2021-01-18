@@ -4,6 +4,7 @@ from threading import Thread
 
 import cv2
 import math
+import time
 
 import pywintypes
 from win32api import GetSystemMetrics
@@ -69,6 +70,8 @@ def loop():
         temp_img = np.array(ImageGrab.grab(bbox=windowcrop))
     except OSError:
         logging.error("ImageGrab failed")
+        WindowServer.qrcontent = None
+        time.sleep(0.5)
         return
     except:
         logging.error("ESO not started")
@@ -76,18 +79,26 @@ def loop():
 
     if temp_img.size == 0:
         logging.error("Don't minimize or drag game window outside the screen")
-        WindowServer.status = Status.CRASHED
+        WindowServer.qrcontent = None
+        time.sleep(0.5)
+        return
 
     #color does not matter
     temp_img = cv2.cvtColor(temp_img, cv2.COLOR_BGR2RGB)
-    WindowServer.Screen = temp_img
 
     decodedText, points, _ = WindowServer.qrCodeDetector.detectAndDecode(temp_img)
 
     if points is None:
         WindowServer.qrcontent = None
-    else:
-        WindowServer.qrcontent = decodedText.split(",")
+        time.sleep(0.5)
+        return
+    elif decodedText == "stop" or decodedText == "" :
+        #reduce polling when stopped or invalid
+        WindowServer.qrcontent = None
+        time.sleep(0.5)
+        return
+
+    WindowServer.qrcontent = decodedText.split(",")
 
 
 def loop_end():

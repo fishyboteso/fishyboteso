@@ -79,7 +79,10 @@ def subscribe():
 
 def fisher_callback(event: State):
     callbacks_map = {State.REELIN: on_reelin, State.LOOKING: on_looking, State.IDLE: on_idle, State.FISHING: on_fishing}
-    callbacks_map[event]()
+    try:
+        callbacks_map[event]()
+    except KeyError:
+        pass
     FishEvent.previousState = event
 
 

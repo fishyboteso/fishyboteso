@@ -10,7 +10,7 @@ import logging
 from fishy.engine.semifisher.fishing_event import FishEvent
 
 from fishy.engine.common.window import WindowClient
-from fishy.engine.semifisher.fishing_mode import FishingMode
+from fishy.engine.semifisher.fishing_mode import FishingMode, State
 
 from fishy.engine.common.IEngine import IEngine
 from fishy.engine.semifisher import fishing_mode, fishing_event
@@ -48,12 +48,11 @@ class SemiFisherEngine(IEngine):
                 self.toggle_start()
                 continue
 
-            if qrcontent == "stop":
-                #reduce polling when stopped
-                time.sleep(1)
-                continue
+            try:
+                state = int(qrcontent[-1])
+            except ValueError:
+                state = State.IDLE
 
-            state = int(qrcontent[-1])
             fishing_mode.loop(state)
 
         logging.info("Fishing engine stopped")
