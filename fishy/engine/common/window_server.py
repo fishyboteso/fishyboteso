@@ -6,8 +6,8 @@ import cv2
 import math
 
 import pywintypes
-import win32gui
 from win32api import GetSystemMetrics
+from win32gui import GetWindowRect, FindWindow, GetClientRect
 
 import numpy as np
 from PIL import ImageGrab
@@ -30,6 +30,8 @@ class WindowServer:
     titleOffset = None
     hwnd = None
     status = Status.STOPPED
+    qrCodeDetector = cv2.QRCodeDetector()
+    qrcontent = None
 
 
 def init():
@@ -38,9 +40,9 @@ def init():
     Finds the game window, and calculates the offset to remove the title bar
     """
     try:
-        WindowServer.hwnd = win32gui.FindWindow(None, "Elder Scrolls Online")
-        rect = win32gui.GetWindowRect(WindowServer.hwnd)
-        client_rect = win32gui.GetClientRect(WindowServer.hwnd)
+        WindowServer.hwnd = FindWindow(None, "Elder Scrolls Online")
+        rect = GetWindowRect(WindowServer.hwnd)
+        client_rect = GetClientRect(WindowServer.hwnd)
         WindowServer.windowOffset = math.floor(((rect[2] - rect[0]) - client_rect[2]) / 2)
         WindowServer.titleOffset = ((rect[3] - rect[1]) - client_rect[3]) - WindowServer.windowOffset
         if config.get("borderless"):
@@ -56,22 +58,36 @@ def loop():
     Executed in the start of the main loop
     finds the game window location and captures it
     """
-    bbox = (0, 0, GetSystemMetrics(0), GetSystemMetrics(1))
+    try:
+        window = GetWindowRect(FindWindow(None, "Elder Scrolls Online"))
+        """
+        TODO: crop to magic number
+        cropping first speeds up the process enormous
+        """
+        mgk_num = 4
+        windowcrop = (window[0],window[1],int(window[2]/mgk_num),int(window[3]/mgk_num))
+        temp_img = np.array(ImageGrab.grab(bbox=windowcrop))
+    except OSError:
+        logging.error("ImageGrab failed")
+        return
+    except:
+        logging.error("ESO not started")
+        WindowServer.status = Status.CRASHED
 
-    temp_screen = np.array(ImageGrab.grab(bbox=bbox))
-
-    temp_screen = cv2.cvtColor(temp_screen, cv2.COLOR_BGR2RGB)
-
-    rect = win32gui.GetWindowRect(WindowServer.hwnd)
-    crop = (
-        rect[0] + WindowServer.windowOffset, rect[1] + WindowServer.titleOffset, rect[2] - WindowServer.windowOffset,
-        rect[3] - WindowServer.windowOffset)
-
-    WindowServer.Screen = temp_screen[crop[1]:crop[3], crop[0]:crop[2]]
-
-    if WindowServer.Screen.size == 0:
+    if temp_img.size == 0:
         logging.error("Don't minimize or drag game window outside the screen")
         WindowServer.status = Status.CRASHED
+
+    #color does not matter
+    temp_img = cv2.cvtColor(temp_img, cv2.COLOR_BGR2RGB)
+    WindowServer.Screen = temp_img
+
+    decodedText, points, _ = WindowServer.qrCodeDetector.detectAndDecode(temp_img)
+
+    if points is None:
+        WindowServer.qrcontent = None
+    else:
+        WindowServer.qrcontent = decodedText.split(",")
 
 
 def loop_end():
@@ -92,6 +108,10 @@ def start():
     init()
     if WindowServer.status == Status.RUNNING:
         Thread(target=run).start()
+
+
+def qrcontent_ready():
+    return WindowServer.qrcontent is not None or WindowServer.status == Status.CRASHED
 
 
 def screen_ready():

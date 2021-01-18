@@ -40,17 +40,21 @@ class SemiFisherEngine(IEngine):
             logging.info("Starting the bot engine, look at the fishing hole to start fishing")
         Thread(target=self._wait_and_check).start()
         while self.start and WindowClient.running():
-            capture = self.fishPixWindow.get_capture()
+            qrcontent = self.fishPixWindow.get_qrcontent()
 
-            if capture is None:
+            if qrcontent is None:
                 # if window server crashed
                 self.gui.bot_started(False)
                 self.toggle_start()
                 continue
 
-            self.fishPixWindow.crop = PixelLoc.val
-            hue_value = capture[0][0][0]
-            fishing_mode.loop(hue_value)
+            if qrcontent == "stop":
+                #reduce polling when stopped
+                time.sleep(1)
+                continue
+
+            state = int(qrcontent[-1])
+            fishing_mode.loop(state)
 
         logging.info("Fishing engine stopped")
         self.gui.bot_started(False)

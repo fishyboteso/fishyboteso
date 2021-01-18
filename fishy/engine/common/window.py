@@ -39,6 +39,18 @@ class WindowClient:
     def running():
         return WindowServer.status == Status.RUNNING
 
+
+    def get_qrcontent(self):
+        if WindowServer.status == Status.CRASHED:
+            return None
+
+        if not window_server.qrcontent_ready():
+            print("waiting for qrcontent...")
+            helper.wait_until(window_server.qrcontent_ready)
+            print("qrcontent ready, continuing...")
+
+        return WindowServer.qrcontent
+
     def get_capture(self):
         """
         copies the recorded screen and then pre processes its
