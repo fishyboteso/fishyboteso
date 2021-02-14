@@ -70,10 +70,10 @@ def main():
 
     hotkey.initalize()
 
-    gui_window.start()
-
     logging.info(f"Fishybot v{fishy.__version__}")
     initialize(window_to_hide)
+
+    gui_window.start()
 
     bot.start_event_handler()
 
