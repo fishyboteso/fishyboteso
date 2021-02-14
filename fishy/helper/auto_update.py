@@ -11,6 +11,10 @@ from os import execl
 
 from bs4 import BeautifulSoup
 
+def _hr_version(v):
+    return '.'.join([str(x) for x in v])
+    #return str(v[0])+"."+str(v[1])+"."+str(v[2])
+
 
 def _normalize_version(v):
     """
@@ -68,17 +72,28 @@ def _get_current_version():
     return _normalize_version(fishy.__version__)
 
 
+index = "https://pypi.python.org/simple"
+pkg = "fishy"
+
+def versions():
+    return _hr_version(_get_current_version()), _hr_version(_get_highest_version(index, pkg))
+
+
+def upgrade_avail():
+    """
+    Checks if update is available
+    :return: boolean
+    """
+    return _get_current_version() < _get_highest_version(index, pkg)
+
+
 def auto_upgrade():
     """
     public function,
     compares current version with the latest version (from web),
     if current version is older, then it updates and restarts the script
     """
-    index = "https://pypi.python.org/simple"
-    pkg = "fishy"
-    hightest_version = _get_highest_version(index, pkg)
-    if hightest_version > _get_current_version():
-        version = '.'.join([str(x) for x in hightest_version])
-        logging.info(f"Updating to v{version}, Please Wait...")
-        subprocess.call(["python", '-m', 'pip', 'install', '--upgrade', 'fishy', '--user'])
-        execl(sys.executable, *([sys.executable] + sys.argv))
+    version = _hr_version(_get_highest_version(index, pkg))
+    logging.info(f"Updating to v{version}, Please Wait...")
+    subprocess.call(["python", '-m', 'pip', 'install', '--upgrade', 'fishy', '--user'])
+    execl(sys.executable, *([sys.executable] + sys.argv))
