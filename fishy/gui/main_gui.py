@@ -55,6 +55,8 @@ def _create(gui: 'GUI'):
     dark_mode_var.set(int(config.get('dark_mode', True)))
     filemenu.add_checkbutton(label="Dark Mode", command=_toggle_mode,
                              variable=dark_mode_var)
+    if config.get("dont_ask_update", False):
+        filemenu.add_command(label="Update", command=helper.update)
 
     menubar.add_cascade(label="Options", menu=filemenu)
 
