@@ -53,8 +53,12 @@ class Config:
         deletes a key from config
         :param key: key to delete
         """
-        del self.config_dict[key]
-        self.save_config()
+        try:
+            del self.config_dict[key]
+            self.save_config()
+        except KeyError:
+            pass
+
 
     def save_config(self):
         """
