@@ -96,4 +96,4 @@ def auto_upgrade():
     version = _hr_version(_get_highest_version(index, pkg))
     logging.info(f"Updating to v{version}, Please Wait...")
     subprocess.call(["python", '-m', 'pip', 'install', '--upgrade', 'fishy', '--user'])
-    execl(sys.executable, *([sys.executable] + sys.argv))
+    execl(sys.executable, *([sys.executable, '-m', 'fishy'] + sys.argv[1:]))
