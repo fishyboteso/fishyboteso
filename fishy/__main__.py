@@ -52,9 +52,6 @@ def initialize(window_to_hide):
 
     helper.check_addon("ProvisionsChalutier")
 
-    if config.get("debug", False):
-        helper.check_addon("FooAddon")
-
 
 def main():
     splash.start()
