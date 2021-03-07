@@ -18,8 +18,8 @@ if typing.TYPE_CHECKING:
 
 # noinspection PyProtectedMember
 def discord_login(gui: 'GUI'):
-    if web.is_logged_in(config.get("uid")):
-        if web.logout(config.get("uid")):
+    if web.is_logged_in():
+        if web.logout():
             gui.login.set(0)
         return
 

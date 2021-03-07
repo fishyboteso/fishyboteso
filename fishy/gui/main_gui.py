@@ -39,7 +39,7 @@ def _create(gui: 'GUI'):
 
     filemenu = Menu(menubar, tearoff=0)
 
-    login = web.is_logged_in(config.get('uid'))
+    login = web.is_logged_in()
     gui.login = IntVar()
     gui.login.set(1 if login > 0 else 0)
     state = DISABLED if login == -1 else ACTIVE
