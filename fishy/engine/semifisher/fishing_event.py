@@ -32,6 +32,7 @@ class FishEvent:
 
     # initialize these
     action_key = 'e'
+    collect_key = 'r' 
     collect_allow_auto = False
     sound = False
 

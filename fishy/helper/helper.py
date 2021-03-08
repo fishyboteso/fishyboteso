@@ -76,7 +76,6 @@ def install_thread_excepthook():
     If using psyco, call psycho.cannotcompile(threading.Thread.run)
     since this replaces a new-style class method.
     """
-    import sys
     run_old = threading.Thread.run
 
     # noinspection PyBroadException
@@ -168,3 +167,10 @@ def get_documents():
 
 def restart():
     os.execl(sys.executable, *([sys.executable] + sys.argv))
+
+
+def update():
+    from .config import config
+
+    config.delete("dont_ask_update")
+    restart()

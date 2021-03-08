@@ -9,7 +9,7 @@ import win32gui
 import fishy
 from fishy import web, helper, gui
 from fishy.engine.common.event_handler import EngineEventHandler
-from fishy.gui import GUI, splash
+from fishy.gui import GUI, splash, update_dialog
 from fishy.helper import hotkey
 from fishy.helper.config import config
 
@@ -36,12 +36,20 @@ def initialize(window_to_hide):
         is_admin = os.getuid() == 0
     except AttributeError:
         is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-
     if is_admin:
         logging.info("Running with admin privileges")
 
     try:
-        helper.auto_upgrade()
+        if helper.upgrade_avail() and not config.get("dont_ask_update", False):
+            cv,hv = helper.versions()
+            update_now, dont_ask_update = update_dialog.start(cv,hv)
+            if dont_ask_update:
+                config.set("dont_ask_update", dont_ask_update)
+            else:
+                config.delete("dont_ask_update")
+
+            if update_now:
+                helper.auto_upgrade()
     except Exception:
         logging.error(traceback.format_exc())
 
@@ -70,10 +78,10 @@ def main():
 
     hotkey.initalize()
 
-    gui_window.start()
-
     logging.info(f"Fishybot v{fishy.__version__}")
     initialize(window_to_hide)
+
+    gui_window.start()
 
     bot.start_event_handler()
 
