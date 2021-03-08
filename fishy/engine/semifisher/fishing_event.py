@@ -33,7 +33,6 @@ class FishEvent:
     # initialize these
     action_key = 'e'
     collect_allow_auto = False
-    uid = None
     sound = False
 
 
@@ -117,7 +116,7 @@ def on_look():
 
 def on_idle():
     if FishEvent.fishCaught > 0:
-        web.send_hole_deplete(FishEvent.uid, FishEvent.fishCaught, time.time() - FishEvent.hole_start_time,
+        web.send_hole_deplete(FishEvent.fishCaught, time.time() - FishEvent.hole_start_time,
                               FishEvent.fish_times)
         FishEvent.fishCaught = 0
 
