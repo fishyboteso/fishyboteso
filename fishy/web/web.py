@@ -6,6 +6,7 @@ from fishy import helper
 from . import urls
 from .decorators import fallback, uses_session
 from ..helper.config import config
+from .constants import apiversion
 
 _session_id = None
 
@@ -15,7 +16,7 @@ def is_logged_in():
     if config.get("uid") is None:
         return -1
 
-    body = {"uid": config.get("uid")}
+    body = {"uid": config.get("uid"), "apiversion":apiversion}
     response = requests.get(urls.discord, params=body)
     logged_in = response.json()["discord_login"]
     return 1 if logged_in else 0
@@ -23,10 +24,7 @@ def is_logged_in():
 
 @fallback(False)
 def login(uid, login_code):
-    body = {
-        "uid": uid,
-        "login_code": login_code
-    }
+    body = {"uid": uid, "login_code": login_code, "apiversion":apiversion}
     reponse = requests.post(urls.discord, json=body)
     result = reponse.json()
 
@@ -38,9 +36,7 @@ def login(uid, login_code):
 
 @fallback(False)
 def logout():
-    body = {
-        "uid": config.get("uid"),
-    }
+    body = {"uid": config.get("uid"), "apiversion":apiversion}
     reponse = requests.delete(urls.discord, json=body)
     result = reponse.json()
     return result["success"]
@@ -49,7 +45,7 @@ def logout():
 @fallback(False)
 def register_user(new_uid):
     ip = get_ip(GoogleDnsProvider)
-    body = {"uid": new_uid, "ip": ip}
+    body = {"uid": new_uid, "ip": ip, "apiversion":apiversion}
     response = requests.post(urls.user, json=body)
     return response.ok and response.json()["success"]
 
@@ -60,7 +56,7 @@ def send_notification(uid, message):
     if not is_subbed(uid):
         return False
 
-    body = {"uid": uid, "message": message}
+    body = {"uid": uid, "message": message, "apiversion":apiversion}
     requests.post(urls.notify, json=body)
 
 
@@ -74,13 +70,13 @@ def send_hole_deplete(fish_caught, hole_time, fish_times):
         "session": get_session()
     }
 
-    body = {"uid": config.get("uid"), "hole_data": hole_data}
+    body = {"uid": config.get("uid"), "hole_data": hole_data, "apiversion":apiversion}
     requests.post(urls.hole_depleted, json=body)
 
 
 @fallback(False)
 def sub():
-    body = {"uid": config.get("uid")}
+    body = {"uid": config.get("uid"), "apiversion":apiversion}
     response = requests.post(urls.subscription, json=body)
     result = response.json()
     return result["success"]
@@ -97,7 +93,7 @@ def is_subbed():
     if config.get("uid") is None:
         return False, False
 
-    body = {"uid": config.get("uid")}
+    body = {"uid": config.get("uid"), "apiversion":apiversion}
     response = requests.get(urls.subscription, params=body)
 
     if response.status_code != 200:
@@ -109,7 +105,7 @@ def is_subbed():
 
 @fallback(None)
 def unsub():
-    body = {"uid": config.get("uid")}
+    body = {"uid": config.get("uid"), "apiversion":apiversion}
     response = requests.delete(urls.subscription, json=body)
     result = response.json()
     return result["success"]
@@ -122,7 +118,7 @@ def get_session(lazy=True):
     if lazy and _session_id is not None:
         return _session_id
 
-    body = {"uid": config.get("uid")}
+    body = {"uid": config.get("uid"), "apiversion":apiversion}
     response = requests.post(urls.session, params=body)
 
     if response.status_code == 405:
@@ -136,7 +132,7 @@ def get_session(lazy=True):
 
 @fallback(False)
 def has_beta():
-    body = {'uid': config.get("uid")}
+    body = {"uid": config.get("uid"), "apiversion":apiversion}
     response = requests.get(urls.beta, params=body)
     result = response.json()
 
