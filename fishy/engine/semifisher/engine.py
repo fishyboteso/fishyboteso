@@ -49,8 +49,7 @@ class SemiFisherEngine(IEngine):
                 continue
 
             self.fishPixWindow.crop = PixelLoc.val
-            hue_value = capture[0][0][0]
-            fishing_mode.loop(hue_value)
+            fishing_mode.loop(capture[0][0])
 
         logging.info("Fishing engine stopped")
         self.gui.bot_started(False)

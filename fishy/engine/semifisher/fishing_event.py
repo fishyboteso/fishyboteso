@@ -73,24 +73,75 @@ def subscribe():
     if fisher_callback not in fishing_mode.subscribers:
         fishing_mode.subscribers.append(fisher_callback)
 
-        if FishingMode.CurrentMode == State.LOOK:
+        if FishingMode.CurrentMode == State.LOOKING:
             fisher_callback(FishingMode.CurrentMode)
 
 
 def fisher_callback(event: State):
-    callbacks_map = {State.HOOK: on_hook, State.LOOK: on_look, State.IDLE: on_idle, State.STICK: on_stick}
-    callbacks_map[event]()
-    FishEvent.previousState = event
+    callbacks_map = {
+        State.IDLE: on_idle,
+        State.LOOKAWAY: on_lookaway,
+        State.LOOKING: on_looking,
+        State.DEPLETED: on_depleted,
+        State.NOBAIT: on_dead,
+        State.FISHING: on_fishing,
+        State.REELIN: on_reelin,
+        State.LOOT: on_loot,
+        State.INVFULL: on_dead,
+        State.FIGHT: on_fight,
+        State.DEAD: on_dead
+    }
+    try:
+        callbacks_map[event]()
+        FishEvent.previousState = event
+    except KeyError as ex:
+        pass
+
+
+def on_idle():
+    if FishEvent.previousState in (State.FISHING, State.REELIN):
+        logging.info("FISHING INTERRUPTED")
+
+    if FishEvent.sound:
+        playsound(helper.manifest_file("sound.mp3"), False)
+
+
+def on_lookaway():
+    return
 
 
 @if_eso_is_focused
-def on_hook():
+def on_looking():
+    """
+    presses e to throw the fishing rod
+    """
+    _fishing_sleep(0.0)
+    keyboard.press_and_release(FishEvent.action_key)
+
+
+def on_depleted():
+    logging.info("HOLE DEPLETED")
+    if FishEvent.fishCaught > 0:
+        web.send_hole_deplete(FishEvent.fishCaught, time.time() - FishEvent.hole_start_time, FishEvent.fish_times)
+        FishEvent.fishCaught = 0
+
+
+def on_fishing():
+    FishEvent.stickInitTime = time.time()
+    FishEvent.FishingStarted = True
+
+    if FishEvent.fishCaught == 0:
+        FishEvent.hole_start_time = time.time()
+        FishEvent.fish_times = []
+
+
+@if_eso_is_focused
+def on_reelin():
     """
     called when the fish hook is detected
     increases the `fishCaught`  and `totalFishCaught`, calculates the time it took to catch
     presses e to catch the fish
     """
-
     FishEvent.fishCaught += 1
     FishEvent.totalFishCaught += 1
     time_to_hook = time.time() - FishEvent.stickInitTime
@@ -98,42 +149,21 @@ def on_hook():
     logging.info("HOOOOOOOOOOOOOOOOOOOOOOOK....... " + str(FishEvent.fishCaught) + " caught " + "in " + str(
         round(time_to_hook, 2)) + " secs.  " + "Total: " + str(FishEvent.totalFishCaught))
 
+    _fishing_sleep(0.0)
     keyboard.press_and_release(FishEvent.action_key)
+    _fishing_sleep(0.5)
 
+
+def on_loot():
     if FishEvent.collect_allow_auto:
         _fishing_sleep(0.15)
         keyboard.press_and_release(FishEvent.collect_key)
-        _fishing_sleep(0.1)
-    _fishing_sleep(0.0)
+        _fishing_sleep(0.3)
 
 
-@if_eso_is_focused
-def on_look():
-    """
-    presses e to throw the fishing rod
-    """
-    keyboard.press_and_release(FishEvent.action_key)
+def on_fight():
+    logging.info("FIGHTING")
 
 
-def on_idle():
-    if FishEvent.fishCaught > 0:
-        web.send_hole_deplete(FishEvent.fishCaught, time.time() - FishEvent.hole_start_time,
-                              FishEvent.fish_times)
-        FishEvent.fishCaught = 0
-
-    if FishEvent.previousState == State.HOOK:
-        logging.info("HOLE DEPLETED")
-    else:
-        logging.info("FISHING INTERRUPTED")
-
-    if FishEvent.sound:
-        playsound(helper.manifest_file("sound.mp3"), False)
-
-
-def on_stick():
-    FishEvent.stickInitTime = time.time()
-    FishEvent.FishingStarted = True
-
-    if FishEvent.fishCaught == 0:
-        FishEvent.hole_start_time = time.time()
-        FishEvent.fish_times = []
+def on_dead():
+    logging.info("DEAD or INVENTORY FULL or NO BAIT EQUIPPED")
