@@ -1,2 +1,2 @@
 from fishy.__main__ import main
-__version__ = "0.4.4"
+__version__ = "0.4.5"
