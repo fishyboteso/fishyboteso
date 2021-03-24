@@ -1,10 +1,13 @@
 import logging
 import os
+import shutil
 import sys
 import threading
 import time
 import traceback
 import webbrowser
+import requests
+from io import BytesIO
 from threading import Thread
 from zipfile import ZipFile
 
@@ -142,23 +145,34 @@ def create_shortcut(anti_ghosting: bool):
         logging.error("Couldn't create shortcut")
 
 
+def get_addondir():
+    # noinspection PyUnresolvedReferences
+    from win32com.shell import shell, shellcon
+    documents = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
+    return os.path.join(documents, "Elder Scrolls Online", "live", "Addons")        
+
+
+def addon_exists(name):
+    return os.path.exists(os.path.join(get_addondir(), name))
+
+
 # noinspection PyBroadException
-def check_addon(name):
-    """
-    Extracts the addon from zip and installs it into the AddOn folder of eso
-    """
+def install_addon(name, url):
     try:
-        # noinspection PyUnresolvedReferences
-        from win32com.shell import shell, shellcon
-        documents = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
-        addon_dir = os.path.join(documents, "Elder Scrolls Online", "live", "Addons")
-        if not os.path.exists(os.path.join(addon_dir, name)):
-            logging.info(f"{name} Addon not found, installing it...")
-            with ZipFile(manifest_file(f"{name}.zip"), 'r') as z:
-                z.extractall(path=addon_dir)
-            logging.info("Please make sure you enable \"Allow outdated addons\" in-game")
-    except Exception:
-        logging.error("couldn't install addon, try doing it manually")
+        r = requests.get(url, stream=True)
+        z = ZipFile(BytesIO(r.content))
+        z.extractall(path=get_addondir())
+        logging.info("Add-On "+name+" installed successfully!\nPlease make sure to enable \"Allow outdated addons\" in ESO")
+    except Exception as ex:
+        logging.error("Could not install Add-On "+name+", try doing it manually")
+
+
+def remove_addon(name):
+    try:
+        shutil.rmtree(os.path.join(get_addondir(), name))
+        logging.info("Add-On "+name+" removed!")
+    except FileNotFoundError:
+        pass
 
 
 def get_documents():

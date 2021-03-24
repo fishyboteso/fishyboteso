@@ -14,6 +14,7 @@ from fishy.helper import hotkey
 from .discord_login import discord_login
 from ..helper.config import config
 from ..helper.hotkey import Key
+from ..constants import chalutier, lam2
 
 if typing.TYPE_CHECKING:
     from . import GUI
@@ -58,6 +59,16 @@ def _create(gui: 'GUI'):
     if config.get("dont_ask_update", False):
         filemenu.add_command(label="Update", command=helper.update)
 
+    def installer():
+        if filemenu.entrycget(4, 'label') == "Remove Chalutier":
+            helper.remove_addon(chalutier[0])
+            filemenu.entryconfigure(4, label="Install Chalutier")
+        else:
+            helper.install_addon(*chalutier)
+            helper.install_addon(*lam2)
+            filemenu.entryconfigure(4, label="Remove Chalutier")
+    chaEntry = "Remove Chalutier" if helper.addon_exists(chalutier[0]) else "Install Chalutier"
+    filemenu.add_command(label=chaEntry, command=installer)
     menubar.add_cascade(label="Options", menu=filemenu)
 
     debug_menu = Menu(menubar, tearoff=0)
