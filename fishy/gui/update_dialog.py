@@ -2,11 +2,14 @@ from multiprocessing import Process, Manager
 from tkinter import *
 import time
 
+from fishy import helper
+
 def show(currentversion, newversion, returns):
     top = Tk()
-    top.title("A wild update appears!")
+    top.title("A wild fishy update appeared!")
+    top.iconbitmap(helper.manifest_file('icon.ico'))
 
-    dialogLabel = Label(top, text="There is a new update available ("+currentversion+"->"+newversion+"). Do you want to update now?")
+    dialogLabel = Label(top, text="There is a new fishy update available ("+currentversion+"->"+newversion+"). Do you want to update now?")
     dialogLabel.grid(row=0, columnspan=2, padx=5, pady=5)
 
     cbVar = IntVar()
