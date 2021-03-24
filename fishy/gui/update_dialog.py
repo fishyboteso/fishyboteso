@@ -24,10 +24,11 @@ def show(currentversion, newversion, returns):
         top.destroy()
 
     pixelVirtual = PhotoImage(width=1, height=1) # trick to use buttonWidth as pixels, not #symbols
+    dialogBtnNo = Button(top, text="No " + str(chr(10005)),  fg='red4', command=_clickNo, image=pixelVirtual, width=buttonWidth, compound="c")
+    dialogBtnNo.grid(row=2, column=0, padx=5, pady=5)
     dialogBtnYes = Button(top, text="Yes " + str(chr(10003)),  fg='green', command=_clickYes, image=pixelVirtual, width=buttonWidth, compound="c")
-    dialogBtnYes.grid(row=2, column=0, padx=5, pady=5)
-    dialogBtnNo = Button(top, text="No " + str(chr(10005)),  fg='red', command=_clickNo, image=pixelVirtual, width=buttonWidth, compound="c")
-    dialogBtnNo.grid(row=2, column=1, padx=5, pady=5)
+    dialogBtnYes.grid(row=2, column=1, padx=5, pady=5)
+    dialogBtnYes.focus_set()
 
     top.protocol('WM_DELETE_WINDOW', _clickNo)
 
