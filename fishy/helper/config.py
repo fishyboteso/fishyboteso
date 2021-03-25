@@ -60,10 +60,17 @@ class Config:
             pass
 
 
+    def _sort_dict(self):
+        tmpdict = dict()
+        for key in sorted(self.config_dict.keys()):
+            tmpdict[key] = self.config_dict[key]
+        self.config_dict = tmpdict
+
     def save_config(self):
         """
         save the cache to the file
         """
+        self._sort_dict()
         with open(filename(), 'w') as f:
             f.write(json.dumps(self.config_dict))
 
