@@ -59,9 +59,10 @@ def initialize(window_to_hide):
         helper.install_thread_excepthook()
         sys.excepthook = helper.unhandled_exception_logging
 
-    if not config.get("addoninstalled", False) and not helper.addon_exists(chalutier[0]):
+    if not config.get("addoninstalled", False):
         helper.install_addon(*chalutier)
         helper.install_addon(*lam2)
+        helper.remove_addon("ProvisionsChalutier")
     config.set("addoninstalled", True)
 
 
