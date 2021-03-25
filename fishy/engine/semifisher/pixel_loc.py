@@ -57,7 +57,7 @@ class PixelLoc:
     def config():
         """
         Uses the game window to get an image of the game screen
-        then uses `GetKeypointFromImage()` to find the ProvisionsChalutier pixel location
+        then uses `GetKeypointFromImage()` to find the Chalutier pixel location
         :return: false if pixel loc not found
         """
 

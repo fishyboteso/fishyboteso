@@ -12,6 +12,7 @@ from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui import GUI, splash, update_dialog
 from fishy.helper import hotkey
 from fishy.helper.config import config
+from fishy.constants import chalutier, lam2
 
 
 def check_window_name(title):
@@ -58,7 +59,10 @@ def initialize(window_to_hide):
         helper.install_thread_excepthook()
         sys.excepthook = helper.unhandled_exception_logging
 
-    helper.check_addon("ProvisionsChalutier")
+    if not config.get("addoninstalled", False) and not helper.addon_exists(chalutier[0]):
+        helper.install_addon(*chalutier)
+        helper.install_addon(*lam2)
+    config.set("addoninstalled", True)
 
 
 def main():

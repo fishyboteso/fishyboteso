@@ -6,7 +6,7 @@ from fishy import helper
 from . import urls
 from .decorators import fallback, uses_session
 from ..helper.config import config
-from .constants import apiversion
+from ..constants import apiversion
 
 _session_id = None
 
