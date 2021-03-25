@@ -2,11 +2,14 @@ from multiprocessing import Process, Manager
 from tkinter import *
 import time
 
+from fishy import helper
+
 def show(currentversion, newversion, returns):
     top = Tk()
-    top.title("A wild update appears!")
+    top.title("A wild fishy update appeared!")
+    top.iconbitmap(helper.manifest_file('icon.ico'))
 
-    dialogLabel = Label(top, text="There is a new update available ("+currentversion+"->"+newversion+"). Do you want to update now?")
+    dialogLabel = Label(top, text="There is a new fishy update available ("+currentversion+"->"+newversion+"). Do you want to update now?")
     dialogLabel.grid(row=0, columnspan=2, padx=5, pady=5)
 
     cbVar = IntVar()
@@ -24,10 +27,11 @@ def show(currentversion, newversion, returns):
         top.destroy()
 
     pixelVirtual = PhotoImage(width=1, height=1) # trick to use buttonWidth as pixels, not #symbols
+    dialogBtnNo = Button(top, text="No " + str(chr(10005)),  fg='red4', command=_clickNo, image=pixelVirtual, width=buttonWidth, compound="c")
+    dialogBtnNo.grid(row=2, column=0, padx=5, pady=5)
     dialogBtnYes = Button(top, text="Yes " + str(chr(10003)),  fg='green', command=_clickYes, image=pixelVirtual, width=buttonWidth, compound="c")
-    dialogBtnYes.grid(row=2, column=0, padx=5, pady=5)
-    dialogBtnNo = Button(top, text="No " + str(chr(10005)),  fg='red', command=_clickNo, image=pixelVirtual, width=buttonWidth, compound="c")
-    dialogBtnNo.grid(row=2, column=1, padx=5, pady=5)
+    dialogBtnYes.grid(row=2, column=1, padx=5, pady=5)
+    dialogBtnYes.focus_set()
 
     top.protocol('WM_DELETE_WINDOW', _clickNo)
 
