@@ -58,7 +58,7 @@ def start_semifisher_config(gui: 'GUI'):
         gui.config.save_config()
 
     def toggle_sub():
-        if web.is_subbed(config.get("uid"))[0]:
+        if web.is_subbed()[0]:
             if web.unsub():
                 gui._notify.set(0)
         else:
