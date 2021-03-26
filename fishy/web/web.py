@@ -51,12 +51,11 @@ def register_user(new_uid):
 
 
 @fallback(None)
-def send_notification(uid, message):
-    # todo clean dead code
-    if not is_subbed(uid):
+def send_notification(message):
+    if not is_subbed():
         return False
 
-    body = {"uid": uid, "message": message, "apiversion":apiversion}
+    body = {"uid": config.get("uid"), "message": message, "apiversion":apiversion}
     requests.post(urls.notify, json=body)
 
 

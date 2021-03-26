@@ -162,8 +162,12 @@ def on_loot():
 
 
 def on_fight():
-    logging.info("FIGHTING")
+    msg = "FIGHTING!"
+    logging.info(msg)
+    web.send_notification(msg)
 
 
 def on_dead():
-    logging.info("DEAD or INVENTORY FULL or NO BAIT EQUIPPED")
+    msg = "DEAD or INVENTORY FULL or NO BAIT EQUIPPED"
+    logging.info(msg)
+    web.send_notification(msg)

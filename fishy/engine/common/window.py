@@ -33,7 +33,6 @@ class WindowClient:
             WindowClient.clients.remove(self)
         if len(WindowClient.clients) == 0:
             window_server.stop()
-            logging.info("window server stopped")
 
     @staticmethod
     def running():
