@@ -152,12 +152,25 @@ def get_addondir():
     return os.path.join(documents, "Elder Scrolls Online", "live", "Addons")        
 
 
-def addon_exists(name):
+def addon_exists(name, url=None, v=None):
     return os.path.exists(os.path.join(get_addondir(), name))
 
 
+def get_addonversion(name, url=None, v=None):
+    if addon_exists(name):
+        txt = name + ".txt"
+        try:
+            with open(os.path.join(get_addondir(), name, txt)) as f:
+                for line in f:
+                    if "AddOnVersion" in line:
+                        return int(line.split(' ')[2])
+        except Exception:
+            pass
+    return 0
+
+
 # noinspection PyBroadException
-def install_addon(name, url):
+def install_addon(name, url, v=None):
     try:
         r = requests.get(url, stream=True)
         z = ZipFile(BytesIO(r.content))
@@ -167,7 +180,7 @@ def install_addon(name, url):
         logging.error("Could not install Add-On "+name+", try doing it manually")
 
 
-def remove_addon(name):
+def remove_addon(name, url=None, v=None):
     try:
         shutil.rmtree(os.path.join(get_addondir(), name))
         logging.info("Add-On "+name+" removed!")
