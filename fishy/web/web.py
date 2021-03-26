@@ -51,18 +51,20 @@ def register_user(new_uid):
 
 
 @fallback(None)
-def send_notification(uid, message):
-    # todo clean dead code
-    if not is_subbed(uid):
+def send_notification(message):
+    if not is_subbed():
         return False
 
-    body = {"uid": uid, "message": message, "apiversion":apiversion}
+    body = {"uid": config.get("uid"), "message": message, "apiversion":apiversion}
     requests.post(urls.notify, json=body)
 
 
 @uses_session
 @fallback(None)
 def send_hole_deplete(fish_caught, hole_time, fish_times):
+    if not is_subbed():
+        return False
+
     hole_data = {
         "fish_caught": fish_caught,
         "hole_time": hole_time,
