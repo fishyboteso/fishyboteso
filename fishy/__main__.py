@@ -59,11 +59,11 @@ def initialize(window_to_hide):
         helper.install_thread_excepthook()
         sys.excepthook = helper.unhandled_exception_logging
 
-    if not config.get("addoninstalled", False):
+    if not config.get("addoninstalled", 0) or helper.get_addonversion(chalutier[0]) < chalutier[2]:
         helper.install_addon(*chalutier)
         helper.install_addon(*lam2)
-        helper.remove_addon("ProvisionsChalutier")
-    config.set("addoninstalled", True)
+        helper.remove_addon("ProvisionsChalutier") #TODO delete with fishy 0.4.6
+    config.set("addoninstalled", helper.get_addonversion(chalutier[0]))
 
 
 def main():
