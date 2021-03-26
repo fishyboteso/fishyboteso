@@ -61,12 +61,13 @@ def _create(gui: 'GUI'):
 
     def installer():
         if filemenu.entrycget(4, 'label') == "Remove Chalutier":
-            helper.remove_addon(chalutier[0])
-            filemenu.entryconfigure(4, label="Install Chalutier")
+            if helper.remove_addon(chalutier[0]) == 0:
+                filemenu.entryconfigure(4, label="Install Chalutier")
         else:
-            helper.install_addon(*chalutier)
-            helper.install_addon(*lam2)
-            filemenu.entryconfigure(4, label="Remove Chalutier")
+            r = helper.install_addon(*chalutier)
+            r += helper.install_addon(*lam2)
+            if r == 0:
+                filemenu.entryconfigure(4, label="Remove Chalutier")
     chaEntry = "Remove Chalutier" if helper.addon_exists(chalutier[0]) else "Install Chalutier"
     filemenu.add_command(label=chaEntry, command=installer)
     menubar.add_cascade(label="Options", menu=filemenu)
