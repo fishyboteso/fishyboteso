@@ -56,8 +56,8 @@ def initialize_uid():
     if config.get("uid") is not None:
         return
 
-    new_uid = _create_new_uid()
-    if web.register_user(new_uid):
+    new_uid = web.register_user()
+    if new_uid is not None:
         config.set("uid", new_uid)
     else:
         logging.error("Couldn't register uid, some features might not work")
