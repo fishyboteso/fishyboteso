@@ -132,7 +132,7 @@ def _create(gui: 'GUI'):
     # noinspection PyProtectedMember
     def set_destroy():
         if gui._bot_running:
-            if(not messagebox.askyesno(title="Quit?", message="Bot engine running. Quit Anyway?")):
+            if not messagebox.askyesno(title="Quit?", message="Bot engine running. Quit Anyway?"):
                 return
 
         config.set("win_loc", gui._root.geometry())
