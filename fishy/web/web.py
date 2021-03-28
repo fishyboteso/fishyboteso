@@ -42,12 +42,13 @@ def logout():
     return result["success"]
 
 
-@fallback(False)
-def register_user(new_uid):
+@fallback(None)
+def register_user():
     ip = get_ip(GoogleDnsProvider)
-    body = {"uid": new_uid, "ip": ip, "apiversion":apiversion}
+    body = {"ip": ip, "apiversion": apiversion}
     response = requests.post(urls.user, json=body)
-    return response.ok and response.json()["success"]
+    result = response.json()
+    return result["uid"]
 
 
 @fallback(None)
