@@ -63,6 +63,7 @@ def initialize(window_to_hide):
         helper.install_addon(*chalutier)
         helper.install_addon(*lam2)
         helper.remove_addon("ProvisionsChalutier") #TODO delete with fishy 0.4.6
+        helper.remove_addon("FooAddon") #TODO delete with fishy 0.4.6
     config.set("addoninstalled", helper.get_addonversion(chalutier[0]))
 
 
