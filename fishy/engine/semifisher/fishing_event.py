@@ -83,11 +83,11 @@ def fisher_callback(event: State):
         State.LOOKAWAY: on_lookaway,
         State.LOOKING: on_looking,
         State.DEPLETED: on_depleted,
-        State.NOBAIT: on_dead,
+        State.NOBAIT: on_nobait,
         State.FISHING: on_fishing,
         State.REELIN: on_reelin,
         State.LOOT: on_loot,
-        State.INVFULL: on_dead,
+        State.INVFULL: on_invfull,
         State.FIGHT: on_fight,
         State.DEAD: on_dead
     }
@@ -126,6 +126,12 @@ def on_depleted():
         FishEvent.fishCaught = 0
 
 
+def on_nobait():
+    msg = "No bait equipped!"
+    logging.info(msg)
+    web.send_notification(msg)
+
+
 def on_fishing():
     FishEvent.stickInitTime = time.time()
     FishEvent.FishingStarted = True
@@ -161,6 +167,12 @@ def on_loot():
         _fishing_sleep(0.3)
 
 
+def on_invfull():
+    msg = "Inventory full!"
+    logging.info(msg)
+    web.send_notification(msg)
+
+
 def on_fight():
     msg = "FIGHTING!"
     logging.info(msg)
@@ -168,6 +180,6 @@ def on_fight():
 
 
 def on_dead():
-    msg = "DEAD or INVENTORY FULL or NO BAIT EQUIPPED"
+    msg = "Character is dead!"
     logging.info(msg)
     web.send_notification(msg)
