@@ -9,11 +9,11 @@ class State(Enum):
     LOOKAWAY = [150, 255,  76]
     LOOKING  = [100, 255, 101]
     DEPLETED = [ 30, 255,  76]
-    NOBAIT   = [  0,   0,   0]
+    NOBAIT   = [ 96, 255, 255]
     FISHING  = [ 18, 165, 213]
     REELIN   = [ 60, 255, 204]
     LOOT     = [  0, 255, 204]
-    INVFULL  = [  0,   0,   0]
+    INVFULL  = [  0, 255,  51]
     FIGHT    = [120, 255, 204]
     DEAD     = [  0,   0,   0]
 
