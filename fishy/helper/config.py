@@ -3,9 +3,12 @@ config.py
 Saves configuration in file as json file
 """
 import json
+import logging
 import os
 
 # path to save the configuration file
+from typing import Optional
+from event_scheduler import EventScheduler
 
 
 def filename():
@@ -18,53 +21,60 @@ def filename():
     return os.path.join(get_documents(), name)
 
 
+temp_file = os.path.join(os.environ["TEMP"], "fishy_config.BAK")
+
+
 class Config:
 
     def __init__(self):
-        """
-        cache the configuration in a dict for faster access,
-        if file is not found initialize the dict
-        """
-        self.config_dict = json.loads(open(filename()).read()) if os.path.exists(filename()) else dict()
+        self._config_dict: Optional[dict] = None
+        self._scheduler: Optional[EventScheduler] = None
 
-    def get(self, key, default=None):
-        """
-        gets a value from  configuration,
-        if it is not found, return the default configuration
-        :param key: key of the config
-        :param default: default value to return if key is not found
-        :return: config value
-        """
-        return self.config_dict[key] if key in self.config_dict else default
+    def __getitem__(self, item):
+        return self._config_dict.get(item)
 
-    def set(self, key, value, save=True):
-        """
-        saves the configuration is cache (and saves it in file if needed)
-        :param key: key to save
-        :param value: value to save
-        :param save: False if don't want to save right away
-        """
-        self.config_dict[key] = value
-        if save:
-            self.save_config()
+    def __setitem__(self, key, value):
+        self._config_dict[key] = value
 
-    def delete(self, key):
-        """
-        deletes a key from config
-        :param key: key to delete
-        """
-        try:
-            del self.config_dict[key]
-            self.save_config()
-        except KeyError:
-            pass
+    def __delitem__(self, key):
+        del self._config_dict[key]
 
+    def initialize(self):
+        self._scheduler = EventScheduler()
+        if os.path.exists(filename()):
+
+            try:
+                self._config_dict = json.loads(open(filename()).read())
+            except json.JSONDecodeError:
+                try:
+                    print("Config file got corrupted, trying to restore backup")
+                    self._config_dict = json.loads(open(temp_file).read())
+                    self.save_config()
+                except (FileNotFoundError, json.JSONDecodeError):
+                    print("couldn't restore, creating new")
+                    os.remove(filename())
+                    self._config_dict = dict()
+
+        else:
+            self._config_dict = dict()
+
+        self._create_backup()
+        self._scheduler.start()
+        self._scheduler.enter_recurring(5 * 60, 1, self._create_backup)
+
+    def stop(self):
+        self._scheduler.stop(True)
+
+    def _create_backup(self):
+        with open(temp_file, 'w') as f:
+            f.write(json.dumps(self._config_dict))
+        print("created backup")
 
     def _sort_dict(self):
         tmpdict = dict()
-        for key in sorted(self.config_dict.keys()):
-            tmpdict[key] = self.config_dict[key]
-        self.config_dict = tmpdict
+        for key in sorted(self._config_dict.keys()):
+            tmpdict[key] = self._config_dict[key]
+        self._config_dict = tmpdict
 
     def save_config(self):
         """
@@ -72,7 +82,57 @@ class Config:
         """
         self._sort_dict()
         with open(filename(), 'w') as f:
-            f.write(json.dumps(self.config_dict))
+            f.write(json.dumps(self._config_dict))
 
 
-config = Config()
+# noinspection PyPep8Naming
+class config:
+    _instance = None
+
+    @staticmethod
+    def init():
+        config._instance = Config()
+        config._instance.initialize()
+
+    @staticmethod
+    def stop():
+        config._instance.stop()
+
+    @staticmethod
+    def get(key, default=None):
+        """
+        gets a value from  configuration,
+        if it is not found, return the default configuration
+        :param key: key of the config
+        :param default: default value to return if key is not found
+        :return: config value
+        """
+        return config._instance[key] or default
+
+    @staticmethod
+    def set(key, value, save=True):
+        """
+        saves the configuration is cache (and saves it in file if needed)
+        :param key: key to save
+        :param value: value to save
+        :param save: False if don't want to save right away
+        """
+        config._instance[key] = value
+        if save:
+            config.save_config()
+
+    @staticmethod
+    def delete(key):
+        """
+        deletes a key from config
+        :param key: key to delete
+        """
+        try:
+            del config._instance[key]
+            config.save_config()
+        except KeyError:
+            pass
+
+    @staticmethod
+    def save_config():
+        config._instance.save_config()
