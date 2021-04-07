@@ -107,7 +107,7 @@ class config:
         :param default: default value to return if key is not found
         :return: config value
         """
-        return config._instance[key] or default
+        return default if config._instance[key] is None else config._instance[key]
 
     @staticmethod
     def set(key, value, save=True):
