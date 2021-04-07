@@ -68,6 +68,7 @@ def initialize(window_to_hide):
 
 
 def main():
+    config.init()
     splash.start()
     print("launching please wait...")
 
@@ -90,6 +91,7 @@ def main():
     gui_window.start()
 
     bot.start_event_handler()
+    config.stop()
 
 
 if __name__ == "__main__":

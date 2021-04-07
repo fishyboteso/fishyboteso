@@ -13,3 +13,4 @@ pynput
 pytesseract
 keyboard
 playsound
+event-scheduler

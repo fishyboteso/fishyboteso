@@ -7,7 +7,7 @@ from fishy.helper.config import config
 from fishy.helper import helper
 
 
-def show():
+def show(win_loc):
     dim=(300,200)
     top = Tk()
 
@@ -25,8 +25,10 @@ def show():
     canvas.create_image(0, 0, anchor=NW, image=top.image)
 
     # Position splash at the center of the main window
-    win_loc = config.get("win_loc", str(top.winfo_reqwidth())+"+"+str(top.winfo_reqheight())+"+"+"0"+"0").split("+")[1:]
-    top.geometry("{}x{}+{}+{}".format(dim[0], dim[1], int(win_loc[0])+int(dim[0]/2), int(win_loc[1])+int(dim[1]/2)))
+
+    default_loc = (str(top.winfo_reqwidth())+"+"+str(top.winfo_reqheight())+"+"+"0"+"0")
+    loc = (win_loc or default_loc).split("+")[1:]
+    top.geometry("{}x{}+{}+{}".format(dim[0], dim[1], int(loc[0])+int(dim[0]/2), int(loc[1])+int(dim[1]/2)))
 
     top.update()
     time.sleep(3)
@@ -34,4 +36,4 @@ def show():
 
 
 def start():
-    Process(target=show).start()
+    Process(target=show, args=(config.get("win_loc"),)).start()
