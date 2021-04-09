@@ -31,7 +31,7 @@ class SemiFisherEngine(IEngine):
         code explained in comments in detail
         """
         fishing_event.init()
-        self.fishPixWindow = WindowClient(color=cv2.COLOR_RGB2HSV)
+        self.fishPixWindow = WindowClient()
 
         # check for game window and stuff
         self.gui.bot_started(True)
