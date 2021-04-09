@@ -98,6 +98,7 @@ def fisher_callback(event: State):
         State.FIGHT: on_fight,
         State.DEAD: on_dead
     }
+
     try:
         callbacks_map[event]()
         FishEvent.previousState = event

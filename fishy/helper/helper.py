@@ -145,11 +145,18 @@ def create_shortcut(anti_ghosting: bool):
         logging.error("Couldn't create shortcut")
 
 
+def get_savedvarsdir():
+    # noinspection PyUnresolvedReferences
+    from win32com.shell import shell, shellcon
+    documents = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
+    return os.path.join(documents, "Elder Scrolls Online", "live", "SavedVariables")
+
+
 def get_addondir():
     # noinspection PyUnresolvedReferences
     from win32com.shell import shell, shellcon
     documents = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
-    return os.path.join(documents, "Elder Scrolls Online", "live", "Addons")        
+    return os.path.join(documents, "Elder Scrolls Online", "live", "Addons")
 
 
 def addon_exists(name, url=None, v=None):
