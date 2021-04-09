@@ -62,8 +62,6 @@ def initialize(window_to_hide):
     if not config.get("addoninstalled", 0) or helper.get_addonversion(chalutier[0]) < chalutier[2]:
         helper.install_addon(*chalutier)
         helper.install_addon(*lam2)
-        helper.remove_addon("ProvisionsChalutier") #TODO delete with fishy 0.4.6
-        helper.remove_addon("FooAddon") #TODO delete with fishy 0.4.6
     config.set("addoninstalled", helper.get_addonversion(chalutier[0]))
 
 
