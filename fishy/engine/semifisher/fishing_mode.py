@@ -15,7 +15,7 @@ class State(Enum):
     LOOT     = [  0, 255, 204]
     INVFULL  = [  0, 255,  51]
     FIGHT    = [120, 255, 204]
-    DEAD     = [  0,   0,   0]
+    DEAD     = [  0,   0,  51]
 
 def _notify(event):
     for subscriber in subscribers:
