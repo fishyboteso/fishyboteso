@@ -52,11 +52,6 @@ class Calibrate:
         self._callibrate_state = -1
         self.engine = engine
 
-    # region getters
-    @property
-    def crop(self):
-        return _get_factor("crop")
-
     @property
     def move_factor(self):
         return _get_factor("move_factor")
@@ -72,17 +67,10 @@ class Calibrate:
     # endregion
 
     def all_callibrated(self):
-        return self.crop is not None and self.move_factor is not None and self.rot_factor is not None
+        return self.move_factor is not None and self.rot_factor is not None
 
     def toggle_show(self):
         self.engine.show_crop = not self.engine.show_crop
-
-    def update_crop(self, enable_crop=True):
-        if enable_crop:
-            self.engine.show_crop = True
-        crop = get_crop_coods(self.engine.window)
-        _update_factor("crop", crop)
-        self.engine.window.crop = crop
 
     def walk_calibrate(self):
         walking_time = 3

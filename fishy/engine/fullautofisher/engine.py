@@ -14,8 +14,7 @@ import time
 import numpy as np
 import pytesseract
 
-from fishy.engine.fullautofisher.tesseract import is_tesseract_installed, downlaoad_and_extract_tesseract, \
-    get_values_from_image
+from fishy.engine.fullautofisher.qr_detection import get_values_from_image, get_qr_location
 from fishy.engine.semifisher.fishing_mode import FishingMode
 
 from fishy.engine import SemiFisherEngine
@@ -27,7 +26,6 @@ from pynput import keyboard, mouse
 
 from fishy.helper import hotkey, helper
 from fishy.helper.config import config
-from fishy.helper.downloader import download_file_from_google_drive
 from fishy.helper.helper import sign
 from fishy.helper.hotkey import Key
 
@@ -36,12 +34,11 @@ kb = keyboard.Controller()
 
 
 def image_pre_process(img):
-    scale_percent = 200  # percent of original size
+    scale_percent = 100  # percent of original size
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
     dim = (width, height)
     img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
-    img = cv2.bitwise_not(img)
     return img
 
 
@@ -73,7 +70,6 @@ class FullAuto(IEngine):
         self.show_crop = False
 
     def run(self):
-        self.show_crop = False
         FullAuto.state = State.NONE
 
         self.gui.bot_started(True)
@@ -83,21 +79,19 @@ class FullAuto(IEngine):
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
 
         try:
-            if self.calibrate.crop is None:
-                self.calibrate.update_crop(enable_crop=False)
-            self.window.crop = self.calibrate.crop
-
-            if not is_tesseract_installed():
-                logging.info("tesseract not found")
-                downlaoad_and_extract_tesseract()
+            self.window.crop = get_qr_location(self.window.get_capture())
+            if self.window.crop is None:
+                print("FishyQR not found")
+                self.start = False
 
             if not self.calibrate.all_callibrated():
                 logging.error("you need to callibrate first")
 
             self.controls.initialize()
             while self.start and WindowClient.running():
-                self.window.show(self.show_crop, func=image_pre_process)
-                if not self.show_crop:
+                if self.show_crop:
+                    self.window.show(self.show_crop, func=image_pre_process)
+                else:
                     time.sleep(0.1)
         except:
             traceback.print_exc()
@@ -173,11 +167,11 @@ class FullAuto(IEngine):
     def look_for_hole(self):
         self._hole_found_flag = False
 
-        if FishingMode.CurrentMode == fishing_mode.State.LOOK:
+        if FishingMode.CurrentMode == fishing_mode.State.LOOKING:
             return True
 
         def found_hole(e):
-            if e == fishing_mode.State.LOOK:
+            if e == fishing_mode.State.LOOKING:
                 self._hole_found_flag = True
 
         fishing_mode.subscribers.append(found_hole)

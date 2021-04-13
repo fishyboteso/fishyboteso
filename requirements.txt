@@ -10,7 +10,6 @@ requests
 beautifulsoup4
 whatsmyip
 pynput
-pytesseract
 keyboard
 playsound
 event-scheduler

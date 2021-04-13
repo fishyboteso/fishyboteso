@@ -17,7 +17,7 @@ def get_controls(engine: FullAuto):
             Key.DOWN: (Recorder(engine).toggle_recording, "start/stop record"),
         }),
         ("CALIBRATE", {
-            Key.RIGHT: (engine.calibrate.update_crop, "cropping"),
+            Key.RIGHT: (None, ""),
             Key.UP: (engine.calibrate.walk_calibrate, "walking"),
             Key.LEFT: (engine.calibrate.rotate_calibrate, "rotation"),
             Key.DOWN: (engine.calibrate.time_to_reach_bottom_callibrate, "look up down")
