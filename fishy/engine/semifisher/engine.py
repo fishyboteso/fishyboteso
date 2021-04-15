@@ -5,6 +5,7 @@ import logging
 from threading import Thread
 from typing import Callable
 from typing import Optional
+from playsound import playsound
 
 from fishy.engine.common.window import WindowClient
 from fishy.engine.semifisher.fishing_mode import Colors, FishingMode
@@ -14,6 +15,7 @@ from fishy.engine.semifisher.fishing_mode import FishingMode
 from fishy.engine.semifisher.fishing_event import FishEvent
 from fishy.engine.semifisher import fishing_mode, fishing_event
 from fishy.engine.semifisher.pixel_loc import PixelLoc
+from fishy.helper import helper
 
 from fishy.helper.luaparser import sv_color_extract
 
@@ -84,6 +86,9 @@ class SemiFisherEngine(IEngine):
         if self.start:
             self.thread = Thread(target=self.run)
             self.thread.start()
+            playsound(helper.manifest_file("beep.wav"), False)
+        else:
+            helper.playsound_multiple(helper.manifest_file("beep.wav"))
 
 
 if __name__ == '__main__':
