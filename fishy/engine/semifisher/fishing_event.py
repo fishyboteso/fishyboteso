@@ -87,7 +87,7 @@ def subscribe():
 def fisher_callback(event: State):
     callbacks_map = {
         State.IDLE: on_idle,
-        State.LOOKAWAY: on_lookaway,
+        State.LOOKAWAY: on_idle,
         State.LOOKING: on_looking,
         State.DEPLETED: on_depleted,
         State.NOBAIT: on_nobait,
@@ -117,10 +117,6 @@ def on_idle():
 def on_depleted():
     logging.info("HOLE DEPLETED")
     _sound_and_send_fishy_data()
-
-
-def on_lookaway():
-    return
 
 
 @if_eso_is_focused
