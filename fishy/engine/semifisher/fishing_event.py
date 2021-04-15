@@ -5,19 +5,16 @@ also implements callbacks which is called when states are changed
 """
 import logging
 import time
-
-from fishy.engine.semifisher import fishing_mode
-from playsound import playsound
-
-from fishy import web
-from fishy.engine.semifisher.fishing_mode import State, FishingMode
-from fishy.helper import helper
+import random
 import keyboard
+from playsound import playsound
 from win32gui import GetWindowText, GetForegroundWindow
 
+from fishy import web
+from fishy.engine.semifisher import fishing_mode
+from fishy.engine.semifisher.fishing_mode import State, FishingMode
+from fishy.helper import helper
 from fishy.helper.config import config
-
-import random
 
 
 class FishEvent:
