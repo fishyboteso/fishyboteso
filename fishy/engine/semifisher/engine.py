@@ -67,7 +67,7 @@ class SemiFisherEngine(IEngine):
             t = 0
             while t < 10.0:
                 t += freq
-                logging.debug(str(FishingMode.CurrentMode.label) + ":" + str(self.fishPixWindow.get_capture()[0][0]))
+                logging.debug(str(FishingMode.CurrentMode) + ":" + str(self.fishPixWindow.get_capture()[0][0]))
                 time.sleep(freq)
 
         logging.debug("Will display pixel values for 10 seconds")
