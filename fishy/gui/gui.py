@@ -2,6 +2,7 @@ import logging
 import uuid
 from tkinter import OptionMenu, Button, IntVar
 from typing import List, Callable, Optional, Dict, Any
+import queue
 import threading
 
 from fishy.web import web
@@ -25,8 +26,8 @@ class GUI:
         self._start_restart = False
         self._destroyed = True
         self._log_strings = []
-        self._function_queue: Dict[str, Callable] = {}
-        self._result_queue: Dict[str, Any] = {}
+        self._function_queue = queue.Queue()
+        self._result_dict: Dict[str, Any] = {}
         self._bot_running = False
 
         # UI items
@@ -72,21 +73,21 @@ class GUI:
         self._thread.start()
 
     def _clear_function_queue(self):
-        while len(self._function_queue) > 0:
-            _id, func = self._function_queue.popitem()
+        while not self._function_queue.empty():
+            _id, func = self._function_queue.get()
             result = func()
-            self._result_queue[_id] = result
+            self._result_dict[_id] = result
 
     def call_in_thread(self, func: Callable, block=False):
         _id = str(uuid.uuid4())
-        self._function_queue[_id] = func
+        self._function_queue.put((_id, func))
 
         if not block:
             return None
 
-        wait_until(lambda: _id in self._result_queue)
+        wait_until(lambda: _id in self._result_dict)
 
-        return self._result_queue.pop(_id)
+        return self._result_dict.pop(_id)
 
     def _get_start_stop_text(self):
         return "STOP (F9)" if self._bot_running else "START (F9)"
