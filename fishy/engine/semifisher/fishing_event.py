@@ -137,6 +137,9 @@ def on_nobait():
     logging.info(msg)
     web.send_notification(msg)
 
+    if FishEvent.sound:
+        playsound(helper.manifest_file("sound.mp3"), False)
+
 
 def on_fishing():
     FishEvent.stickInitTime = time.time()
@@ -177,14 +180,23 @@ def on_invfull():
     logging.info(msg)
     web.send_notification(msg)
 
+    if FishEvent.sound:
+        playsound(helper.manifest_file("sound.mp3"), False)
+
 
 def on_fight():
     msg = "FIGHTING!"
     logging.info(msg)
     web.send_notification(msg)
 
+    if FishEvent.sound:
+        playsound(helper.manifest_file("sound.mp3"), False)
+
 
 def on_dead():
     msg = "Character is dead!"
     logging.info(msg)
     web.send_notification(msg)
+
+    if FishEvent.sound:
+        playsound(helper.manifest_file("sound.mp3"), False)
