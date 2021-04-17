@@ -185,7 +185,7 @@ class FullAuto(IEngine):
         fishing_mode.subscribers.append(found_hole)
 
         t = 0
-        while not self._hole_found_flag and t <= 4.47:
+        while not self._hole_found_flag and t <= 1.25:
             mse.move(0, FullAuto.rotate_by)
             time.sleep(0.05)
             t += 0.05
