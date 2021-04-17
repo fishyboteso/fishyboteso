@@ -14,6 +14,7 @@ import time
 import numpy as np
 import pytesseract
 
+from fishy.constants import libgps, fishyqr, lam2
 from fishy.engine.fullautofisher.qr_detection import get_values_from_image, get_qr_location
 from fishy.engine.semifisher.fishing_mode import FishingMode
 
@@ -24,9 +25,9 @@ from fishy.engine.semifisher import fishing_mode, fishing_event
 from fishy.engine.common.IEngine import IEngine
 from pynput import keyboard, mouse
 
-from fishy.helper import hotkey, helper
+from fishy.helper import hotkey, helper, hotkey_process
 from fishy.helper.config import config
-from fishy.helper.helper import sign
+from fishy.helper.helper import sign, addon_exists
 from fishy.helper.hotkey import Key
 
 mse = mouse.Controller()
@@ -56,7 +57,7 @@ class FullAuto(IEngine):
     def __init__(self, gui_ref):
         from fishy.engine.fullautofisher.controls import Controls
         from fishy.engine.fullautofisher import controls
-        from fishy.engine.fullautofisher.calibrate import Calibrate
+        from fishy.engine.fullautofisher.calibrator import Calibrator
         from fishy.engine.fullautofisher.test import Test
 
         super().__init__(gui_ref)
@@ -64,7 +65,7 @@ class FullAuto(IEngine):
         self._curr_rotate_y = 0
 
         self.fisher = SemiFisherEngine(None)
-        self.calibrate = Calibrate(self)
+        self.calibrator = Calibrator(self)
         self.test = Test(self)
         self.controls = Controls(controls.get_controls(self))
         self.show_crop = False
@@ -73,19 +74,20 @@ class FullAuto(IEngine):
         FullAuto.state = State.NONE
 
         self.gui.bot_started(True)
-        fishing_event.unsubscribe()
-        self.fisher.toggle_start()
-
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
 
         try:
             self.window.crop = get_qr_location(self.window.get_capture())
             if self.window.crop is None:
-                print("FishyQR not found")
+                logging.warning("FishyQR not found")
                 self.start = False
+                raise Exception("FishyQR not found")
 
-            if not self.calibrate.all_callibrated():
-                logging.error("you need to callibrate first")
+            if not self.calibrator.all_callibrated():
+                logging.error("you need to calibrate first")
+
+            self.fisher.toggle_start()
+            fishing_event.unsubscribe()
 
             self.controls.initialize()
             while self.start and WindowClient.running():
@@ -115,7 +117,7 @@ class FullAuto(IEngine):
             logging.error("set target first")
             return
 
-        if not self.calibrate.all_callibrated():
+        if not self.calibrator.all_callibrated():
             logging.error("you need to callibrate first")
             return
 
@@ -134,7 +136,7 @@ class FullAuto(IEngine):
 
         self.rotate_to(target_angle, from_angle)
 
-        walking_time = dist / self.calibrate.move_factor
+        walking_time = dist / self.calibrator.move_factor
         print(f"walking for {walking_time}")
         kb.press('w')
         time.sleep(walking_time)
@@ -156,7 +158,7 @@ class FullAuto(IEngine):
         if abs(angle_diff) > 180:
             angle_diff = (360 - abs(angle_diff)) * sign(angle_diff) * -1
 
-        rotate_times = int(angle_diff / self.calibrate.rot_factor) * -1
+        rotate_times = int(angle_diff / self.calibrator.rot_factor) * -1
 
         print(f"rotate_times: {rotate_times}")
 
@@ -177,7 +179,7 @@ class FullAuto(IEngine):
         fishing_mode.subscribers.append(found_hole)
 
         t = 0
-        while not self._hole_found_flag and t <= self.calibrate.time_to_reach_bottom / 3:
+        while not self._hole_found_flag and t <= 4.47:
             mse.move(0, FullAuto.rotate_by)
             time.sleep(0.05)
             t += 0.05
