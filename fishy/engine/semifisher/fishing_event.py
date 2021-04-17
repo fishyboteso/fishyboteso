@@ -33,7 +33,6 @@ class FishEvent:
     # initialize these
     action_key = 'e'
     collect_key = 'r' 
-    collect_allow_auto = False
     sound = False
 
 
@@ -59,7 +58,6 @@ def init():
     FishEvent.jitter = config.get("jitter", False)
     FishEvent.action_key = config.get("action_key", 'e')
     FishEvent.collect_key = config.get("collect_key", 'r')
-    FishEvent.collect_allow_auto = config.get("collect_allow_auto", False)
     FishEvent.uid = config.get("uid")
     FishEvent.sound = config.get("sound_notification", False)
 
@@ -161,10 +159,9 @@ def on_reelin():
 
 
 def on_loot():
-    if FishEvent.collect_allow_auto:
-        _fishing_sleep(0.15)
-        keyboard.press_and_release(FishEvent.collect_key)
-        _fishing_sleep(0.3)
+    _fishing_sleep(0)
+    keyboard.press_and_release(FishEvent.collect_key)
+    _fishing_sleep(0)
 
 
 def on_invfull():

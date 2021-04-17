@@ -63,9 +63,6 @@ def send_notification(message):
 @uses_session
 @fallback(None)
 def send_hole_deplete(fish_caught, hole_time, fish_times):
-    if not is_subbed()[0]:
-        return False
-
     hole_data = {
         "fish_caught": fish_caught,
         "hole_time": hole_time,

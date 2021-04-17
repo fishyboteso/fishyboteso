@@ -39,10 +39,7 @@ def loop(hsv):
         if all(hsv == s.value):
             FishingMode.CurrentMode = s
 
-    if FishingMode.CurrentMode == State.LOOKING:
-        _notify(FishingMode.CurrentMode)
-        time.sleep(1)
-    elif FishingMode.CurrentMode != FishingMode.PrevMode:
+    if FishingMode.CurrentMode != FishingMode.PrevMode:
         _notify(FishingMode.CurrentMode)
 
     FishingMode.PrevMode = FishingMode.CurrentMode
