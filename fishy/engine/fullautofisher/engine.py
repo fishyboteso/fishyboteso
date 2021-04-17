@@ -71,6 +71,12 @@ class FullAuto(IEngine):
         self.show_crop = False
 
     def run(self):
+
+        addons_req = [libgps, lam2, fishyqr]
+        for addon in addons_req:
+            if not helper.addon_exists(*addon):
+                helper.install_addon(*addon)
+
         FullAuto.state = State.NONE
 
         self.gui.bot_started(True)
