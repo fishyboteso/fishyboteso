@@ -13,3 +13,5 @@ pynput
 keyboard
 playsound
 event-scheduler
+pyzbar
+mouse
