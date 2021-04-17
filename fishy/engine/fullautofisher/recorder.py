@@ -6,8 +6,8 @@ from tkinter.filedialog import asksaveasfile
 
 from fishy.engine.fullautofisher.engine import FullAuto, State
 
-from fishy.helper import hotkey
 from fishy.helper.hotkey import Key
+from fishy.helper.hotkey_process import HotKey
 
 
 class Recorder:
@@ -35,7 +35,8 @@ class Recorder:
     def _start_recording(self):
         FullAuto.state = State.RECORDING
         logging.info("starting, press f8 to mark hole")
-        hotkey.set_hotkey(Recorder.mark_hole_key, self._mark_hole)
+        hk = HotKey()
+        hk.start_process(self._mark_hole)
 
         self.timeline = []
 
@@ -52,7 +53,7 @@ class Recorder:
             else:
                 logging.warning("Took too much time to record")
 
-        hotkey.free_key(Recorder.mark_hole_key)
+        hk.stop()
 
         def func():
             _file = None
