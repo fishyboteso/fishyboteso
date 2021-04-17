@@ -38,7 +38,8 @@ class SemiFisherEngine(IEngine):
 
         if self.get_gui:
             logging.info("Starting the bot engine, look at the fishing hole to start fishing")
-        Thread(target=self._wait_and_check).start()
+            Thread(target=self._wait_and_check).start()
+
         while self.start and WindowClient.running():
             capture = self.fishPixWindow.get_capture()
 
@@ -59,7 +60,7 @@ class SemiFisherEngine(IEngine):
     def _wait_and_check(self):
         time.sleep(10)
         if not FishEvent.FishingStarted and self.start:
-            logging.warn("Doesn't look like fishing has started \nCheck out #read-me-first on our discord channel to troubleshoot the issue")
+            logging.warning("Doesn't look like fishing has started \nCheck out #read-me-first on our discord channel to troubleshoot the issue")
 
     def show_pixel_vals(self):
         def show():
