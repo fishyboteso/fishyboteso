@@ -1,7 +1,6 @@
 import logging
 
 from fishy.engine.fullautofisher.engine import FullAuto
-from fishy.helper.config import config
 
 
 class Test:
