@@ -1,6 +1,6 @@
 import logging
 
-from fishy.helper import hotkey, helper
+from fishy.helper import hotkey
 
 from fishy.engine.fullautofisher.engine import FullAuto, State
 from fishy.helper.hotkey import Key

@@ -8,10 +8,7 @@ import numpy as np
 from fishy.engine.fullautofisher.engine import FullAuto
 from pynput import keyboard, mouse
 
-from fishy.helper import hotkey
 from fishy.helper.config import config
-from fishy.helper.helper import wait_until
-from fishy.helper.hotkey import Key
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
