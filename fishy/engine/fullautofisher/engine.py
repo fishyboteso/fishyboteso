@@ -14,8 +14,8 @@ import time
 import numpy as np
 import pytesseract
 
-from fishy.engine.fullautofisher.tesseract import is_tesseract_installed, downlaoad_and_extract_tesseract, \
-    get_values_from_image
+from fishy.constants import libgps, fishyqr, lam2
+from fishy.engine.fullautofisher.qr_detection import get_values_from_image, get_qr_location
 from fishy.engine.semifisher.fishing_mode import FishingMode
 
 from fishy.engine import SemiFisherEngine
@@ -25,10 +25,9 @@ from fishy.engine.semifisher import fishing_mode, fishing_event
 from fishy.engine.common.IEngine import IEngine
 from pynput import keyboard, mouse
 
-from fishy.helper import hotkey, helper
+from fishy.helper import hotkey, helper, hotkey_process
 from fishy.helper.config import config
-from fishy.helper.downloader import download_file_from_google_drive
-from fishy.helper.helper import sign
+from fishy.helper.helper import sign, addon_exists
 from fishy.helper.hotkey import Key
 
 mse = mouse.Controller()
@@ -36,12 +35,11 @@ kb = keyboard.Controller()
 
 
 def image_pre_process(img):
-    scale_percent = 200  # percent of original size
+    scale_percent = 100  # percent of original size
     width = int(img.shape[1] * scale_percent / 100)
     height = int(img.shape[0] * scale_percent / 100)
     dim = (width, height)
     img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
-    img = cv2.bitwise_not(img)
     return img
 
 
@@ -59,7 +57,7 @@ class FullAuto(IEngine):
     def __init__(self, gui_ref):
         from fishy.engine.fullautofisher.controls import Controls
         from fishy.engine.fullautofisher import controls
-        from fishy.engine.fullautofisher.calibrate import Calibrate
+        from fishy.engine.fullautofisher.calibrator import Calibrator
         from fishy.engine.fullautofisher.test import Test
 
         super().__init__(gui_ref)
@@ -67,37 +65,41 @@ class FullAuto(IEngine):
         self._curr_rotate_y = 0
 
         self.fisher = SemiFisherEngine(None)
-        self.calibrate = Calibrate(self)
+        self.calibrator = Calibrator(self)
         self.test = Test(self)
         self.controls = Controls(controls.get_controls(self))
         self.show_crop = False
 
     def run(self):
-        self.show_crop = False
+
+        addons_req = [libgps, lam2, fishyqr]
+        for addon in addons_req:
+            if not helper.addon_exists(*addon):
+                helper.install_addon(*addon)
+
         FullAuto.state = State.NONE
 
         self.gui.bot_started(True)
-        fishing_event.unsubscribe()
-        self.fisher.toggle_start()
-
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
 
         try:
-            if self.calibrate.crop is None:
-                self.calibrate.update_crop(enable_crop=False)
-            self.window.crop = self.calibrate.crop
+            self.window.crop = get_qr_location(self.window.get_capture())
+            if self.window.crop is None:
+                logging.warning("FishyQR not found")
+                self.start = False
+                raise Exception("FishyQR not found")
 
-            if not is_tesseract_installed():
-                logging.info("tesseract not found")
-                downlaoad_and_extract_tesseract()
+            if not self.calibrator.all_callibrated():
+                logging.error("you need to calibrate first")
 
-            if not self.calibrate.all_callibrated():
-                logging.error("you need to callibrate first")
+            self.fisher.toggle_start()
+            fishing_event.unsubscribe()
 
             self.controls.initialize()
             while self.start and WindowClient.running():
-                self.window.show(self.show_crop, func=image_pre_process)
-                if not self.show_crop:
+                if self.show_crop:
+                    self.window.show(self.show_crop, func=image_pre_process)
+                else:
                     time.sleep(0.1)
         except:
             traceback.print_exc()
@@ -121,7 +123,7 @@ class FullAuto(IEngine):
             logging.error("set target first")
             return
 
-        if not self.calibrate.all_callibrated():
+        if not self.calibrator.all_callibrated():
             logging.error("you need to callibrate first")
             return
 
@@ -140,7 +142,7 @@ class FullAuto(IEngine):
 
         self.rotate_to(target_angle, from_angle)
 
-        walking_time = dist / self.calibrate.move_factor
+        walking_time = dist / self.calibrator.move_factor
         print(f"walking for {walking_time}")
         kb.press('w')
         time.sleep(walking_time)
@@ -162,7 +164,7 @@ class FullAuto(IEngine):
         if abs(angle_diff) > 180:
             angle_diff = (360 - abs(angle_diff)) * sign(angle_diff) * -1
 
-        rotate_times = int(angle_diff / self.calibrate.rot_factor) * -1
+        rotate_times = int(angle_diff / self.calibrator.rot_factor) * -1
 
         print(f"rotate_times: {rotate_times}")
 
@@ -173,17 +175,17 @@ class FullAuto(IEngine):
     def look_for_hole(self):
         self._hole_found_flag = False
 
-        if FishingMode.CurrentMode == fishing_mode.State.LOOK:
+        if FishingMode.CurrentMode == fishing_mode.State.LOOKING:
             return True
 
         def found_hole(e):
-            if e == fishing_mode.State.LOOK:
+            if e == fishing_mode.State.LOOKING:
                 self._hole_found_flag = True
 
         fishing_mode.subscribers.append(found_hole)
 
         t = 0
-        while not self._hole_found_flag and t <= self.calibrate.time_to_reach_bottom / 3:
+        while not self._hole_found_flag and t <= 1.25:
             mse.move(0, FullAuto.rotate_by)
             time.sleep(0.05)
             t += 0.05

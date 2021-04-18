@@ -11,16 +11,10 @@ def get_controls(engine: FullAuto):
     from fishy.engine.fullautofisher.player import Player
     controls = [
         ("MODE_SELECT", {
-            Key.RIGHT: (lambda: engine.controls.select_mode("CALIBRATE"), "calibrate mode"),
-            Key.UP: (lambda: engine.controls.select_mode("TEST1"), "test mode"),
+            Key.RIGHT: (Recorder(engine).toggle_recording, "start/stop record"),
+            Key.UP: (engine.calibrator.calibrate, "calibrate mode"),
             Key.LEFT: (Player(engine).toggle_move, "start/stop play"),
-            Key.DOWN: (Recorder(engine).toggle_recording, "start/stop record"),
-        }),
-        ("CALIBRATE", {
-            Key.RIGHT: (engine.calibrate.update_crop, "cropping"),
-            Key.UP: (engine.calibrate.walk_calibrate, "walking"),
-            Key.LEFT: (engine.calibrate.rotate_calibrate, "rotation"),
-            Key.DOWN: (engine.calibrate.time_to_reach_bottom_callibrate, "look up down")
+            Key.DOWN: (lambda: engine.controls.select_mode("TEST1"), "test mode"),
         }),
         ("TEST1", {
             Key.RIGHT: (engine.test.print_coods, "print coordinates"),

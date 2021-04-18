@@ -49,10 +49,13 @@ class Player:
             self.hole_complete_flag = True
 
     def _start_route(self):
-        FullAuto.state = State.PLAYING
         timeline = _get_rec_file()
         if not timeline:
+            logging.log("data not found, can't start")
             return
+
+        FullAuto.state = State.PLAYING
+        logging.info("starting to move")
 
         forward = True
         i = 0

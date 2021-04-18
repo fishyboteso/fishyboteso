@@ -47,15 +47,10 @@ def _get_factor(key):
     return config.get("full_auto_factors", {}).get(key)
 
 
-class Calibrate:
+class Calibrator:
     def __init__(self, engine: FullAuto):
         self._callibrate_state = -1
         self.engine = engine
-
-    # region getters
-    @property
-    def crop(self):
-        return _get_factor("crop")
 
     @property
     def move_factor(self):
@@ -65,26 +60,15 @@ class Calibrate:
     def rot_factor(self):
         return _get_factor("rot_factor")
 
-    @property
-    def time_to_reach_bottom(self):
-        return _get_factor("time_to_reach_bottom")
-
     # endregion
 
     def all_callibrated(self):
-        return self.crop is not None and self.move_factor is not None and self.rot_factor is not None
+        return self.move_factor is not None and self.rot_factor is not None
 
     def toggle_show(self):
         self.engine.show_crop = not self.engine.show_crop
 
-    def update_crop(self, enable_crop=True):
-        if enable_crop:
-            self.engine.show_crop = True
-        crop = get_crop_coods(self.engine.window)
-        _update_factor("crop", crop)
-        self.engine.window.crop = crop
-
-    def walk_calibrate(self):
+    def _walk_calibrate(self):
         walking_time = 3
 
         coods = self.engine.get_coods()
@@ -107,7 +91,7 @@ class Calibrate:
         _update_factor("move_factor", move_factor)
         logging.info("done")
 
-    def rotate_calibrate(self):
+    def _rotate_calibrate(self):
         rotate_times = 50
 
         coods = self.engine.get_coods()
@@ -131,25 +115,7 @@ class Calibrate:
         _update_factor("rot_factor", rot_factor)
         logging.info("done")
 
-    def time_to_reach_bottom_callibrate(self):
-        self._callibrate_state = 0
+    def calibrate(self):
+        self._walk_calibrate()
+        self._rotate_calibrate()
 
-        def _f8_pressed():
-            self._callibrate_state += 1
-
-        logging.info("look straight up and press f8")
-        hotkey.set_hotkey(Key.F8, _f8_pressed)
-
-        wait_until(lambda: self._callibrate_state == 1)
-
-        logging.info("as soon as you look on the floor, press f8 again")
-
-        y_cal_start_time = time.time()
-        while self._callibrate_state == 1:
-            mse.move(0, FullAuto.rotate_by)
-            time.sleep(0.05)
-        hotkey.free_key(Key.F8)
-
-        time_to_reach_bottom = time.time() - y_cal_start_time
-        _update_factor("time_to_reach_bottom", time_to_reach_bottom)
-        logging.info("done")
