@@ -1,9 +1,7 @@
 cd temp\test
-Remove-Item venv -Recurse
-& conda create --prefix venv python=3.7.3 -y
-conda activate ./venv
+Get-ChildItem $venv | Remove-Item -Recurse
+python -m venv venv
+.\venv\Scripts\Activate.ps1
 cd ../../dist
 pip install ((dir).Name | grep whl)
-python -m fishy
-cd ..
-conda deactivate
+python -m fishy --test-server
