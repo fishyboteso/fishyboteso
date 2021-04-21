@@ -53,6 +53,15 @@ def if_eso_is_focused(func):
     return wrapper
 
 
+def _sound_and_send_fishy_data():
+    if FishEvent.fishCaught > 0:
+        web.send_hole_deplete(FishEvent.fishCaught, time.time() - FishEvent.hole_start_time, FishEvent.fish_times)
+        FishEvent.fishCaught = 0
+
+    if FishEvent.sound:
+        playsound(helper.manifest_file("sound.mp3"), False)
+
+
 def init():
     subscribe()
     FishEvent.jitter = config.get("jitter", False)
@@ -99,9 +108,12 @@ def fisher_callback(event: State):
 def on_idle():
     if FishEvent.previousState in (State.FISHING, State.REELIN):
         logging.info("FISHING INTERRUPTED")
+        _sound_and_send_fishy_data()
 
-    if FishEvent.sound:
-        playsound(helper.manifest_file("sound.mp3"), False)
+
+def on_depleted():
+    logging.info("HOLE DEPLETED")
+    _sound_and_send_fishy_data()
 
 
 def on_lookaway():
@@ -115,13 +127,6 @@ def on_looking():
     """
     _fishing_sleep(0.0)
     keyboard.press_and_release(FishEvent.action_key)
-
-
-def on_depleted():
-    logging.info("HOLE DEPLETED")
-    if FishEvent.fishCaught > 0:
-        web.send_hole_deplete(FishEvent.fishCaught, time.time() - FishEvent.hole_start_time, FishEvent.fish_times)
-        FishEvent.fishCaught = 0
 
 
 def on_nobait():
