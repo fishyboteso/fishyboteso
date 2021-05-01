@@ -39,10 +39,25 @@ def start_fullfisher_config(gui: 'GUI'):
 
         file_name_label.set(file_name())
 
+    def start_calibrate():
+        ...
+
+    def select_radio():
+        ...
+
     file_name_label = StringVar(value=file_name())
-    Label(controls_frame, textvariable=file_name_label).grid(row=0, column=0)
-    Button(controls_frame, text="Select fishy file", command=select_file).grid(row=0, column=1)
-    Label(controls_frame, text="Use semi-fisher config for rest").grid(row=2, column=0, columnspan=2)
+    radio_var = IntVar()
+
+    Button(controls_frame, text="Recalibrate", command=start_calibrate).grid(row=0, column=0, columnspan=2, pady=(5, 5))
+
+    Label(controls_frame, text="Mode: ").grid(row=1, column=0, pady=(5, 0))
+    Radiobutton(controls_frame, text="Player", variable=radio_var, value=0, command=select_radio).grid(row=1, column=1, sticky="w")
+    Radiobutton(controls_frame, text="Recorder", variable=radio_var, value=1, command=select_radio).grid(row=2, column=1, sticky="w", pady=(0, 5))
+
+    Button(controls_frame, text="Select fishy file", command=select_file).grid(row=3, column=0, columnspan=2, pady=(5, 0))
+    Label(controls_frame, textvariable=file_name_label).grid(row=4, column=0, columnspan=2, pady=(0, 5))
+
+    Label(controls_frame, text="Use semi-fisher config for rest").grid(row=5, column=0, columnspan=2, pady=(15, 5))
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()
