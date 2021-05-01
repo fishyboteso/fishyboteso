@@ -46,8 +46,6 @@ class FullAuto(IEngine):
     state = State.NONE
 
     def __init__(self, gui_ref):
-        from fishy.engine.fullautofisher.controls import Controls
-        from fishy.engine.fullautofisher import controls
         from fishy.engine.fullautofisher.calibrator import Calibrator
         from fishy.engine.fullautofisher.test import Test
 
@@ -58,7 +56,6 @@ class FullAuto(IEngine):
         self.fisher = SemiFisherEngine(None)
         self.calibrator = Calibrator(self)
         self.test = Test(self)
-        self.controls = Controls(controls.get_controls(self))
         self.show_crop = False
 
     def run(self):
@@ -86,7 +83,6 @@ class FullAuto(IEngine):
             self.fisher.toggle_start()
             fishing_event.unsubscribe()
 
-            self.controls.initialize()
             while self.start and WindowClient.running():
                 if self.show_crop:
                     self.window.show(self.show_crop, func=image_pre_process)
@@ -99,7 +95,6 @@ class FullAuto(IEngine):
                 logging.error("Game window not found")
 
         self.gui.bot_started(False)
-        self.controls.unassign_keys()
         self.window.show(False)
         logging.info("Quitting")
         self.window.destory()

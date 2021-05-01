@@ -1,27 +1,18 @@
 import logging
 
+from pynput.keyboard import Key
+
 from fishy.helper import hotkey
 
 from fishy.engine.fullautofisher.engine import FullAuto, State
-from fishy.helper.hotkey import Key
 
 
-def get_controls(engine: FullAuto):
-    from fishy.engine.fullautofisher.recorder import Recorder
-    from fishy.engine.fullautofisher.player import Player
+def get_controls(controls: 'Controls'):
     controls = [
         ("MODE_SELECT", {
-            Key.RIGHT: (Recorder(engine).toggle_recording, "start/stop record"),
-            Key.UP: (engine.calibrator.calibrate, "calibrate mode"),
-            Key.LEFT: (Player(engine).toggle_move, "start/stop play"),
-            Key.DOWN: (lambda: engine.controls.select_mode("TEST1"), "test mode"),
+            Key.DOWN: (lambda: controls.select_mode("TEST1"), "test mode"),
         }),
-        ("TEST1", {
-            Key.RIGHT: (engine.test.print_coods, "print coordinates"),
-            Key.UP: (engine.test.look_for_hole, "look for hole up down"),
-            Key.LEFT: (engine.test.set_target, "set target"),
-            Key.DOWN: (engine.test.move_to_target, "move to target")
-        })
+        ("TEST1", {})
     ]
 
     return controls
