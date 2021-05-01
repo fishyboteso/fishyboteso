@@ -5,8 +5,29 @@ from fishy.engine import SemiFisherEngine
 from fishy.engine.fullautofisher.engine import FullAuto
 
 
-class EngineEventHandler:
+class IEngineHandler:
+    def __init__(self):
+        ...
+
+    def start_event_handler(self):
+        ...
+
+    def toggle_semifisher(self):
+        ...
+
+    def toggle_fullfisher(self):
+        ...
+
+    def check_pixel_val(self):
+        ...
+
+    def quit(self):
+        ...
+
+
+class EngineEventHandler(IEngineHandler):
     def __init__(self, gui_ref):
+        super().__init__()
         self.event_handler_running = True
         self.event = []
 

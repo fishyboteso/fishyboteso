@@ -3,6 +3,7 @@ import os
 import typing
 from tkinter.filedialog import askopenfilename
 
+from fishy.engine.common.event_handler import IEngineHandler
 from fishy.helper import helper
 
 from fishy import web
@@ -109,3 +110,10 @@ def start_semifisher_config(gui: 'GUI'):
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()
+
+
+if __name__ == '__main__':
+    from fishy.gui import GUI
+    gui = GUI(lambda: IEngineHandler())
+    gui.call_in_thread(lambda: start_fullfisher_config(gui))
+    gui.create()

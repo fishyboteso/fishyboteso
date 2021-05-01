@@ -8,7 +8,7 @@ import threading
 from fishy.web import web
 from ttkthemes import ThemedTk
 
-from fishy.engine.common.event_handler import EngineEventHandler
+from fishy.engine.common.event_handler import EngineEventHandler, IEngineHandler
 from fishy.gui import config_top
 from fishy.gui.funcs import GUIFuncs
 from . import main_gui
@@ -18,7 +18,7 @@ from ..helper.helper import wait_until
 
 
 class GUI:
-    def __init__(self, get_engine: Callable[[], EngineEventHandler]):
+    def __init__(self, get_engine: Callable[[], IEngineHandler]):
         self.funcs = GUIFuncs(self)
         self.get_engine = get_engine
 
