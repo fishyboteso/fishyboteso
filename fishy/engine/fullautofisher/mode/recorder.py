@@ -1,4 +1,5 @@
 import logging
+import os
 import pickle
 import time
 from pprint import pprint
@@ -6,6 +7,7 @@ from tkinter.filedialog import asksaveasfile
 
 import typing
 
+from fishy.helper.config import config
 from playsound import playsound
 
 from fishy import helper
@@ -34,7 +36,7 @@ class Recorder(IMode):
         logging.info("check_fish")
 
     def run(self):
-        logging.info("starting, press f8 to mark hole")
+        logging.info("starting, press LMB to mark hole")
         hk = HotKey()
         hk.start_process(self._mark_hole)
 
@@ -63,9 +65,10 @@ class Recorder(IMode):
 
             return _file
 
-        file = self.engine.get_gui().call_in_thread(func, block=True)
+        file: typing.BinaryIO = self.engine.get_gui().call_in_thread(func, block=True)
         data = {"full_auto_path": self.timeline}
-        pprint(data)
         pickle.dump(data, file)
+        config.set("full_auto_rec_file", file.name)
+        logging.info(f"saved {os.path.basename(file.name)} recording, and loaded it in player")
         file.close()
 
