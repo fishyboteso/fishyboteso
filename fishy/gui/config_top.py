@@ -4,6 +4,7 @@ import typing
 from tkinter.filedialog import askopenfilename
 
 from fishy.engine.common.event_handler import IEngineHandler
+from fishy.engine.fullautofisher.mode.imode import FullAutoMode
 from fishy.helper import helper
 
 from fishy import web
@@ -42,17 +43,17 @@ def start_fullfisher_config(gui: 'GUI'):
     def start_calibrate():
         ...
 
-    def select_radio():
-        ...
+    def mode_command():
+        config.set("full_auto_mode", mode_var.get())
 
     file_name_label = StringVar(value=file_name())
-    radio_var = IntVar()
+    mode_var = IntVar(value=config.get("full_auto_mode", 0))
 
-    Button(controls_frame, text="Recalibrate", command=start_calibrate).grid(row=0, column=0, columnspan=2, pady=(5, 5))
+    Button(controls_frame, text="Calibrate", command=start_calibrate).grid(row=0, column=0, columnspan=2, pady=(5, 5))
 
     Label(controls_frame, text="Mode: ").grid(row=1, column=0, pady=(5, 0))
-    Radiobutton(controls_frame, text="Player", variable=radio_var, value=0, command=select_radio).grid(row=1, column=1, sticky="w")
-    Radiobutton(controls_frame, text="Recorder", variable=radio_var, value=1, command=select_radio).grid(row=2, column=1, sticky="w", pady=(0, 5))
+    Radiobutton(controls_frame, text="Player", variable=mode_var, value=FullAutoMode.Player.value, command=mode_command).grid(row=1, column=1, sticky="w")
+    Radiobutton(controls_frame, text="Recorder", variable=mode_var, value=FullAutoMode.Recorder.value, command=mode_command).grid(row=2, column=1, sticky="w", pady=(0, 5))
 
     Button(controls_frame, text="Select fishy file", command=select_file).grid(row=3, column=0, columnspan=2, pady=(5, 0))
     Label(controls_frame, textvariable=file_name_label).grid(row=4, column=0, columnspan=2, pady=(0, 5))

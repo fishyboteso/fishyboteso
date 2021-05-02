@@ -4,8 +4,6 @@ from pynput.keyboard import Key
 
 from fishy.helper import hotkey
 
-from fishy.engine.fullautofisher.engine import FullAuto, State
-
 
 def get_controls(controls: 'Controls'):
     controls = [
@@ -36,10 +34,6 @@ class Controls:
         logging.info(help_str)
 
     def select_mode(self, mode):
-        if FullAuto.state != State.NONE:
-            self.log_help()
-            return
-
         self.current_menu = 0
         for i, control in enumerate(self.controls):
             if mode == control[0]:

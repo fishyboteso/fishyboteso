@@ -4,17 +4,21 @@ import time
 from pprint import pprint
 from tkinter.filedialog import asksaveasfile
 
-from fishy.engine.fullautofisher.engine import FullAuto, State
+import typing
+
+if typing.TYPE_CHECKING:
+    from fishy.engine.fullautofisher.engine import FullAuto
+from fishy.engine.fullautofisher.mode.imode import IMode
 
 from fishy.helper.hotkey import Key
 from fishy.helper.hotkey_process import HotKey
 
 
-class Recorder:
+class Recorder(IMode):
     recording_fps = 1
     mark_hole_key = Key.F8
 
-    def __init__(self, engine: FullAuto):
+    def __init__(self, engine: 'FullAuto'):
         self.recording = False
         self.engine = engine
         self.timeline = []
@@ -24,23 +28,14 @@ class Recorder:
         self.timeline.append(("check_fish", coods))
         logging.info("check_fish")
 
-    def toggle_recording(self):
-        if FullAuto.state != State.RECORDING and FullAuto.state != State.NONE:
-            return
-
-        self.recording = not self.recording
-        if self.recording:
-            self._start_recording()
-
-    def _start_recording(self):
-        FullAuto.state = State.RECORDING
+    def run(self):
         logging.info("starting, press f8 to mark hole")
         hk = HotKey()
         hk.start_process(self._mark_hole)
 
         self.timeline = []
 
-        while self.recording:
+        while self.engine.start:
             start_time = time.time()
             coods = None
             while not coods:
@@ -68,5 +63,4 @@ class Recorder:
         pprint(data)
         pickle.dump(data, file)
         file.close()
-        FullAuto.state = State.NONE
 

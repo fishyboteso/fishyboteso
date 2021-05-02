@@ -8,6 +8,9 @@ import logging
 import time
 
 from fishy.constants import libgps, fishyqr, lam2
+from fishy.engine.fullautofisher.mode.imode import FullAutoMode
+from fishy.engine.fullautofisher.mode.player import Player
+from fishy.engine.fullautofisher.mode.recorder import Recorder
 from fishy.engine.fullautofisher.qr_detection import get_values_from_image, get_qr_location
 from fishy.engine.semifisher.fishing_mode import FishingMode
 
@@ -19,7 +22,8 @@ from fishy.engine.common.IEngine import IEngine
 from pynput import keyboard, mouse
 
 from fishy.helper import hotkey, helper
-from fishy.helper.helper import sign
+from fishy.helper.helper import sign, log_raise
+from fishy.helper.config import config
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
@@ -34,16 +38,8 @@ def image_pre_process(img):
     return img
 
 
-class State(Enum):
-    NONE = 0
-    PLAYING = 1
-    RECORDING = 2
-    OTHER = 3
-
-
 class FullAuto(IEngine):
     rotate_by = 30
-    state = State.NONE
 
     def __init__(self, gui_ref):
         from fishy.engine.fullautofisher.calibrator import Calibrator
@@ -58,6 +54,8 @@ class FullAuto(IEngine):
         self.test = Test(self)
         self.show_crop = False
 
+        self.mode = None
+
     def run(self):
 
         addons_req = [libgps, lam2, fishyqr]
@@ -65,40 +63,45 @@ class FullAuto(IEngine):
             if not helper.addon_exists(*addon):
                 helper.install_addon(*addon)
 
-        FullAuto.state = State.NONE
-
         self.gui.bot_started(True)
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
+        self.mode = Player(self) if FullAutoMode(config.get("full_auto_mode", 0)) == FullAutoMode.Player else Recorder(self)
 
+        # todo use config to run player or recorder
+        # noinspection PyBroadException
         try:
+            if self.window.get_capture() is None:
+                log_raise("Game window not found")
+
             self.window.crop = get_qr_location(self.window.get_capture())
             if self.window.crop is None:
-                logging.warning("FishyQR not found")
-                self.start = False
-                raise Exception("FishyQR not found")
+                log_raise("FishyQR not found")
 
             if not self.calibrator.all_callibrated():
-                logging.error("you need to calibrate first")
+                log_raise("you need to calibrate first")
 
             self.fisher.toggle_start()
             fishing_event.unsubscribe()
+            if self.show_crop:
+                self.start_show()
 
-            while self.start and WindowClient.running():
-                if self.show_crop:
-                    self.window.show(self.show_crop, func=image_pre_process)
-                else:
-                    time.sleep(0.1)
-        except:
+            self.mode.run()
+
+        except Exception:
             traceback.print_exc()
-
-            if self.window.get_capture() is None:
-                logging.error("Game window not found")
+            self.start = False
 
         self.gui.bot_started(False)
         self.window.show(False)
         logging.info("Quitting")
         self.window.destory()
         self.fisher.toggle_start()
+
+    def start_show(self):
+        def func():
+            while self.start and WindowClient.running():
+                self.window.show(self.show_crop, func=image_pre_process)
+        Thread(target=func).start()
 
     def get_coods(self):
         img = self.window.processed_image(func=image_pre_process)
@@ -191,10 +194,6 @@ class FullAuto(IEngine):
             self._curr_rotate_y -= 0.05
 
     def toggle_start(self):
-        if self.start and FullAuto.state != State.NONE:
-            logging.info("Please turn off RECORDING/PLAYING first")
-            return
-
         self.start = not self.start
         if self.start:
             self.thread = Thread(target=self.run)
