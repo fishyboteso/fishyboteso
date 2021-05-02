@@ -89,7 +89,7 @@ class FullAuto(IEngine):
             if self.window.crop is None:
                 log_raise("FishyQR not found")
 
-            if not self.calibrator.all_callibrated():
+            if not self.calibrator.all_calibrated():
                 log_raise("you need to calibrate first")
 
             self.fisher.toggle_start()
@@ -131,8 +131,8 @@ class FullAuto(IEngine):
             logging.error("set target first")
             return
 
-        if not self.calibrator.all_callibrated():
-            logging.error("you need to callibrate first")
+        if not self.calibrator.all_calibrated():
+            logging.error("you need to calibrate first")
             return
 
         current = self.get_coods()

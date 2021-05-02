@@ -62,8 +62,11 @@ class Calibrator(IMode):
 
     # endregion
 
-    def all_callibrated(self):
-        return self.move_factor is not None and self.rot_factor is not None
+    def all_calibrated(self):
+        return self.move_factor is not None and \
+               self.rot_factor is not None and \
+               self.move_factor != 0 and \
+               self.rot_factor != 0
 
     def toggle_show(self):
         self.engine.show_crop = not self.engine.show_crop
