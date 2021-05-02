@@ -19,6 +19,8 @@ from fishy.helper.config import config
 
 import random
 
+from fishy.helper.helper import is_eso_active
+
 
 class FishEvent:
     fishCaught = 0
@@ -46,7 +48,7 @@ def _fishing_sleep(waittime, lower_limit_ms = 16, upper_limit_ms = 2500):
 
 def if_eso_is_focused(func):
     def wrapper():
-        if GetWindowText(GetForegroundWindow()) != "Elder Scrolls Online":
+        if not is_eso_active():
             logging.warning("ESO window is not focused")
             return
         func()

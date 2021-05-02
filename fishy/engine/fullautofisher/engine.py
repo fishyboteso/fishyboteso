@@ -22,7 +22,7 @@ from fishy.engine.common.IEngine import IEngine
 from pynput import keyboard, mouse
 
 from fishy.helper import hotkey, helper
-from fishy.helper.helper import sign, log_raise
+from fishy.helper.helper import sign, log_raise, wait_until, is_eso_active
 from fishy.helper.config import config
 
 mse = mouse.Controller()
@@ -74,6 +74,12 @@ class FullAuto(IEngine):
         elif FullAutoMode(config.get("full_auto_mode", 0)) == FullAutoMode.Recorder:
             self.mode = Recorder(self)
 
+        if not is_eso_active():
+            logging.info("Waiting for eso window to be active...")
+            wait_until(is_eso_active)
+            logging.info("starting in 2 secs...")
+            time.sleep(2)
+
         # noinspection PyBroadException
         try:
             if self.window.get_capture() is None:
@@ -90,6 +96,7 @@ class FullAuto(IEngine):
             fishing_event.unsubscribe()
             if self.show_crop:
                 self.start_show()
+            self.stop_on_inactive()
 
             self.mode.run()
 
@@ -107,6 +114,12 @@ class FullAuto(IEngine):
         def func():
             while self.start and WindowClient.running():
                 self.window.show(self.show_crop, func=image_pre_process)
+        Thread(target=func).start()
+
+    def stop_on_inactive(self):
+        def func():
+            wait_until(lambda: not is_eso_active())
+            self.start = False
         Thread(target=func).start()
 
     def get_coods(self):

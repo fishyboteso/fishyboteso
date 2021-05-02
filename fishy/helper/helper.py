@@ -17,6 +17,7 @@ from hashlib import md5
 
 from win32com.client import Dispatch
 from win32comext.shell import shell, shellcon
+from win32gui import GetForegroundWindow, GetWindowText
 
 import fishy
 import winshell
@@ -213,6 +214,10 @@ def update():
 
     config.delete("dont_ask_update")
     restart()
+
+
+def is_eso_active():
+    return GetWindowText(GetForegroundWindow()) == "Elder Scrolls Online"
 
 
 # noinspection PyProtectedMember,PyUnresolvedReferences
