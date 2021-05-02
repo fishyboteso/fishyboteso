@@ -6,6 +6,10 @@ from tkinter.filedialog import asksaveasfile
 
 import typing
 
+from playsound import playsound
+
+from fishy import helper
+
 if typing.TYPE_CHECKING:
     from fishy.engine.fullautofisher.engine import FullAuto
 from fishy.engine.fullautofisher.mode.imode import IMode
@@ -26,6 +30,7 @@ class Recorder(IMode):
     def _mark_hole(self):
         coods = self.engine.get_coods()
         self.timeline.append(("check_fish", coods))
+        playsound(helper.manifest_file("beep.wav"), False)
         logging.info("check_fish")
 
     def run(self):
