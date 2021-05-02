@@ -4,10 +4,13 @@ import time
 
 import cv2
 import numpy as np
+import typing
 
-from fishy.engine.fullautofisher.engine import FullAuto
+if typing.TYPE_CHECKING:
+    from fishy.engine.fullautofisher.engine import FullAuto
 from pynput import keyboard, mouse
 
+from fishy.engine.fullautofisher.mode.imode import IMode
 from fishy.helper.config import config
 
 mse = mouse.Controller()
@@ -44,8 +47,8 @@ def _get_factor(key):
     return config.get("full_auto_factors", {}).get(key)
 
 
-class Calibrator:
-    def __init__(self, engine: FullAuto):
+class Calibrator(IMode):
+    def __init__(self, engine: 'FullAuto'):
         self._callibrate_state = -1
         self.engine = engine
 
@@ -86,9 +89,11 @@ class Calibrator:
 
         move_factor = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / walking_time
         _update_factor("move_factor", move_factor)
-        logging.info("done")
+        logging.info("walk calibrate done")
 
     def _rotate_calibrate(self):
+        from fishy.engine.fullautofisher.engine import FullAuto
+
         rotate_times = 50
 
         coods = self.engine.get_coods()
@@ -110,9 +115,11 @@ class Calibrator:
 
         rot_factor = (rot3 - rot2) / rotate_times
         _update_factor("rot_factor", rot_factor)
-        logging.info("done")
+        logging.info("rotate calibrate done")
 
-    def calibrate(self):
+    def run(self):
         self._walk_calibrate()
         self._rotate_calibrate()
+        config.set("calibrate", False)
+        logging.info("calibration done")
 

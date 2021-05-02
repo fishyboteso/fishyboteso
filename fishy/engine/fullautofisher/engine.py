@@ -1,6 +1,5 @@
 import math
 import traceback
-from enum import Enum
 from threading import Thread
 
 import cv2
@@ -8,6 +7,7 @@ import logging
 import time
 
 from fishy.constants import libgps, fishyqr, lam2
+from fishy.engine.fullautofisher.mode.calibrator import Calibrator
 from fishy.engine.fullautofisher.mode.imode import FullAutoMode
 from fishy.engine.fullautofisher.mode.player import Player
 from fishy.engine.fullautofisher.mode.recorder import Recorder
@@ -42,7 +42,7 @@ class FullAuto(IEngine):
     rotate_by = 30
 
     def __init__(self, gui_ref):
-        from fishy.engine.fullautofisher.calibrator import Calibrator
+        from fishy.engine.fullautofisher.mode.calibrator import Calibrator
         from fishy.engine.fullautofisher.test import Test
 
         super().__init__(gui_ref)
@@ -65,9 +65,15 @@ class FullAuto(IEngine):
 
         self.gui.bot_started(True)
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
-        self.mode = Player(self) if FullAutoMode(config.get("full_auto_mode", 0)) == FullAutoMode.Player else Recorder(self)
 
-        # todo use config to run player or recorder
+        self.mode = None
+        if config.get("calibrate", False):
+            self.mode = Calibrator(self)
+        elif FullAutoMode(config.get("full_auto_mode", 0)) == FullAutoMode.Player:
+            self.mode = Player(self)
+        elif FullAutoMode(config.get("full_auto_mode", 0)) == FullAutoMode.Recorder:
+            self.mode = Recorder(self)
+
         # noinspection PyBroadException
         try:
             if self.window.get_capture() is None:

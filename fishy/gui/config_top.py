@@ -41,7 +41,9 @@ def start_fullfisher_config(gui: 'GUI'):
         file_name_label.set(file_name())
 
     def start_calibrate():
-        ...
+        top.quit_top()
+        config.set("calibrate", True)
+        gui.engine.toggle_fullfisher()
 
     def mode_command():
         config.set("full_auto_mode", mode_var.get())
