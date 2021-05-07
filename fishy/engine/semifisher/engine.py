@@ -10,11 +10,13 @@ import logging
 from fishy.engine.semifisher.fishing_event import FishEvent
 
 from fishy.engine.common.window import WindowClient
-from fishy.engine.semifisher.fishing_mode import FishingMode
+from fishy.engine.semifisher.fishing_mode import Colors, FishingMode
 
 from fishy.engine.common.IEngine import IEngine
 from fishy.engine.semifisher import fishing_mode, fishing_event
 from fishy.engine.semifisher.pixel_loc import PixelLoc
+
+from fishy.helper.luaparser import sv_color_extract
 
 if typing.TYPE_CHECKING:
     from fishy.gui import GUI
@@ -31,10 +33,12 @@ class SemiFisherEngine(IEngine):
         code explained in comments in detail
         """
         fishing_event.init()
-        self.fishPixWindow = WindowClient(color=cv2.COLOR_RGB2HSV)
+        self.fishPixWindow = WindowClient()
 
         # check for game window and stuff
         self.gui.bot_started(True)
+
+        sv_color_extract(Colors)
 
         if self.get_gui:
             logging.info("Starting the bot engine, look at the fishing hole to start fishing")

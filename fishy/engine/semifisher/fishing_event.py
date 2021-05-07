@@ -98,11 +98,14 @@ def fisher_callback(event: State):
         State.FIGHT: on_fight,
         State.DEAD: on_dead
     }
+
     try:
         callbacks_map[event]()
         FishEvent.previousState = event
     except KeyError as ex:
-        pass
+        logging.error("KeyError: State " + str(event) + " is not known.")
+    except TypeError as ex:
+        logging.error("TypeError when reading state: " + str(event))
 
 
 def on_idle():

@@ -60,8 +60,6 @@ def loop():
 
     temp_screen = np.array(ImageGrab.grab(bbox=bbox))
 
-    temp_screen = cv2.cvtColor(temp_screen, cv2.COLOR_BGR2RGB)
-
     rect = win32gui.GetWindowRect(WindowServer.hwnd)
     crop = (
         rect[0] + WindowServer.windowOffset, rect[1] + WindowServer.titleOffset, rect[2] - WindowServer.windowOffset,
