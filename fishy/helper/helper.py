@@ -7,6 +7,7 @@ import time
 import traceback
 import webbrowser
 import requests
+from playsound import playsound
 from io import BytesIO
 from threading import Thread
 from zipfile import ZipFile
@@ -21,6 +22,19 @@ import fishy
 import winshell
 
 from fishy import web
+
+
+def playsound_multiple(path, count=2):
+    if count < 1:
+        logging.debug("Please don't make me beep 0 times or less.")
+        return
+
+    def _ps_m():
+        for i in range(count-1):
+            playsound(path, True)
+        playsound(path, False)
+
+    Thread(target=_ps_m).start()
 
 
 def not_implemented():
