@@ -51,6 +51,7 @@ class SemiFisherEngine(IEngine):
 
             self.fishPixWindow.crop = PixelLoc.val
             fishing_mode.loop(capture[0][0])
+            time.sleep(0.1)
 
         logging.info("Fishing engine stopped")
         self.gui.bot_started(False)
