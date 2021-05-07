@@ -28,7 +28,7 @@ class FishEvent:
     hole_start_time = 0
     FishingStarted = False
     jitter = False
-    previousState = "IDLE"
+    previousState = State.IDLE
 
     # initialize these
     action_key = 'e'
@@ -80,23 +80,23 @@ def subscribe():
     if fisher_callback not in fishing_mode.subscribers:
         fishing_mode.subscribers.append(fisher_callback)
 
-        if FishingMode.CurrentMode == ["LOOKING"]:
+        if FishingMode.CurrentMode == State.LOOKING:
             fisher_callback(FishingMode.CurrentMode)
 
 
 def fisher_callback(event: State):
     callbacks_map = {
-        "IDLE": on_idle,
-        "LOOKAWAY": on_lookaway,
-        "LOOKING": on_looking,
-        "DEPLETED": on_depleted,
-        "NOBAIT": on_nobait,
-        "FISHING": on_fishing,
-        "REELIN": on_reelin,
-        "LOOT": on_loot,
-        "INVFULL": on_invfull,
-        "FIGHT": on_fight,
-        "DEAD": on_dead
+        State.IDLE: on_idle,
+        State.LOOKAWAY: on_lookaway,
+        State.LOOKING: on_looking,
+        State.DEPLETED: on_depleted,
+        State.NOBAIT: on_nobait,
+        State.FISHING: on_fishing,
+        State.REELIN: on_reelin,
+        State.LOOT: on_loot,
+        State.INVFULL: on_invfull,
+        State.FIGHT: on_fight,
+        State.DEAD: on_dead
     }
     try:
         callbacks_map[event]()
@@ -108,7 +108,7 @@ def fisher_callback(event: State):
 
 
 def on_idle():
-    if FishEvent.previousState in ("FISHING", "REELIN"):
+    if FishEvent.previousState in (State.FISHING, State.REELIN):
         logging.info("FISHING INTERRUPTED")
         _sound_and_send_fishy_data()
 

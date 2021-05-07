@@ -1,9 +1,23 @@
 import time
+from enum import Enum
 
 subscribers = []
 
 
-State = {
+class State(Enum):
+    IDLE     =  0
+    LOOKAWAY =  1
+    LOOKING  =  2
+    DEPLETED =  3
+    NOBAIT   =  5
+    FISHING  =  6
+    REELIN   =  7
+    LOOT     =  8
+    INVFULL  =  9
+    FIGHT    = 14
+    DEAD     = 15
+
+Colors = {
     "IDLE"     : [255, 255, 255],
     "LOOKAWAY" : [ 76,   0,  76],
     "LOOKING"  : [101,  69,   0],
@@ -24,8 +38,8 @@ def _notify(event):
 
 
 class FishingMode:
-    CurrentMode = "IDLE"
-    PrevMode = "IDLE"
+    CurrentMode = State.IDLE
+    PrevMode = State.IDLE
 
 
 def loop(rgb):
@@ -35,9 +49,9 @@ def loop(rgb):
 
     :param rgb: rgb read by the bot
     """
-    FishingMode.CurrentMode = "IDLE"
+    FishingMode.CurrentMode = State.IDLE
     for s in State:
-        if all(rgb == State[s]):
+        if all(rgb == Colors[s.name]):
             FishingMode.CurrentMode = s
 
     if FishingMode.CurrentMode != FishingMode.PrevMode:
