@@ -52,7 +52,7 @@ def if_eso_is_focused(func):
 
 def _sound_and_send_fishy_data():
     if FishEvent.fishCaught > 0:
-        web.send_hole_deplete(FishEvent.fishCaught, time.time() - FishEvent.hole_start_time, FishEvent.fish_times)
+        web.send_fish_caught(FishEvent.fishCaught, time.time() - FishEvent.hole_start_time, FishEvent.fish_times)
         FishEvent.fishCaught = 0
 
     if FishEvent.sound:
