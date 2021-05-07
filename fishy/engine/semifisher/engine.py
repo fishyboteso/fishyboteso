@@ -10,7 +10,7 @@ import logging
 from fishy.engine.semifisher.fishing_event import FishEvent
 
 from fishy.engine.common.window import WindowClient
-from fishy.engine.semifisher.fishing_mode import State, FishingMode
+from fishy.engine.semifisher.fishing_mode import Colors, FishingMode
 
 from fishy.engine.common.IEngine import IEngine
 from fishy.engine.semifisher import fishing_mode, fishing_event
@@ -38,7 +38,7 @@ class SemiFisherEngine(IEngine):
         # check for game window and stuff
         self.gui.bot_started(True)
 
-        sv_color_extract(State)
+        sv_color_extract(Colors)
 
         if self.get_gui:
             logging.info("Starting the bot engine, look at the fishing hole to start fishing")

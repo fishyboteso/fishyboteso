@@ -18,7 +18,7 @@ def _sv_parser(path):
         EXPRESSIONS: A) List-Start "name=", B) Variable assignment "name=val", C) List End "}"
         """
         for old, new in ((",","\n"), ("{","{\n"), ("}","}\n"), ("{",""), (",", ""), ("[", ""), ("]", ""), ('"', ""), (" ", "")):
-            lua = lua.replace(old, new)    
+            lua = lua.replace(old, new)
         lua = lua.lower().split("\n")
         lua = [expression for expression in lua if expression]
 
@@ -54,10 +54,10 @@ def _sv_parser(path):
         return None
 
 
-def sv_color_extract(states):
+def sv_color_extract(Colors):
     root = _sv_parser(os.path.join(get_savedvarsdir(), "Chalutier.lua"))
     if root == None:
-        return states
+        return Colors
 
     for i in range(4):
         name, root = root.popitem()
@@ -73,7 +73,7 @@ def sv_color_extract(states):
             floor(float(root["colors"][i]["b"])*255)
         ]
         colors.append(rgb)
-    for i,s in enumerate(states):
-        states[s] = colors[i]
-    return states
+    for i,c in enumerate(Colors):
+        Colors[c] = colors[i]
+    return Colors
 
