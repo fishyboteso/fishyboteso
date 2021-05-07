@@ -87,13 +87,13 @@ def fisher_callback(event: State):
         State.LOOKAWAY: on_idle,
         State.LOOKING: on_looking,
         State.DEPLETED: on_depleted,
-        State.NOBAIT: on_nobait,
+        State.NOBAIT: lambda: on_user_interact("You need to equip bait!"),
         State.FISHING: on_fishing,
         State.REELIN: on_reelin,
         State.LOOT: on_loot,
-        State.INVFULL: on_invfull,
-        State.FIGHT: on_fight,
-        State.DEAD: on_dead
+        State.INVFULL: lambda: on_user_interact("Inventory is full!"),
+        State.FIGHT: lambda: on_user_interact("Character is FIGHTING!"),
+        State.DEAD: lambda: on_user_interact("Character died!")
     }
 
     try:
@@ -125,8 +125,7 @@ def on_looking():
     keyboard.press_and_release(FishEvent.action_key)
 
 
-def on_nobait():
-    msg = "No bait equipped!"
+def on_user_interact(msg):
     logging.info(msg)
     web.send_notification(msg)
 
@@ -166,30 +165,3 @@ def on_loot():
     _fishing_sleep(0)
     keyboard.press_and_release(FishEvent.collect_key)
     _fishing_sleep(0)
-
-
-def on_invfull():
-    msg = "Inventory full!"
-    logging.info(msg)
-    web.send_notification(msg)
-
-    if FishEvent.sound:
-        playsound(helper.manifest_file("sound.mp3"), False)
-
-
-def on_fight():
-    msg = "FIGHTING!"
-    logging.info(msg)
-    web.send_notification(msg)
-
-    if FishEvent.sound:
-        playsound(helper.manifest_file("sound.mp3"), False)
-
-
-def on_dead():
-    msg = "Character is dead!"
-    logging.info(msg)
-    web.send_notification(msg)
-
-    if FishEvent.sound:
-        playsound(helper.manifest_file("sound.mp3"), False)
