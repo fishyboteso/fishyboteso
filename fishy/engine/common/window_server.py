@@ -1,16 +1,14 @@
 import logging
+import math
 from enum import Enum
 from threading import Thread
 
 import cv2
-import math
-
+import numpy as np
 import pywintypes
 import win32gui
-from win32api import GetSystemMetrics
-
-import numpy as np
 from PIL import ImageGrab
+from win32api import GetSystemMetrics
 
 from fishy.helper.config import config
 

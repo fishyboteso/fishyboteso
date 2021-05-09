@@ -1,10 +1,11 @@
 import time
-from multiprocessing import Process
 import tkinter as tk
+from multiprocessing import Process
+
 from PIL import Image, ImageTk
 
-from fishy.helper.config import config
 from fishy.helper import helper
+from fishy.helper.config import config
 
 
 def show(win_loc):

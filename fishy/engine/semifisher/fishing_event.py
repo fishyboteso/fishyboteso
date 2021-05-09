@@ -4,15 +4,16 @@ Defines different fishing modes (states) which acts as state for state machine
 also implements callbacks which is called when states are changed
 """
 import logging
-import time
 import random
+import time
+
 import keyboard
 from playsound import playsound
-from win32gui import GetWindowText, GetForegroundWindow
+from win32gui import GetForegroundWindow, GetWindowText
 
 from fishy import web
 from fishy.engine.semifisher import fishing_mode
-from fishy.engine.semifisher.fishing_mode import State, FishingMode
+from fishy.engine.semifisher.fishing_mode import FishingMode, State
 from fishy.helper import helper
 from fishy.helper.config import config
 

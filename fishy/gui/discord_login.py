@@ -1,12 +1,11 @@
 import time
 import tkinter as tk
 import tkinter.ttk as ttk
-
 import typing
 
+from fishy.libs.tkhtmlview import HTMLLabel
 from fishy.web import web
 
-from fishy.libs.tkhtmlview import HTMLLabel
 from ..helper.config import config
 
 if typing.TYPE_CHECKING:

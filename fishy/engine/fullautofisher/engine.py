@@ -1,24 +1,22 @@
+import logging
 import math
+import time
 import traceback
 from enum import Enum
 from threading import Thread
 
 import cv2
-import logging
-import time
-
-from fishy.constants import libgps, fishyqr, lam2
-from fishy.engine.fullautofisher.qr_detection import get_values_from_image, get_qr_location
-from fishy.engine.semifisher.fishing_mode import FishingMode
-
-from fishy.engine import SemiFisherEngine
-from fishy.engine.common.window import WindowClient
-from fishy.engine.semifisher import fishing_mode, fishing_event
-
-from fishy.engine.common.IEngine import IEngine
 from pynput import keyboard, mouse
 
-from fishy.helper import hotkey, helper
+from fishy.constants import fishyqr, lam2, libgps
+from fishy.engine import SemiFisherEngine
+from fishy.engine.common.IEngine import IEngine
+from fishy.engine.common.window import WindowClient
+from fishy.engine.fullautofisher.qr_detection import (get_qr_location,
+                                                      get_values_from_image)
+from fishy.engine.semifisher import fishing_event, fishing_mode
+from fishy.engine.semifisher.fishing_mode import FishingMode
+from fishy.helper import helper, hotkey
 from fishy.helper.helper import sign
 
 mse = mouse.Controller()
@@ -46,9 +44,9 @@ class FullAuto(IEngine):
     state = State.NONE
 
     def __init__(self, gui_ref):
-        from fishy.engine.fullautofisher.controls import Controls
         from fishy.engine.fullautofisher import controls
         from fishy.engine.fullautofisher.calibrator import Calibrator
+        from fishy.engine.fullautofisher.controls import Controls
         from fishy.engine.fullautofisher.test import Test
 
         super().__init__(gui_ref)

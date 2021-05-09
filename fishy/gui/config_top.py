@@ -1,15 +1,12 @@
 import logging
 import os
+import tkinter as tk
+import tkinter.ttk as ttk
 import typing
 from tkinter.filedialog import askopenfilename
 
-from fishy.helper import helper
-
 from fishy import web
-
-import tkinter as tk
-import tkinter.ttk as ttk
-
+from fishy.helper import helper
 from fishy.helper.config import config
 from fishy.helper.popup import PopUp
 

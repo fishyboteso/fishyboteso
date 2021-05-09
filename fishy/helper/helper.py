@@ -6,21 +6,19 @@ import threading
 import time
 import traceback
 import webbrowser
-import requests
-from playsound import playsound
+from hashlib import md5
 from io import BytesIO
 from threading import Thread
+from uuid import uuid1
 from zipfile import ZipFile
 
-from uuid import uuid1
-from hashlib import md5
-
+import requests
+import winshell
+from playsound import playsound
 from win32com.client import Dispatch
 from win32comext.shell import shell, shellcon
 
 import fishy
-import winshell
-
 from fishy import web
 
 

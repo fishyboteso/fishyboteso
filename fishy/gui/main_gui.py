@@ -2,19 +2,18 @@ import logging
 import time
 import tkinter as tk
 import tkinter.ttk as ttk
+import typing
 
-from fishy.web import web
 from ttkthemes import ThemedTk
 
 from fishy import helper
-
-import typing
-
 from fishy.helper import hotkey
-from .discord_login import discord_login
+from fishy.web import web
+
+from ..constants import chalutier, lam2
 from ..helper.config import config
 from ..helper.hotkey import Key
-from ..constants import chalutier, lam2
+from .discord_login import discord_login
 
 if typing.TYPE_CHECKING:
     from . import GUI

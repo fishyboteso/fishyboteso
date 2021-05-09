@@ -1,6 +1,7 @@
-import os
 import logging
+import os
 from math import floor
+
 from .helper import get_savedvarsdir
 
 

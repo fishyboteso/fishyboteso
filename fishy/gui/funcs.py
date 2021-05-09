@@ -1,6 +1,5 @@
-from tkinter import messagebox
-
 import typing
+from tkinter import messagebox
 
 from fishy.helper.config import config
 

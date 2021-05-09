@@ -1,13 +1,12 @@
-import math
 import logging
+import math
 import time
 
 import cv2
 import numpy as np
-
-from fishy.engine.fullautofisher.engine import FullAuto
 from pynput import keyboard, mouse
 
+from fishy.engine.fullautofisher.engine import FullAuto
 from fishy.helper.config import config
 
 mse = mouse.Controller()

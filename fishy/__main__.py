@@ -3,16 +3,17 @@ import logging
 import os
 import sys
 import traceback
+
 import win32con
 import win32gui
 
 import fishy
-from fishy import web, helper, gui
+from fishy import gui, helper, web
+from fishy.constants import chalutier, lam2
 from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui import GUI, splash, update_dialog
 from fishy.helper import hotkey
 from fishy.helper.config import config
-from fishy.constants import chalutier, lam2
 
 
 def check_window_name(title):

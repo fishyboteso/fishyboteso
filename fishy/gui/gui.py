@@ -1,20 +1,21 @@
 import logging
-import uuid
-import tkinter as tk
-from typing import Callable, Optional, Dict, Any
 import queue
 import threading
+import tkinter as tk
+import uuid
+from typing import Any, Callable, Dict, Optional
 
-from fishy.web import web
 from ttkthemes import ThemedTk
 
 from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui import config_top
 from fishy.gui.funcs import GUIFuncs
-from . import main_gui
-from .log_config import GUIStreamHandler
+from fishy.web import web
+
 from ..helper.config import config
 from ..helper.helper import wait_until
+from . import main_gui
+from .log_config import GUIStreamHandler
 
 
 class GUI:

@@ -1,20 +1,18 @@
+import logging
 import time
 import typing
-import logging
 from threading import Thread
-from typing import Callable
-from typing import Optional
+from typing import Callable, Optional
+
 from playsound import playsound
 
-from fishy.engine.common.window import WindowClient
-from fishy.engine.semifisher.fishing_mode import Colors, FishingMode
-
 from fishy.engine.common.IEngine import IEngine
+from fishy.engine.common.window import WindowClient
+from fishy.engine.semifisher import fishing_event, fishing_mode
 from fishy.engine.semifisher.fishing_event import FishEvent
-from fishy.engine.semifisher import fishing_mode, fishing_event
+from fishy.engine.semifisher.fishing_mode import Colors, FishingMode
 from fishy.engine.semifisher.pixel_loc import PixelLoc
 from fishy.helper import helper
-
 from fishy.helper.luaparser import sv_color_extract
 
 if typing.TYPE_CHECKING:

@@ -1,7 +1,8 @@
-from multiprocessing import Process, Manager
 import tkinter as tk
+from multiprocessing import Manager, Process
 
 from fishy import helper
+
 
 def show(currentversion, newversion, returns):
     top = tk.Tk()

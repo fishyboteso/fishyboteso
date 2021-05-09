@@ -11,6 +11,7 @@ from os import execl
 
 from bs4 import BeautifulSoup
 
+
 def _hr_version(v):
     return '.'.join([str(x) for x in v])
     #return str(v[0])+"."+str(v[1])+"."+str(v[2])
