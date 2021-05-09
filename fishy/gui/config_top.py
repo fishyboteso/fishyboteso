@@ -62,7 +62,7 @@ def start_semifisher_config(gui: 'GUI'):
                 gui._notify.set(1)
 
     def del_entry_key(event):
-        event.widget.delete(0,"end")
+        event.widget.delete(0, "end")
         event.widget.insert(0, str(event.char))
 
     top = PopUp(save, gui._root, background=gui._root["background"])

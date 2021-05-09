@@ -28,7 +28,7 @@ def playsound_multiple(path, count=2):
         return
 
     def _ps_m():
-        for i in range(count-1):
+        for i in range(count - 1):
             playsound(path, True)
         playsound(path, False)
 
@@ -194,21 +194,21 @@ def install_addon(name, url, v=None):
         r = requests.get(url, stream=True)
         z = ZipFile(BytesIO(r.content))
         z.extractall(path=get_addondir())
-        logging.info("Add-On "+name+" installed successfully!\nPlease make sure to enable \"Allow outdated addons\" in ESO")
+        logging.info("Add-On " + name + " installed successfully!\nPlease make sure to enable \"Allow outdated addons\" in ESO")
         return 0
     except Exception as ex:
-        logging.error("Could not install Add-On "+name+", try doing it manually")
+        logging.error("Could not install Add-On " + name + ", try doing it manually")
         return 1
 
 
 def remove_addon(name, url=None, v=None):
     try:
         shutil.rmtree(os.path.join(get_addondir(), name))
-        logging.info("Add-On "+name+" removed!")
+        logging.info("Add-On " + name + " removed!")
     except FileNotFoundError:
         pass
     except PermissionError as ex:
-        logging.error("Fishy has no permission to remove "+name+" Add-On")
+        logging.error("Fishy has no permission to remove " + name + " Add-On")
         return 1
     return 0
 

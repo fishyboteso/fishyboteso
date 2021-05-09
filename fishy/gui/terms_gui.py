@@ -8,7 +8,7 @@ from PIL import Image, ImageTk
 from fishy import helper, web
 from fishy.helper.config import config
 
-hyperlinkPattern = re.compile(r'\[(?P<title>.*?)\]\((?P<address>.*?)\)')                                                        
+hyperlinkPattern = re.compile(r'\[(?P<title>.*?)\]\((?P<address>.*?)\)')
 
 
 def check_eula():
@@ -45,7 +45,7 @@ def _run_terms_window():
     g1 = ttk.Frame(f)
     ttk.Checkbutton(g1, command=disable_enable_button, variable=check_value).pack(side=tk.LEFT)
     text = tk.Text(g1, width=len(hyperlinkPattern.sub(r'\g<title>', message)),
-                height=1, borderwidth=0, highlightthickness=0)
+                   height=1, borderwidth=0, highlightthickness=0)
     text["background"] = root["background"]
 
     _format_hyper_link(text, message)
@@ -57,10 +57,10 @@ def _run_terms_window():
 
     g2 = ttk.Frame(f)
     accept_button = ttk.Button(g2, text="Accept",
-                           command=accept)
+                               command=accept)
     accept_button.grid(row=0, column=0)
     ttk.Button(g2, text="Deny",
-           command=lambda: root.destroy()).grid(row=0, column=1)
+               command=lambda: root.destroy()).grid(row=0, column=1)
     g2.pack(pady=(5, 0))
     disable_enable_button()
 

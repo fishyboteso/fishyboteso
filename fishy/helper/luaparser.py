@@ -18,7 +18,7 @@ def _sv_parser(path):
         - remove empty expressions
         EXPRESSIONS: A) List-Start "name=", B) Variable assignment "name=val", C) List End "}"
         """
-        for old, new in ((",","\n"), ("{","{\n"), ("}","}\n"), ("{",""), (",", ""), ("[", ""), ("]", ""), ('"', ""), (" ", "")):
+        for old, new in ((",", "\n"), ("{", "{\n"), ("}", "}\n"), ("{", ""), (",", ""), ("[", ""), ("]", ""), ('"', ""), (" ", "")):
             lua = lua.replace(old, new)
         lua = lua.lower().split("\n")
         lua = [expression for expression in lua if expression]
@@ -29,22 +29,22 @@ def _sv_parser(path):
         the last symbol of each line decides the type of the node (branch vertex or leaf)
         """
         stack = []
-        root = (dict(),"root")
+        root = (dict(), "root")
         stack.append(root)
         for line in lua:
             if line == "":
                 break
-            if line[-1] == '=': #subtree start
+            if line[-1] == '=':  #subtree start
                 t = dict()
                 tname = line.split("=")[0]
-                stack.append((t,tname))
-            elif line[-1] == '}': #subtree end
+                stack.append((t, tname))
+            elif line[-1] == '}':  #subtree end
                 t = stack.pop()
                 tp = stack.pop()
                 tp[0][t[1]] = t[0]
                 stack.append(tp)
-            else: #new element in tree
-                name,val = line.split("=")
+            else:  #new element in tree
+                name, val = line.split("=")
                 t = stack.pop()
                 t[0][name] = val
                 stack.append(t)
@@ -68,13 +68,12 @@ def sv_color_extract(Colors):
         ingame representation of colors range from 0 to 1 in float
         these values are scaled by 255
         """
-        rgb=[
-            floor(float(root["colors"][i]["r"])*255),
-            floor(float(root["colors"][i]["g"])*255),
-            floor(float(root["colors"][i]["b"])*255)
+        rgb = [
+            floor(float(root["colors"][i]["r"]) * 255),
+            floor(float(root["colors"][i]["g"]) * 255),
+            floor(float(root["colors"][i]["b"]) * 255)
         ]
         colors.append(rgb)
-    for i,c in enumerate(Colors):
+    for i, c in enumerate(Colors):
         Colors[c] = colors[i]
     return Colors
-

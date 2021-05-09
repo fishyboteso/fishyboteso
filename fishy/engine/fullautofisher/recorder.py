@@ -68,4 +68,3 @@ class Recorder:
         pickle.dump(data, file)
         file.close()
         FullAuto.state = State.NONE
-

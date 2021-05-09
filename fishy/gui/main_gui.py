@@ -114,7 +114,7 @@ def _create(gui: 'GUI'):
     gui._config_button.pack(side=tk.RIGHT)
 
     gui._start_button = ttk.Button(start_frame, text=gui._get_start_stop_text(), width=25,
-                               command=gui.funcs.start_engine)
+                                   command=gui.funcs.start_engine)
     gui._start_button.pack(side=tk.RIGHT)
 
     start_frame.pack(padx=(10, 10), pady=(5, 15), fill=tk.X)

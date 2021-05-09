@@ -114,4 +114,3 @@ class Calibrator:
     def calibrate(self):
         self._walk_calibrate()
         self._rotate_calibrate()
-

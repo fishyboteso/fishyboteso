@@ -9,7 +9,7 @@ from fishy.helper.config import config
 
 
 def show(win_loc):
-    dim=(300,200)
+    dim = (300, 200)
     top = tk.Tk()
 
     top.overrideredirect(True)
@@ -27,9 +27,9 @@ def show(win_loc):
 
     # Position splash at the center of the main window
 
-    default_loc = (str(top.winfo_reqwidth())+"+"+str(top.winfo_reqheight())+"+"+"0"+"0")
+    default_loc = (str(top.winfo_reqwidth()) + "+" + str(top.winfo_reqheight()) + "+" + "0" + "0")
     loc = (win_loc or default_loc).split("+")[1:]
-    top.geometry("{}x{}+{}+{}".format(dim[0], dim[1], int(loc[0])+int(dim[0]/2), int(loc[1])+int(dim[1]/2)))
+    top.geometry("{}x{}+{}+{}".format(dim[0], dim[1], int(loc[0]) + int(dim[0] / 2), int(loc[1]) + int(dim[1] / 2)))
 
     top.update()
     time.sleep(3)

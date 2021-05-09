@@ -43,8 +43,8 @@ def initialize(window_to_hide):
 
     try:
         if helper.upgrade_avail() and not config.get("dont_ask_update", False):
-            cv,hv = helper.versions()
-            update_now, dont_ask_update = update_dialog.start(cv,hv)
+            cv, hv = helper.versions()
+            update_now, dont_ask_update = update_dialog.start(cv, hv)
             if dont_ask_update:
                 config.set("dont_ask_update", dont_ask_update)
             else:

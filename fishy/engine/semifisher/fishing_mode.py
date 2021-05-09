@@ -16,6 +16,7 @@ class State(Enum):
     FIGHT    = 14
     DEAD     = 15
 
+
 Colors = {
     State.IDLE     : [255, 255, 255],
     State.LOOKAWAY : [ 76,   0,  76],

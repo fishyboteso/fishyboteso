@@ -76,6 +76,7 @@ def _get_current_version():
 index = "https://pypi.python.org/simple"
 pkg = "fishy"
 
+
 def versions():
     return _hr_version(_get_current_version()), _hr_version(_get_highest_version(index, pkg))
 

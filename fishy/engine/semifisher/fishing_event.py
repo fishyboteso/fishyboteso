@@ -30,15 +30,15 @@ class FishEvent:
 
     # initialize these
     action_key = 'e'
-    collect_key = 'r' 
+    collect_key = 'r'
     sound = False
 
 
-def _fishing_sleep(waittime, lower_limit_ms = 16, upper_limit_ms = 2500):
+def _fishing_sleep(waittime, lower_limit_ms=16, upper_limit_ms=2500):
     reaction = 0.0
     if FishEvent.jitter and upper_limit_ms > lower_limit_ms:
-        reaction = float( random.randrange(lower_limit_ms, upper_limit_ms) )/1000.0
-    max_wait_t = waittime+reaction if waittime+reaction <= 2.5 else 2.5
+        reaction = float(random.randrange(lower_limit_ms, upper_limit_ms)) / 1000.0
+    max_wait_t = waittime + reaction if waittime + reaction <= 2.5 else 2.5
     time.sleep(max_wait_t)
 
 
