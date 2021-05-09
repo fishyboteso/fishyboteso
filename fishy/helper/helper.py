@@ -197,7 +197,7 @@ def install_addon(name, url, v=None):
         logging.info("Add-On " + name +
                      " installed successfully!\nPlease make sure to enable \"Allow outdated addons\" in ESO")
         return 0
-    except Exception as ex:
+    except Exception:
         logging.error("Could not install Add-On " + name + ", try doing it manually")
         return 1
 
@@ -208,7 +208,7 @@ def remove_addon(name, url=None, v=None):
         logging.info("Add-On " + name + " removed!")
     except FileNotFoundError:
         pass
-    except PermissionError as ex:
+    except PermissionError:
         logging.error("Fishy has no permission to remove " + name + " Add-On")
         return 1
     return 0

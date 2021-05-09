@@ -100,9 +100,9 @@ def fisher_callback(event: State):
     try:
         callbacks_map[event]()
         FishEvent.previousState = event
-    except KeyError as ex:
+    except KeyError:
         logging.error("KeyError: State " + str(event) + " is not known.")
-    except TypeError as ex:
+    except TypeError:
         logging.error("TypeError when reading state: " + str(event))
 
 

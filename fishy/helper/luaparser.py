@@ -36,16 +36,16 @@ def _sv_parser(path):
         for line in lua:
             if line == "":
                 break
-            if line[-1] == '=':  #subtree start
+            if line[-1] == '=':  # subtree start
                 t = dict()
                 tname = line.split("=")[0]
                 stack.append((t, tname))
-            elif line[-1] == '}':  #subtree end
+            elif line[-1] == '}':  # subtree end
                 t = stack.pop()
                 tp = stack.pop()
                 tp[0][t[1]] = t[0]
                 stack.append(tp)
-            else:  #new element in tree
+            else:  # new element in tree
                 name, val = line.split("=")
                 t = stack.pop()
                 t[0][name] = val
@@ -59,7 +59,7 @@ def _sv_parser(path):
 
 def sv_color_extract(Colors):
     root = _sv_parser(os.path.join(get_savedvarsdir(), "Chalutier.lua"))
-    if root == None:
+    if root is None:
         return Colors
 
     for i in range(4):
