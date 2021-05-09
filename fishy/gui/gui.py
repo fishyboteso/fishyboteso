@@ -1,7 +1,7 @@
 import logging
 import uuid
-from tkinter import OptionMenu, Button, IntVar
 from typing import List, Callable, Optional, Dict, Any
+import tkinter as tk
 import queue
 import threading
 
@@ -35,8 +35,8 @@ class GUI:
         self._console = None
         self._start_button = None
         self._notify_check = None
-        self._engine_select: Optional[OptionMenu] = None
-        self._config_button: Optional[Button] = None
+        self._engine_select: Optional[tk.OptionMenu] = None
+        self._config_button: Optional[tk.Button] = None
         self._engine_var = None
 
         self._thread = threading.Thread(target=self.create, args=())

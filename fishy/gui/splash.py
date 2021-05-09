@@ -1,6 +1,6 @@
 import time
 from multiprocessing import Process
-from tkinter import *
+import tkinter as tk
 from PIL import Image, ImageTk
 
 from fishy.helper.config import config
@@ -9,7 +9,7 @@ from fishy.helper import helper
 
 def show(win_loc):
     dim=(300,200)
-    top = Tk()
+    top = tk.Tk()
 
     top.overrideredirect(True)
     top.lift()
@@ -18,11 +18,11 @@ def show(win_loc):
     top.resizable(False, False)
     top.iconbitmap(helper.manifest_file('icon.ico'))
 
-    canvas = Canvas(top, width=dim[0], height=dim[1], bg='white')
+    canvas = tk.Canvas(top, width=dim[0], height=dim[1], bg='white')
     canvas.pack()
     top.image = Image.open(helper.manifest_file('fishybot_logo.png')).resize(dim)
     top.image = ImageTk.PhotoImage(top.image)
-    canvas.create_image(0, 0, anchor=NW, image=top.image)
+    canvas.create_image(0, 0, anchor=tk.NW, image=top.image)
 
     # Position splash at the center of the main window
 
