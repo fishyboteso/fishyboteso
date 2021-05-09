@@ -1,7 +1,7 @@
 import logging
 import uuid
-from typing import List, Callable, Optional, Dict, Any
 import tkinter as tk
+from typing import Callable, Optional, Dict, Any
 import queue
 import threading
 

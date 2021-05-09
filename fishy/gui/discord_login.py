@@ -4,8 +4,6 @@ import tkinter.ttk as ttk
 
 import typing
 
-from fishy.helper import helper
-
 from fishy.web import web
 
 from fishy.libs.tkhtmlview import HTMLLabel

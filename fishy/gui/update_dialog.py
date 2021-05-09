@@ -1,6 +1,5 @@
 from multiprocessing import Process, Manager
 import tkinter as tk
-import time
 
 from fishy import helper
 

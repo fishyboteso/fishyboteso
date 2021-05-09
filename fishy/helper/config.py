@@ -3,7 +3,6 @@ config.py
 Saves configuration in file as json file
 """
 import json
-import logging
 import os
 
 # path to save the configuration file
