@@ -194,7 +194,8 @@ def install_addon(name, url, v=None):
         r = requests.get(url, stream=True)
         z = ZipFile(BytesIO(r.content))
         z.extractall(path=get_addondir())
-        logging.info("Add-On " + name + " installed successfully!\nPlease make sure to enable \"Allow outdated addons\" in ESO")
+        logging.info("Add-On " + name +
+                     " installed successfully!\nPlease make sure to enable \"Allow outdated addons\" in ESO")
         return 0
     except Exception as ex:
         logging.error("Could not install Add-On " + name + ", try doing it manually")

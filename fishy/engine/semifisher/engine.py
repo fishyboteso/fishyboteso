@@ -62,7 +62,8 @@ class SemiFisherEngine(IEngine):
     def _wait_and_check(self):
         time.sleep(10)
         if not FishEvent.FishingStarted and self.start:
-            logging.warning("Doesn't look like fishing has started \nCheck out #read-me-first on our discord channel to troubleshoot the issue")
+            logging.warning("Doesn't look like fishing has started \n"
+                            "Check out #read-me-first on our discord channel to troubleshoot the issue")
 
     def show_pixel_vals(self):
         def show():

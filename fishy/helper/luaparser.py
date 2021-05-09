@@ -18,7 +18,9 @@ def _sv_parser(path):
         - remove empty expressions
         EXPRESSIONS: A) List-Start "name=", B) Variable assignment "name=val", C) List End "}"
         """
-        for old, new in ((",", "\n"), ("{", "{\n"), ("}", "}\n"), ("{", ""), (",", ""), ("[", ""), ("]", ""), ('"', ""), (" ", "")):
+        subs = ((",", "\n"), ("{", "{\n"), ("}", "}\n"),
+                ("{", ""), (",", ""), ("[", ""), ("]", ""), ('"', ""), (" ", ""))
+        for old, new in subs:
             lua = lua.replace(old, new)
         lua = lua.lower().split("\n")
         lua = [expression for expression in lua if expression]
