@@ -5,7 +5,7 @@ import cv2
 import imutils
 
 from fishy.engine.common import window_server
-from fishy.engine.common.window_server import WindowServer, Status
+from fishy.engine.common.window_server import Status, WindowServer
 from fishy.helper import helper
 
 

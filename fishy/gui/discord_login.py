@@ -1,15 +1,11 @@
 import time
-from tkinter import *
-from tkinter import messagebox
-from tkinter.ttk import *
-
+import tkinter as tk
+import tkinter.ttk as ttk
 import typing
 
-from fishy.helper import helper
-
+from fishy.libs.tkhtmlview import HTMLLabel
 from fishy.web import web
 
-from fishy.libs.tkhtmlview import HTMLLabel
 from ..helper.config import config
 
 if typing.TYPE_CHECKING:
@@ -34,14 +30,14 @@ def discord_login(gui: 'GUI'):
         code = int(login_code.get()) if login_code.get().isdigit() else 0
         if web.login(config.get("uid"), code):
             gui.login.set(1)
-            messagebox.showinfo("Note!", "Logged in successfuly!")
+            tk.messagebox.showinfo("Note!", "Login successful!")
             quit_top()
         else:
-            messagebox.showerror("Error", "Logged wasn't successful")
+            tk.messagebox.showerror("Error", "Login was not successful!")
 
     top_running = [True]
 
-    top = Toplevel(background=gui._root["background"])
+    top = tk.Toplevel(background=gui._root["background"])
     top.minsize(width=300, height=300)
     top.title("Notification Setup")
 
@@ -58,8 +54,8 @@ def discord_login(gui: 'GUI'):
     html_label.pack(pady=(20, 5))
     html_label.fit_height()
 
-    login_code = Entry(top, justify=CENTER, font="Calibri 15")
-    login_code.pack(padx=(15, 15), expand=True, fill=BOTH)
+    login_code = ttk.Entry(top, justify=tk.CENTER, font="Calibri 15")
+    login_code.pack(padx=(15, 15), expand=True, fill=tk.BOTH)
 
     html_label = HTMLLabel(top,
                            html=f'<div style="color: {gui._console["fg"]}; text-align: center">'
@@ -69,7 +65,7 @@ def discord_login(gui: 'GUI'):
     html_label.pack(pady=(5, 5))
     html_label.fit_height()
 
-    Button(top, text="REGISTER", command=check).pack(pady=(5, 20))
+    ttk.Button(top, text="REGISTER", command=check).pack(pady=(5, 20))
 
     top.protocol("WM_DELETE_WINDOW", quit_top)
     top.grab_set()

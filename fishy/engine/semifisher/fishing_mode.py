@@ -1,4 +1,3 @@
-import time
 from enum import Enum
 
 subscribers = []
@@ -16,6 +15,7 @@ class State(Enum):
     INVFULL  =  9
     FIGHT    = 14
     DEAD     = 15
+
 
 Colors = {
     State.IDLE     : [255, 255, 255],

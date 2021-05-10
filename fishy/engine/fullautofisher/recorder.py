@@ -5,7 +5,6 @@ from pprint import pprint
 from tkinter.filedialog import asksaveasfile
 
 from fishy.engine.fullautofisher.engine import FullAuto, State
-
 from fishy.helper.hotkey import Key
 from fishy.helper.hotkey_process import HotKey
 
@@ -69,4 +68,3 @@ class Recorder:
         pickle.dump(data, file)
         file.close()
         FullAuto.state = State.NONE
-

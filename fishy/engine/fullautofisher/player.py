@@ -2,10 +2,8 @@ import logging
 import pickle
 from pprint import pprint
 
-from fishy.engine.semifisher import fishing_event, fishing_mode
-
 from fishy.engine.fullautofisher.engine import FullAuto, State
-
+from fishy.engine.semifisher import fishing_event, fishing_mode
 from fishy.helper import helper
 from fishy.helper.config import config
 

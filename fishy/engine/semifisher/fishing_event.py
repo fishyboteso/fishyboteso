@@ -4,15 +4,16 @@ Defines different fishing modes (states) which acts as state for state machine
 also implements callbacks which is called when states are changed
 """
 import logging
-import time
 import random
+import time
+
 import keyboard
 from playsound import playsound
-from win32gui import GetWindowText, GetForegroundWindow
+from win32gui import GetForegroundWindow, GetWindowText
 
 from fishy import web
 from fishy.engine.semifisher import fishing_mode
-from fishy.engine.semifisher.fishing_mode import State, FishingMode
+from fishy.engine.semifisher.fishing_mode import FishingMode, State
 from fishy.helper import helper
 from fishy.helper.config import config
 
@@ -29,15 +30,15 @@ class FishEvent:
 
     # initialize these
     action_key = 'e'
-    collect_key = 'r' 
+    collect_key = 'r'
     sound = False
 
 
-def _fishing_sleep(waittime, lower_limit_ms = 16, upper_limit_ms = 2500):
+def _fishing_sleep(waittime, lower_limit_ms=16, upper_limit_ms=2500):
     reaction = 0.0
     if FishEvent.jitter and upper_limit_ms > lower_limit_ms:
-        reaction = float( random.randrange(lower_limit_ms, upper_limit_ms) )/1000.0
-    max_wait_t = waittime+reaction if waittime+reaction <= 2.5 else 2.5
+        reaction = float(random.randrange(lower_limit_ms, upper_limit_ms)) / 1000.0
+    max_wait_t = waittime + reaction if waittime + reaction <= 2.5 else 2.5
     time.sleep(max_wait_t)
 
 
@@ -99,9 +100,9 @@ def fisher_callback(event: State):
     try:
         callbacks_map[event]()
         FishEvent.previousState = event
-    except KeyError as ex:
+    except KeyError:
         logging.error("KeyError: State " + str(event) + " is not known.")
-    except TypeError as ex:
+    except TypeError:
         logging.error("TypeError when reading state: " + str(event))
 
 

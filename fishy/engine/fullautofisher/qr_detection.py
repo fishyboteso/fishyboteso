@@ -3,11 +3,10 @@ import os
 from datetime import datetime
 
 import cv2
-
-from fishy.helper.helper import get_documents
-
 import numpy as np
 from pyzbar.pyzbar import decode
+
+from fishy.helper.helper import get_documents
 
 
 def get_qr_location(og_img):

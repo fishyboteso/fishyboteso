@@ -6,21 +6,19 @@ import threading
 import time
 import traceback
 import webbrowser
-import requests
-from playsound import playsound
+from hashlib import md5
 from io import BytesIO
 from threading import Thread
+from uuid import uuid1
 from zipfile import ZipFile
 
-from uuid import uuid1
-from hashlib import md5
-
+import requests
+import winshell
+from playsound import playsound
 from win32com.client import Dispatch
 from win32comext.shell import shell, shellcon
 
 import fishy
-import winshell
-
 from fishy import web
 
 
@@ -30,7 +28,7 @@ def playsound_multiple(path, count=2):
         return
 
     def _ps_m():
-        for i in range(count-1):
+        for i in range(count - 1):
             playsound(path, True)
         playsound(path, False)
 
@@ -196,21 +194,22 @@ def install_addon(name, url, v=None):
         r = requests.get(url, stream=True)
         z = ZipFile(BytesIO(r.content))
         z.extractall(path=get_addondir())
-        logging.info("Add-On "+name+" installed successfully!\nPlease make sure to enable \"Allow outdated addons\" in ESO")
+        logging.info("Add-On " + name +
+                     " installed successfully!\nPlease make sure to enable \"Allow outdated addons\" in ESO")
         return 0
-    except Exception as ex:
-        logging.error("Could not install Add-On "+name+", try doing it manually")
+    except Exception:
+        logging.error("Could not install Add-On " + name + ", try doing it manually")
         return 1
 
 
 def remove_addon(name, url=None, v=None):
     try:
         shutil.rmtree(os.path.join(get_addondir(), name))
-        logging.info("Add-On "+name+" removed!")
+        logging.info("Add-On " + name + " removed!")
     except FileNotFoundError:
         pass
-    except PermissionError as ex:
-        logging.error("Fishy has no permission to remove "+name+" Add-On")
+    except PermissionError:
+        logging.error("Fishy has no permission to remove " + name + " Add-On")
         return 1
     return 0
 

@@ -1,6 +1,6 @@
 from enum import Enum
 from threading import Thread
-from typing import Dict, Callable, Optional
+from typing import Callable, Dict, Optional
 
 import keyboard
 

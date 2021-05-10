@@ -11,9 +11,9 @@ from os import execl
 
 from bs4 import BeautifulSoup
 
+
 def _hr_version(v):
     return '.'.join([str(x) for x in v])
-    #return str(v[0])+"."+str(v[1])+"."+str(v[2])
 
 
 def _normalize_version(v):
@@ -74,6 +74,7 @@ def _get_current_version():
 
 index = "https://pypi.python.org/simple"
 pkg = "fishy"
+
 
 def versions():
     return _hr_version(_get_current_version()), _hr_version(_get_highest_version(index, pkg))

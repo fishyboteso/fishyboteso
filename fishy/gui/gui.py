@@ -1,20 +1,21 @@
 import logging
-import uuid
-from tkinter import OptionMenu, Button, IntVar
-from typing import List, Callable, Optional, Dict, Any
 import queue
 import threading
+import tkinter as tk
+import uuid
+from typing import Any, Callable, Dict, Optional
 
-from fishy.web import web
 from ttkthemes import ThemedTk
 
 from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui import config_top
 from fishy.gui.funcs import GUIFuncs
-from . import main_gui
-from .log_config import GUIStreamHandler
+from fishy.web import web
+
 from ..helper.config import config
 from ..helper.helper import wait_until
+from . import main_gui
+from .log_config import GUIStreamHandler
 
 
 class GUI:
@@ -35,8 +36,8 @@ class GUI:
         self._console = None
         self._start_button = None
         self._notify_check = None
-        self._engine_select: Optional[OptionMenu] = None
-        self._config_button: Optional[Button] = None
+        self._engine_select: Optional[tk.OptionMenu] = None
+        self._config_button: Optional[tk.Button] = None
         self._engine_var = None
 
         self._thread = threading.Thread(target=self.create, args=())

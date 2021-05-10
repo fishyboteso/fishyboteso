@@ -1,14 +1,13 @@
 import logging
 
-from fishy.helper import hotkey
-
 from fishy.engine.fullautofisher.engine import FullAuto, State
+from fishy.helper import hotkey
 from fishy.helper.hotkey import Key
 
 
 def get_controls(engine: FullAuto):
-    from fishy.engine.fullautofisher.recorder import Recorder
     from fishy.engine.fullautofisher.player import Player
+    from fishy.engine.fullautofisher.recorder import Recorder
     controls = [
         ("MODE_SELECT", {
             Key.RIGHT: (Recorder(engine).toggle_recording, "start/stop record"),
