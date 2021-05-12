@@ -2,6 +2,7 @@ import logging
 import os
 import pickle
 import time
+from tkinter.messagebox import askyesno
 import typing
 from tkinter.filedialog import asksaveasfile
 
@@ -53,16 +54,20 @@ class Recorder(IMode):
                 logging.warning("Took too much time to record")
 
         hk.stop()
+        self._ask_to_save()
 
+    def _ask_to_save(self):
         def func():
             _file = None
             files = [('Fishy File', '*.fishy')]
-            while not _file:
+            while not _file and askyesno("Save Recording?", "Would you like to save the recording?"):
                 _file = asksaveasfile(mode='wb', filetypes=files, defaultextension=files)
-
             return _file
 
         file: typing.BinaryIO = self.engine.get_gui().call_in_thread(func, block=True)
+        if not file:
+            return
+
         data = {"full_auto_path": self.timeline}
         pickle.dump(data, file)
         config.set("full_auto_rec_file", file.name)
