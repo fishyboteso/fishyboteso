@@ -3,16 +3,17 @@ import logging
 import os
 import sys
 import traceback
+
 import win32con
 import win32gui
 
 import fishy
-from fishy import web, helper, gui
+from fishy import gui, helper, web
+from fishy.constants import chalutier, lam2
 from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui import GUI, splash, update_dialog
 from fishy.helper import hotkey
 from fishy.helper.config import config
-from fishy.constants import chalutier, lam2
 
 
 def check_window_name(title):
@@ -42,8 +43,8 @@ def initialize(window_to_hide):
 
     try:
         if helper.upgrade_avail() and not config.get("dont_ask_update", False):
-            cv,hv = helper.versions()
-            update_now, dont_ask_update = update_dialog.start(cv,hv)
+            cv, hv = helper.versions()
+            update_now, dont_ask_update = update_dialog.start(cv, hv)
             if dont_ask_update:
                 config.set("dont_ask_update", dont_ask_update)
             else:

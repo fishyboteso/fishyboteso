@@ -1,6 +1,5 @@
-from logging import StreamHandler
-
 import typing
+from logging import StreamHandler
 
 if typing.TYPE_CHECKING:
     from . import GUI

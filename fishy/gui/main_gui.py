@@ -1,20 +1,19 @@
 import logging
 import time
-from tkinter import *
-from tkinter.ttk import *
+import tkinter as tk
+import tkinter.ttk as ttk
+import typing
 
-from fishy.web import web
 from ttkthemes import ThemedTk
 
 from fishy import helper
-
-import typing
-
 from fishy.helper import hotkey
-from .discord_login import discord_login
+from fishy.web import web
+
+from ..constants import chalutier, lam2
 from ..helper.config import config
 from ..helper.hotkey import Key
-from ..constants import chalutier, lam2
+from .discord_login import discord_login
 
 if typing.TYPE_CHECKING:
     from . import GUI
@@ -36,14 +35,14 @@ def _create(gui: 'GUI'):
     gui._root.iconbitmap(helper.manifest_file('icon.ico'))
 
     # region menu
-    menubar = Menu(gui._root)
+    menubar = tk.Menu(gui._root)
 
-    filemenu = Menu(menubar, tearoff=0)
+    filemenu = tk.Menu(menubar, tearoff=0)
 
     login = web.is_logged_in()
-    gui.login = IntVar()
+    gui.login = tk.IntVar()
     gui.login.set(1 if login > 0 else 0)
-    state = DISABLED if login == -1 else ACTIVE
+    state = tk.DISABLED if login == -1 else tk.ACTIVE
     filemenu.add_checkbutton(label="Login", command=lambda: discord_login(gui), variable=gui.login, state=state)
     filemenu.add_command(label="Create Shortcut", command=lambda: helper.create_shortcut(False))
     # filemenu.add_command(label="Create Anti-Ghost Shortcut", command=lambda: helper.create_shortcut(True))
@@ -52,7 +51,7 @@ def _create(gui: 'GUI'):
         config.set("dark_mode", not config.get("dark_mode", True))
         gui._start_restart = True
 
-    dark_mode_var = IntVar()
+    dark_mode_var = tk.IntVar()
     dark_mode_var.set(int(config.get('dark_mode', True)))
     filemenu.add_checkbutton(label="Dark Mode", command=_toggle_mode,
                              variable=dark_mode_var)
@@ -72,11 +71,11 @@ def _create(gui: 'GUI'):
     filemenu.add_command(label=chaEntry, command=installer)
     menubar.add_cascade(label="Options", menu=filemenu)
 
-    debug_menu = Menu(menubar, tearoff=0)
+    debug_menu = tk.Menu(menubar, tearoff=0)
     debug_menu.add_command(label="Check PixelVal",
                            command=lambda: gui.engine.check_pixel_val())
 
-    debug_var = IntVar()
+    debug_var = tk.IntVar()
     debug_var.set(int(config.get('debug', False)))
 
     def keep_console():
@@ -87,7 +86,7 @@ def _create(gui: 'GUI'):
     debug_menu.add_command(label="Restart", command=helper.restart)
     menubar.add_cascade(label="Debug", menu=debug_menu)
 
-    help_menu = Menu(menubar, tearoff=0)
+    help_menu = tk.Menu(menubar, tearoff=0)
     help_menu.add_command(label="Need Help?", command=lambda: helper.open_web("http://discord.definex.in"))
     help_menu.add_command(label="Donate", command=lambda: helper.open_web("https://paypal.me/AdamSaudagar"))
     menubar.add_cascade(label="Help", menu=help_menu)
@@ -96,29 +95,29 @@ def _create(gui: 'GUI'):
     # endregion
 
     # region console
-    gui._console = Text(gui._root, state='disabled', wrap='none', background="#707070", fg="#ffffff")
-    gui._console.pack(fill=BOTH, expand=True, pady=(15, 15), padx=(10, 10))
-    gui._console.mark_set("sentinel", INSERT)
-    gui._console.config(state=DISABLED)
+    gui._console = tk.Text(gui._root, state='disabled', wrap='none', background="#707070", fg="#ffffff")
+    gui._console.pack(fill=tk.BOTH, expand=True, pady=(15, 15), padx=(10, 10))
+    gui._console.mark_set("sentinel", tk.INSERT)
+    gui._console.config(state=tk.DISABLED)
     # endregion
 
     # region controls
-    start_frame = Frame(gui._root)
+    start_frame = ttk.Frame(gui._root)
 
-    gui._engine_var = StringVar(start_frame)
+    gui._engine_var = tk.StringVar(start_frame)
     labels = list(engines.keys())
     last_started = config.get("last_started", labels[0])
-    gui._engine_select = OptionMenu(start_frame, gui._engine_var, last_started, *labels)
-    gui._engine_select.pack(side=LEFT)
+    gui._engine_select = ttk.OptionMenu(start_frame, gui._engine_var, last_started, *labels)
+    gui._engine_select.pack(side=tk.LEFT)
 
-    gui._config_button = Button(start_frame, text="⚙", width=0, command=lambda: engines[gui._engine_var.get()][0]())
-    gui._config_button.pack(side=RIGHT)
+    gui._config_button = ttk.Button(start_frame, text="⚙", width=0, command=lambda: engines[gui._engine_var.get()][0]())
+    gui._config_button.pack(side=tk.RIGHT)
 
-    gui._start_button = Button(start_frame, text=gui._get_start_stop_text(), width=25,
-                               command=gui.funcs.start_engine)
-    gui._start_button.pack(side=RIGHT)
+    gui._start_button = ttk.Button(start_frame, text=gui._get_start_stop_text(), width=25,
+                                   command=gui.funcs.start_engine)
+    gui._start_button.pack(side=tk.RIGHT)
 
-    start_frame.pack(padx=(10, 10), pady=(5, 15), fill=X)
+    start_frame.pack(padx=(10, 10), pady=(5, 15), fill=tk.X)
     # endregion
 
     _apply_theme(gui)
@@ -132,7 +131,7 @@ def _create(gui: 'GUI'):
     # noinspection PyProtectedMember
     def set_destroy():
         if gui._bot_running:
-            if not messagebox.askyesno(title="Quit?", message="Bot engine running. Quit Anyway?"):
+            if not tk.messagebox.askyesno(title="Quit?", message="Bot engine running. Quit Anyway?"):
                 return
 
         config.set("win_loc", gui._root.geometry())

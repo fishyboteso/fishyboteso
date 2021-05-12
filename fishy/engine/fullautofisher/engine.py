@@ -1,29 +1,29 @@
 import math
+import logging
+import math
+import time
 import traceback
 from threading import Thread
 
 import cv2
-import logging
-import time
+from pynput import keyboard, mouse
 
-from fishy.constants import libgps, fishyqr, lam2
+from fishy.constants import fishyqr, lam2, libgps
+from fishy.engine import SemiFisherEngine
+from fishy.engine.common.IEngine import IEngine
+from fishy.engine.common.window import WindowClient
 from fishy.engine.fullautofisher.mode.calibrator import Calibrator
 from fishy.engine.fullautofisher.mode.imode import FullAutoMode
 from fishy.engine.fullautofisher.mode.player import Player
 from fishy.engine.fullautofisher.mode.recorder import Recorder
-from fishy.engine.fullautofisher.qr_detection import get_values_from_image, get_qr_location
+from fishy.engine.fullautofisher.qr_detection import (get_qr_location,
+                                                      get_values_from_image)
+from fishy.engine.semifisher import fishing_event, fishing_mode
 from fishy.engine.semifisher.fishing_mode import FishingMode
-
-from fishy.engine import SemiFisherEngine
-from fishy.engine.common.window import WindowClient
-from fishy.engine.semifisher import fishing_mode, fishing_event
-
-from fishy.engine.common.IEngine import IEngine
-from pynput import keyboard, mouse
-
-from fishy.helper import hotkey, helper
-from fishy.helper.helper import sign, log_raise, wait_until, is_eso_active
+from fishy.helper import helper, hotkey
 from fishy.helper.config import config
+from fishy.helper.helper import log_raise, wait_until, is_eso_active
+from fishy.helper.helper import sign
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
@@ -42,7 +42,6 @@ class FullAuto(IEngine):
     rotate_by = 30
 
     def __init__(self, gui_ref):
-        from fishy.engine.fullautofisher.mode.calibrator import Calibrator
         from fishy.engine.fullautofisher.test import Test
 
         super().__init__(gui_ref)

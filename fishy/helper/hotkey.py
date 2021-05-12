@@ -1,11 +1,8 @@
 from enum import Enum
 from threading import Thread
-from typing import Dict, Callable, Optional
+from typing import Callable, Dict, Optional
 
 import keyboard
-from playsound import playsound
-
-from fishy.helper import helper
 
 
 class Key(Enum):
@@ -27,7 +24,6 @@ def _get_callback(k):
         if not _hotkeys[k]:
             return
 
-        playsound(helper.manifest_file("beep.wav"), False)
         Thread(target=_hotkeys[k]).start()
     return callback
 

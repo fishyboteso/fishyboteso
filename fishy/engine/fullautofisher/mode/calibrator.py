@@ -1,16 +1,17 @@
-import math
 import logging
+import math
 import time
+import typing
 
 import cv2
 import numpy as np
-import typing
 
 if typing.TYPE_CHECKING:
     from fishy.engine.fullautofisher.engine import FullAuto
-from pynput import keyboard, mouse
 
 from fishy.engine.fullautofisher.mode.imode import IMode
+from pynput import keyboard, mouse
+
 from fishy.helper.config import config
 
 mse = mouse.Controller()
@@ -125,4 +126,3 @@ class Calibrator(IMode):
         self._rotate_calibrate()
         config.set("calibrate", False)
         logging.info("calibration done")
-

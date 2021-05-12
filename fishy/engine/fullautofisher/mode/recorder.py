@@ -2,20 +2,17 @@ import logging
 import os
 import pickle
 import time
-from pprint import pprint
+import typing
 from tkinter.filedialog import asksaveasfile
 
-import typing
-
-from fishy.helper.config import config
 from playsound import playsound
 
 from fishy import helper
+from fishy.helper.config import config
 
 if typing.TYPE_CHECKING:
     from fishy.engine.fullautofisher.engine import FullAuto
 from fishy.engine.fullautofisher.mode.imode import IMode
-
 from fishy.helper.hotkey import Key
 from fishy.helper.hotkey_process import HotKey
 
@@ -71,4 +68,3 @@ class Recorder(IMode):
         config.set("full_auto_rec_file", file.name)
         logging.info(f"saved {os.path.basename(file.name)} recording, and loaded it in player")
         file.close()
-

@@ -1,8 +1,8 @@
 import time
+from multiprocessing import Process, Queue
 from threading import Thread
 
 import mouse
-from multiprocessing import Process, Queue
 
 
 def event_triggered(queue, e):

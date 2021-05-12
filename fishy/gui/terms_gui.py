@@ -1,14 +1,14 @@
-import webbrowser
-from tkinter import *
-from tkinter.ttk import *
 import re
+import tkinter as tk
+import tkinter.ttk as ttk
+import webbrowser
 
 from PIL import Image, ImageTk
 
 from fishy import helper, web
 from fishy.helper.config import config
 
-hyperlinkPattern = re.compile(r'\[(?P<title>.*?)\]\((?P<address>.*?)\)')                                                        
+hyperlinkPattern = re.compile(r'\[(?P<title>.*?)\]\((?P<address>.*?)\)')
 
 
 def check_eula():
@@ -25,42 +25,42 @@ def _run_terms_window():
         root.destroy()
 
     def disable_enable_button():
-        accept_button.config(state=NORMAL if check_value.get() else DISABLED)
+        accept_button.config(state=tk.NORMAL if check_value.get() else tk.DISABLED)
 
-    root = Tk()
+    root = tk.Tk()
     message = f'I agree to the [Terms of Service and Privacy Policy]({web.get_terms_page()})'
     root.title("EULA")
     root.resizable(False, False)
     root.iconbitmap(helper.manifest_file('icon.ico'))
 
-    f = Frame(root)
-    canvas = Canvas(f, width=300, height=200)
+    f = ttk.Frame(root)
+    canvas = tk.Canvas(f, width=300, height=200)
     canvas.pack()
     root.image = Image.open(helper.manifest_file('fishybot_logo.png')).resize((300, 200))
     root.image = ImageTk.PhotoImage(root.image)
-    canvas.create_image(0, 0, anchor=NW, image=root.image)
+    canvas.create_image(0, 0, anchor=tk.NW, image=root.image)
 
-    check_value = IntVar(0)
+    check_value = tk.IntVar(0)
 
-    g1 = Frame(f)
-    Checkbutton(g1, command=disable_enable_button, variable=check_value).pack(side=LEFT)
-    text = Text(g1, width=len(hyperlinkPattern.sub(r'\g<title>', message)),
-                height=1, borderwidth=0, highlightthickness=0)
+    g1 = ttk.Frame(f)
+    ttk.Checkbutton(g1, command=disable_enable_button, variable=check_value).pack(side=tk.LEFT)
+    text = tk.Text(g1, width=len(hyperlinkPattern.sub(r'\g<title>', message)),
+                   height=1, borderwidth=0, highlightthickness=0)
     text["background"] = root["background"]
 
     _format_hyper_link(text, message)
-    text.config(state=DISABLED)
-    text.pack(side=LEFT)
+    text.config(state=tk.DISABLED)
+    text.pack(side=tk.LEFT)
     g1.pack()
 
     f.pack(padx=(10, 10), pady=(20, 20))
 
-    g2 = Frame(f)
-    accept_button = Button(g2, text="Accept",
-                           command=accept)
+    g2 = ttk.Frame(f)
+    accept_button = ttk.Button(g2, text="Accept",
+                               command=accept)
     accept_button.grid(row=0, column=0)
-    Button(g2, text="Deny",
-           command=lambda: root.destroy()).grid(row=0, column=1)
+    ttk.Button(g2, text="Deny",
+               command=lambda: root.destroy()).grid(row=0, column=1)
     g2.pack(pady=(5, 0))
     disable_enable_button()
 

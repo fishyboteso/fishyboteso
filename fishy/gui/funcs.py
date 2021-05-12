@@ -1,6 +1,5 @@
-from tkinter import messagebox
-
 import typing
+from tkinter import messagebox
 
 from fishy.helper.config import config
 
@@ -16,7 +15,7 @@ class GUIFuncsMock:
         ...
 
     def bot_started(self, started):
-       ...
+        ...
 
     def quit(self):
         ...
