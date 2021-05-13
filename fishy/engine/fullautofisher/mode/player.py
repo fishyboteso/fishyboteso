@@ -1,4 +1,5 @@
 import logging
+import math
 import pickle
 from pprint import pprint
 
@@ -54,6 +55,14 @@ class Player(IMode):
         if not self.timeline:
             log_raise("data not found, can't start")
         logging.info("starting player")
+
+        self.i = self._closest_point()
+
+    def _closest_point(self):
+        current = self.engine.get_coods()
+        distances = [(i, math.sqrt((target[0] - current[0]) ** 2 + (target[1] - current[1]) ** 2))
+                     for i, (command, target) in enumerate(self.timeline) if command == "move_to"]
+        return min(distances, key=lambda d: d[1])[0]
 
     def _loop(self):
         action = self.timeline[self.i]
