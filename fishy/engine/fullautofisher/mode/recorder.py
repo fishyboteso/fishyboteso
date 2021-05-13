@@ -2,10 +2,14 @@ import logging
 import os
 import pickle
 import time
+from tkinter import ttk
 from tkinter.messagebox import askyesno
 import typing
 from tkinter.filedialog import asksaveasfile
 
+from fishy.helper.helper import empty_function
+
+from fishy.helper.popup import PopUp
 from playsound import playsound
 
 from fishy import helper
@@ -56,13 +60,46 @@ class Recorder(IMode):
         hk.stop()
         self._ask_to_save()
 
+    def _open_save_popup(self):
+        top = PopUp(empty_function, self.engine.get_gui()._root, background=self.engine.get_gui()._root["background"])
+        controls_frame = ttk.Frame(top)
+        top.title("Save Recording?")
+
+        button = [-1]
+
+        def button_pressed(_button):
+            button[0] = _button
+            top.quit_top()
+
+        ttk.Label(controls_frame, text="Do you want to save the recording?").grid(row=0, column=0, columnspan=3)
+
+        _overwrite = "normal" if config.get("full_auto_rec_file") else "disable"
+        ttk.Button(controls_frame, text="Overwrite", command=lambda: button_pressed(0), state=_overwrite).grid(row=1, column=0)
+        ttk.Button(controls_frame, text="Save As", command=lambda: button_pressed(1)).grid(row=1, column=1)
+        ttk.Button(controls_frame, text="Cancel", command=lambda: button_pressed(2)).grid(row=1, column=2)
+
+        controls_frame.pack(padx=(5, 5), pady=(5, 5))
+        top.start()
+
+        return button[0]
+
     def _ask_to_save(self):
         def func():
             _file = None
             files = [('Fishy File', '*.fishy')]
-            while not _file and askyesno("Save Recording?", "Would you like to save the recording?"):
-                _file = asksaveasfile(mode='wb', filetypes=files, defaultextension=files)
-            return _file
+
+            while True:
+                button = self._open_save_popup()
+                if button == 0 and config.get("full_auto_rec_file"):
+                    return open(config.get("full_auto_rec_file"), 'wb')
+
+                if button == 1:
+                    _file = asksaveasfile(mode='wb', filetypes=files, defaultextension=files)
+                    if _file:
+                        return _file
+
+                if button == 2:
+                    return None
 
         file: typing.BinaryIO = self.engine.get_gui().call_in_thread(func, block=True)
         if not file:
