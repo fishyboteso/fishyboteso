@@ -50,16 +50,16 @@ def start_fullfisher_config(gui: 'GUI'):
     file_name_label = tk.StringVar(value=file_name())
     mode_var = tk.IntVar(value=config.get("full_auto_mode", 0))
 
-    tk.Button(controls_frame, text="Calibrate", command=start_calibrate).grid(row=0, column=0, columnspan=2, pady=(5, 5))
+    ttk.Button(controls_frame, text="Calibrate", command=start_calibrate).grid(row=0, column=0, columnspan=2, pady=(5, 5))
 
-    tk.Label(controls_frame, text="Mode: ").grid(row=1, column=0, pady=(5, 0))
-    tk.Radiobutton(controls_frame, text="Player", variable=mode_var, value=FullAutoMode.Player.value, command=mode_command).grid(row=1, column=1, sticky="w")
-    tk.Radiobutton(controls_frame, text="Recorder", variable=mode_var, value=FullAutoMode.Recorder.value, command=mode_command).grid(row=2, column=1, sticky="w", pady=(0, 5))
+    ttk.Label(controls_frame, text="Mode: ").grid(row=1, column=0, pady=(5, 0))
+    ttk.Radiobutton(controls_frame, text="Player", variable=mode_var, value=FullAutoMode.Player.value, command=mode_command).grid(row=1, column=1, sticky="w")
+    ttk.Radiobutton(controls_frame, text="Recorder", variable=mode_var, value=FullAutoMode.Recorder.value, command=mode_command).grid(row=2, column=1, sticky="w", pady=(0, 5))
 
-    tk.Button(controls_frame, text="Select fishy file", command=select_file).grid(row=3, column=0, columnspan=2, pady=(5, 0))
-    tk.Label(controls_frame, textvariable=file_name_label).grid(row=4, column=0, columnspan=2, pady=(0, 5))
+    ttk.Button(controls_frame, text="Select fishy file", command=select_file).grid(row=3, column=0, columnspan=2, pady=(5, 0))
+    ttk.Label(controls_frame, textvariable=file_name_label).grid(row=4, column=0, columnspan=2, pady=(0, 5))
 
-    tk.Label(controls_frame, text="Use semi-fisher config for rest").grid(row=5, column=0, columnspan=2, pady=(15, 5))
+    ttk.Label(controls_frame, text="Use semi-fisher config for rest").grid(row=5, column=0, columnspan=2, pady=(15, 5))
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()
