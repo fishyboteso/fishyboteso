@@ -2,6 +2,7 @@ import logging
 import os
 import pickle
 import time
+import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import askyesno
 import typing
@@ -73,7 +74,7 @@ class Recorder(IMode):
 
         ttk.Label(controls_frame, text="Do you want to save the recording?").grid(row=0, column=0, columnspan=3)
 
-        _overwrite = "normal" if config.get("full_auto_rec_file") else "disable"
+        _overwrite = tk.NORMAL if config.get("full_auto_rec_file") else tk.DISABLED
         ttk.Button(controls_frame, text="Overwrite", command=lambda: button_pressed(0), state=_overwrite).grid(row=1, column=0)
         ttk.Button(controls_frame, text="Save As", command=lambda: button_pressed(1)).grid(row=1, column=1)
         ttk.Button(controls_frame, text="Cancel", command=lambda: button_pressed(2)).grid(row=1, column=2)
