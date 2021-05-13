@@ -5,15 +5,18 @@ import time
 import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import askyesno
+from typing import List, Optional
 import typing
 from tkinter.filedialog import asksaveasfile
+
+from fishy.engine.fullautofisher.mode import player
+from fishy.helper import helper
 
 from fishy.helper.helper import empty_function
 
 from fishy.helper.popup import PopUp
 from playsound import playsound
 
-from fishy import helper
 from fishy.helper.config import config
 
 if typing.TYPE_CHECKING:
@@ -39,6 +42,14 @@ class Recorder(IMode):
         logging.info("check_fish")
 
     def run(self):
+        old_timeline: Optional[List] = None
+        start_from = None
+        if config.get("edit_recorder_mode"):
+            logging.info("moving to nearest coord in recording")
+            old_timeline = player.get_rec_file()
+            start_from = player.find_nearest(old_timeline, self.engine.get_coods())
+            self.engine.move_to(start_from[2])
+
         logging.info("starting, press LMB to mark hole")
         hk = HotKey()
         hk.start_process(self._mark_hole)
@@ -59,6 +70,15 @@ class Recorder(IMode):
                 logging.warning("Took too much time to record")
 
         hk.stop()
+
+        if config.get("edit_recorder_mode"):
+            logging.info("moving to nearest coord in recording")
+            end = player.find_nearest(old_timeline, self.engine.get_coods())
+            self.engine.move_to(end[2])
+            part1 = old_timeline[:start_from[0]]
+            part2 = old_timeline[end[0]:]
+            self.timeline = part1 + self.timeline + part2
+
         self._ask_to_save()
 
     def _open_save_popup(self):

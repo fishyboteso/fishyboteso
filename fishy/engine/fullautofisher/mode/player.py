@@ -17,7 +17,7 @@ from fishy.helper import helper
 from fishy.helper.config import config
 
 
-def _get_rec_file():
+def get_rec_file():
     file = config.get("full_auto_rec_file")
 
     if not file:
@@ -27,11 +27,21 @@ def _get_rec_file():
     file = open(file, 'rb')
     data = pickle.load(file)
     file.close()
-    pprint(data)
     if "full_auto_path" not in data:
         logging.error("invalid file")
         return None
     return data["full_auto_path"]
+
+
+def find_nearest(timeline, current):
+    """
+    :param timeline: recording timeline
+    :param current: current coord
+    :return: Tuple[index, distance, target_coord]
+    """
+    distances = [(i, math.sqrt((target[0] - current[0]) ** 2 + (target[1] - current[1]) ** 2), target)
+                 for i, (command, target) in enumerate(timeline) if command == "move_to"]
+    return min(distances, key=lambda d: d[1])
 
 
 class Player(IMode):
@@ -51,18 +61,12 @@ class Player(IMode):
         logging.info("player stopped")
 
     def _init(self):
-        self.timeline = _get_rec_file()
+        self.timeline = get_rec_file()
         if not self.timeline:
             log_raise("data not found, can't start")
         logging.info("starting player")
 
-        self.i = self._closest_point()
-
-    def _closest_point(self):
-        current = self.engine.get_coods()
-        distances = [(i, math.sqrt((target[0] - current[0]) ** 2 + (target[1] - current[1]) ** 2))
-                     for i, (command, target) in enumerate(self.timeline) if command == "move_to"]
-        return min(distances, key=lambda d: d[1])[0]
+        self.i = find_nearest(self.timeline, self.engine.get_coods())[0]
 
     def _loop(self):
         action = self.timeline[self.i]
