@@ -1,8 +1,8 @@
+import math
 import logging
 import math
 import time
 import traceback
-from enum import Enum
 from threading import Thread
 
 import cv2
@@ -12,11 +12,17 @@ from fishy.constants import fishyqr, lam2, libgps
 from fishy.engine import SemiFisherEngine
 from fishy.engine.common.IEngine import IEngine
 from fishy.engine.common.window import WindowClient
+from fishy.engine.fullautofisher.mode.calibrator import Calibrator
+from fishy.engine.fullautofisher.mode.imode import FullAutoMode
+from fishy.engine.fullautofisher.mode.player import Player
+from fishy.engine.fullautofisher.mode.recorder import Recorder
 from fishy.engine.fullautofisher.qr_detection import (get_qr_location,
                                                       get_values_from_image)
 from fishy.engine.semifisher import fishing_event, fishing_mode
 from fishy.engine.semifisher.fishing_mode import FishingMode
 from fishy.helper import helper, hotkey
+from fishy.helper.config import config
+from fishy.helper.helper import log_raise, wait_until, is_eso_active
 from fishy.helper.helper import sign
 
 mse = mouse.Controller()
@@ -32,21 +38,10 @@ def image_pre_process(img):
     return img
 
 
-class State(Enum):
-    NONE = 0
-    PLAYING = 1
-    RECORDING = 2
-    OTHER = 3
-
-
 class FullAuto(IEngine):
     rotate_by = 30
-    state = State.NONE
 
     def __init__(self, gui_ref):
-        from fishy.engine.fullautofisher import controls
-        from fishy.engine.fullautofisher.calibrator import Calibrator
-        from fishy.engine.fullautofisher.controls import Controls
         from fishy.engine.fullautofisher.test import Test
 
         super().__init__(gui_ref)
@@ -56,8 +51,9 @@ class FullAuto(IEngine):
         self.fisher = SemiFisherEngine(None)
         self.calibrator = Calibrator(self)
         self.test = Test(self)
-        self.controls = Controls(controls.get_controls(self))
         self.show_crop = False
+
+        self.mode = None
 
     def run(self):
 
@@ -66,57 +62,81 @@ class FullAuto(IEngine):
             if not helper.addon_exists(*addon):
                 helper.install_addon(*addon)
 
-        FullAuto.state = State.NONE
-
         self.gui.bot_started(True)
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
 
+        self.mode = None
+        if config.get("calibrate", False):
+            self.mode = Calibrator(self)
+        elif FullAutoMode(config.get("full_auto_mode", 0)) == FullAutoMode.Player:
+            self.mode = Player(self)
+        elif FullAutoMode(config.get("full_auto_mode", 0)) == FullAutoMode.Recorder:
+            self.mode = Recorder(self)
+
+        if not is_eso_active():
+            logging.info("Waiting for eso window to be active...")
+            wait_until(lambda: is_eso_active() or not self.start)
+            if self.start:
+                logging.info("starting in 2 secs...")
+                time.sleep(2)
+
+        # noinspection PyBroadException
         try:
+            if self.window.get_capture() is None:
+                log_raise("Game window not found")
+
             self.window.crop = get_qr_location(self.window.get_capture())
             if self.window.crop is None:
-                logging.warning("FishyQR not found")
-                self.start = False
-                raise Exception("FishyQR not found")
+                log_raise("FishyQR not found")
 
-            if not self.calibrator.all_callibrated():
-                logging.error("you need to calibrate first")
+            if not self.calibrator.all_calibrated():
+                log_raise("you need to calibrate first")
 
             self.fisher.toggle_start()
             fishing_event.unsubscribe()
+            if self.show_crop:
+                self.start_show()
+            self.stop_on_inactive()
 
-            self.controls.initialize()
-            while self.start and WindowClient.running():
-                if self.show_crop:
-                    self.window.show(self.show_crop, func=image_pre_process)
-                else:
-                    time.sleep(0.1)
-        except:
+            self.mode.run()
+
+        except Exception:
             traceback.print_exc()
-
-            if self.window.get_capture() is None:
-                logging.error("Game window not found")
+            self.start = False
 
         self.gui.bot_started(False)
-        self.controls.unassign_keys()
         self.window.show(False)
         logging.info("Quitting")
         self.window.destory()
         self.fisher.toggle_start()
 
-    def get_coods(self):
+    def start_show(self):
+        def func():
+            while self.start and WindowClient.running():
+                self.window.show(self.show_crop, func=image_pre_process)
+        Thread(target=func).start()
+
+    def stop_on_inactive(self):
+        def func():
+            wait_until(lambda: not is_eso_active())
+            self.start = False
+        Thread(target=func).start()
+
+    def get_coords(self):
+        """
+        There is chance that this function give None instead of a QR.
+        Need to handle manually
+        todo find a better way of handling None: switch from start bool to state which knows
+        todo its waiting for qr which doesn't block the engine when commanded to close
+        """
         img = self.window.processed_image(func=image_pre_process)
         return get_values_from_image(img)
 
-    def move_to(self, target):
-        if target is None:
-            logging.error("set target first")
-            return
+    def move_to(self, target) -> bool:
+        current = self.get_coords()
+        if not current:
+            return False
 
-        if not self.calibrator.all_callibrated():
-            logging.error("you need to callibrate first")
-            return
-
-        current = self.get_coods()
         print(f"Moving from {(current[0], current[1])} to {target}")
         move_vec = target[0] - current[0], target[1] - current[1]
 
@@ -124,12 +144,13 @@ class FullAuto(IEngine):
         print(f"distance: {dist}")
         if dist < 5e-05:
             print("distance very small skipping")
-            return
+            return True
 
         target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0])) + 90
         from_angle = current[2]
 
-        self.rotate_to(target_angle, from_angle)
+        if not self.rotate_to(target_angle, from_angle):
+            return False
 
         walking_time = dist / self.calibrator.move_factor
         print(f"walking for {walking_time}")
@@ -137,10 +158,14 @@ class FullAuto(IEngine):
         time.sleep(walking_time)
         kb.release('w')
         print("done")
+        return True
 
-    def rotate_to(self, target_angle, from_angle=None):
+    def rotate_to(self, target_angle, from_angle=None) -> bool:
         if from_angle is None:
-            _, _, from_angle = self.get_coods()
+            coords = self.get_coords()
+            if not coords:
+                return False
+            _, _, from_angle = coords
 
         if target_angle < 0:
             target_angle = 360 + target_angle
@@ -161,7 +186,9 @@ class FullAuto(IEngine):
             mse.move(sign(rotate_times) * FullAuto.rotate_by * -1, 0)
             time.sleep(0.05)
 
-    def look_for_hole(self):
+        return True
+
+    def look_for_hole(self) -> bool:
         self._hole_found_flag = False
 
         if FishingMode.CurrentMode == fishing_mode.State.LOOKING:
@@ -194,10 +221,6 @@ class FullAuto(IEngine):
             self._curr_rotate_y -= 0.05
 
     def toggle_start(self):
-        if self.start and FullAuto.state != State.NONE:
-            logging.info("Please turn off RECORDING/PLAYING first")
-            return
-
         self.start = not self.start
         if self.start:
             self.thread = Thread(target=self.run)

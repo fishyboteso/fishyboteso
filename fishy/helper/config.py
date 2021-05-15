@@ -106,7 +106,7 @@ class config:
         :param default: default value to return if key is not found
         :return: config value
         """
-        return default if config._instance[key] is None else config._instance[key]
+        return default if config._instance is None or config._instance[key] is None else config._instance[key]
 
     @staticmethod
     def set(key, value, save=True):
@@ -116,6 +116,9 @@ class config:
         :param value: value to save
         :param save: False if don't want to save right away
         """
+        if config._instance is None:
+            return
+
         config._instance[key] = value
         if save:
             config.save_config()
@@ -134,4 +137,6 @@ class config:
 
     @staticmethod
     def save_config():
+        if config._instance is None:
+            return
         config._instance.save_config()

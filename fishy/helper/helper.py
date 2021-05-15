@@ -1,3 +1,4 @@
+import ctypes
 import logging
 import os
 import shutil
@@ -17,6 +18,7 @@ import winshell
 from playsound import playsound
 from win32com.client import Dispatch
 from win32comext.shell import shell, shellcon
+from win32gui import GetForegroundWindow, GetWindowText
 
 import fishy
 from fishy import web
@@ -222,8 +224,36 @@ def restart():
     os.execl(sys.executable, *([sys.executable] + sys.argv))
 
 
+def log_raise(msg):
+    logging.error(msg)
+    raise Exception(msg)
+
+
 def update():
     from .config import config
 
     config.delete("dont_ask_update")
     restart()
+
+
+def is_eso_active():
+    return GetWindowText(GetForegroundWindow()) == "Elder Scrolls Online"
+
+
+# noinspection PyProtectedMember,PyUnresolvedReferences
+def _get_id(thread):
+    # returns id of the respective thread
+    if hasattr(thread, '_thread_id'):
+        return thread._thread_id
+    for id, thread in threading._active.items():
+        if thread is thread:
+            return id
+
+
+def kill_thread(thread):
+    thread_id = _get_id(thread)
+    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
+                                                     ctypes.py_object(SystemExit))
+    if res > 1:
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
+        print('Exception raise failure')

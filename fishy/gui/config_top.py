@@ -5,6 +5,10 @@ import tkinter.ttk as ttk
 import typing
 from tkinter.filedialog import askopenfilename
 
+from fishy.engine.common.event_handler import IEngineHandler
+from fishy.engine.fullautofisher.mode.imode import FullAutoMode
+from fishy.helper import helper
+
 from fishy import web
 from fishy.helper import helper
 from fishy.helper.config import config
@@ -35,10 +39,37 @@ def start_fullfisher_config(gui: 'GUI'):
 
         file_name_label.set(file_name())
 
+    def start_calibrate():
+        top.quit_top()
+        config.set("calibrate", True)
+        gui.engine.toggle_fullfisher()
+
+    def mode_command():
+        config.set("full_auto_mode", mode_var.get())
+        edit_cb['state'] = "normal" if config.get("full_auto_mode", 0) == FullAutoMode.Recorder.value else "disable"
+
+    def edit_mode_changed():
+        config.set("edit_recorder_mode", edit_var.get())
+
     file_name_label = tk.StringVar(value=file_name())
-    ttk.Label(controls_frame, textvariable=file_name_label).grid(row=0, column=0)
-    ttk.Button(controls_frame, text="Select fishy file", command=select_file).grid(row=0, column=1)
-    ttk.Label(controls_frame, text="Use semi-fisher config for rest").grid(row=2, column=0, columnspan=2)
+    mode_var = tk.IntVar(value=config.get("full_auto_mode", 0))
+    edit_var = tk.IntVar(value=config.get("edit_recorder_mode", 0))
+
+    ttk.Button(controls_frame, text="Calibrate", command=start_calibrate).grid(row=0, column=0, columnspan=2, pady=(5, 5))
+
+    ttk.Label(controls_frame, text="Mode: ").grid(row=1, column=0, pady=(5, 0))
+    ttk.Radiobutton(controls_frame, text="Player", variable=mode_var, value=FullAutoMode.Player.value, command=mode_command).grid(row=1, column=1, sticky="w")
+    ttk.Radiobutton(controls_frame, text="Recorder", variable=mode_var, value=FullAutoMode.Recorder.value, command=mode_command).grid(row=2, column=1, sticky="w", pady=(0, 5))
+
+    ttk.Label(controls_frame, text="Edit Mode: ").grid(row=3, column=0, pady=(5, 5))
+    edit_state = tk.NORMAL if config.get("full_auto_mode", 0) == FullAutoMode.Recorder.value else tk.DISABLED
+    edit_cb = ttk.Checkbutton(controls_frame, variable=edit_var, state=edit_state, command=edit_mode_changed)
+    edit_cb.grid(row=3, column=1, pady=(5, 5))
+
+    ttk.Button(controls_frame, text="Select fishy file", command=select_file).grid(row=4, column=0, columnspan=2, pady=(5, 0))
+    ttk.Label(controls_frame, textvariable=file_name_label).grid(row=5, column=0, columnspan=2, pady=(0, 5))
+
+    ttk.Label(controls_frame, text="Use semi-fisher config for rest").grid(row=6, column=0, columnspan=2, pady=(15, 5))
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()
@@ -106,3 +137,10 @@ def start_semifisher_config(gui: 'GUI'):
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()
+
+
+if __name__ == '__main__':
+    from fishy.gui import GUI
+    gui = GUI(lambda: IEngineHandler())
+    gui.call_in_thread(lambda: start_fullfisher_config(gui))
+    gui.create()

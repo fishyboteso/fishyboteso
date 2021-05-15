@@ -8,11 +8,12 @@ class Test:
         self.engine = engine
         self.target = None
 
+    # noinspection PyProtectedMember
     def print_coods(self):
-        logging.info(self.engine.get_coods())
+        logging.info(self.engine.get_coords())
 
     def set_target(self):
-        self.target = self.engine.get_coods()
+        self.target = self.engine.get_coords()
         logging.info(f"target_coods are {self.target}")
 
     def move_to_target(self):

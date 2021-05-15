@@ -1,12 +1,17 @@
 import logging
 import math
 import time
+import typing
 
 import cv2
 import numpy as np
+
+if typing.TYPE_CHECKING:
+    from fishy.engine.fullautofisher.engine import FullAuto
+
+from fishy.engine.fullautofisher.mode.imode import IMode
 from pynput import keyboard, mouse
 
-from fishy.engine.fullautofisher.engine import FullAuto
 from fishy.helper.config import config
 
 mse = mouse.Controller()
@@ -43,8 +48,8 @@ def _get_factor(key):
     return config.get("full_auto_factors", {}).get(key)
 
 
-class Calibrator:
-    def __init__(self, engine: FullAuto):
+class Calibrator(IMode):
+    def __init__(self, engine: 'FullAuto'):
         self._callibrate_state = -1
         self.engine = engine
 
@@ -58,8 +63,11 @@ class Calibrator:
 
     # endregion
 
-    def all_callibrated(self):
-        return self.move_factor is not None and self.rot_factor is not None
+    def all_calibrated(self):
+        return self.move_factor is not None and \
+               self.rot_factor is not None and \
+               self.move_factor != 0 and \
+               self.rot_factor != 0
 
     def toggle_show(self):
         self.engine.show_crop = not self.engine.show_crop
@@ -67,7 +75,7 @@ class Calibrator:
     def _walk_calibrate(self):
         walking_time = 3
 
-        coods = self.engine.get_coods()
+        coods = self.engine.get_coords()
         if coods is None:
             return
 
@@ -78,19 +86,21 @@ class Calibrator:
         kb.release('w')
         time.sleep(0.5)
 
-        coods = self.engine.get_coods()
+        coods = self.engine.get_coords()
         if coods is None:
             return
         x2, y2, rot2 = coods
 
         move_factor = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / walking_time
         _update_factor("move_factor", move_factor)
-        logging.info("done")
+        logging.info("walk calibrate done")
 
     def _rotate_calibrate(self):
+        from fishy.engine.fullautofisher.engine import FullAuto
+
         rotate_times = 50
 
-        coods = self.engine.get_coods()
+        coods = self.engine.get_coords()
         if coods is None:
             return
         _, _, rot2 = coods
@@ -99,7 +109,7 @@ class Calibrator:
             mse.move(FullAuto.rotate_by, 0)
             time.sleep(0.05)
 
-        coods = self.engine.get_coods()
+        coods = self.engine.get_coords()
         if coods is None:
             return
         x3, y3, rot3 = coods
@@ -109,8 +119,10 @@ class Calibrator:
 
         rot_factor = (rot3 - rot2) / rotate_times
         _update_factor("rot_factor", rot_factor)
-        logging.info("done")
+        logging.info("rotate calibrate done")
 
-    def calibrate(self):
+    def run(self):
         self._walk_calibrate()
         self._rotate_calibrate()
+        config.set("calibrate", False)
+        logging.info("calibration done")
