@@ -87,9 +87,8 @@ class Player(IMode):
             if not self.engine.rotate_to(action[1][2]):
                 return
 
-            # todo swap the order of below two lines
-            fishing_event.subscribe()
             fishing_mode.subscribers.append(self._hole_complete_callback)
+            fishing_event.subscribe()
             # scan for fish hole
             logging.info("scanning")
             # if found start fishing and wait for hole to complete
@@ -101,8 +100,8 @@ class Player(IMode):
             else:
                 logging.info("no hole found")
             # continue when hole completes
-            fishing_event.unsubscribe()
             fishing_mode.subscribers.remove(self._hole_complete_callback)
+            fishing_event.unsubscribe()
 
         self.next()
 
