@@ -7,13 +7,13 @@ import typing
 from ttkthemes import ThemedTk
 
 from fishy import helper
-from fishy.helper import hotkey
 from fishy.web import web
 
 from ..constants import chalutier, lam2
 from ..helper.config import config
-from ..helper.hotkey import Key
 from .discord_login import discord_login
+from ..helper.hotkey.hotkey_process import hotkey
+from ..helper.hotkey.process import Key
 
 if typing.TYPE_CHECKING:
     from . import GUI
@@ -126,7 +126,7 @@ def _create(gui: 'GUI'):
     if config.get("win_loc") is not None:
         gui._root.geometry(config.get("win_loc"))
 
-    hotkey.set_hotkey(Key.F9, gui.funcs.start_engine)
+    hotkey.hook(Key.F9, gui.funcs.start_engine)
 
     # noinspection PyProtectedMember
     def set_destroy():

@@ -4,7 +4,6 @@ import pickle
 import time
 import tkinter as tk
 from tkinter import ttk
-from tkinter.messagebox import askyesno
 from typing import List, Optional
 import typing
 from tkinter.filedialog import asksaveasfile
@@ -13,6 +12,7 @@ from fishy.engine.fullautofisher.mode import player
 from fishy.helper import helper
 
 from fishy.helper.helper import empty_function, log_raise
+from fishy.helper.hotkey.process import Key
 
 from fishy.helper.popup import PopUp
 from playsound import playsound
@@ -22,13 +22,11 @@ from fishy.helper.config import config
 if typing.TYPE_CHECKING:
     from fishy.engine.fullautofisher.engine import FullAuto
 from fishy.engine.fullautofisher.mode.imode import IMode
-from fishy.helper.hotkey import Key
-from fishy.helper.hotkey_process import HotKey
+from fishy.helper.hotkey.hotkey_process import HotKey, hotkey
 
 
 class Recorder(IMode):
     recording_fps = 1
-    mark_hole_key = Key.F8
 
     def __init__(self, engine: 'FullAuto'):
         self.recording = False
@@ -41,7 +39,6 @@ class Recorder(IMode):
             logging.warning("QR not found, couldn't record hole")
             return
         self.timeline.append(("check_fish", coods))
-        playsound(helper.manifest_file("beep.wav"), False)
         logging.info("check_fish")
 
     def run(self):
@@ -58,8 +55,7 @@ class Recorder(IMode):
                 log_raise("QR not found")
 
         logging.info("starting, press LMB to mark hole")
-        hk = HotKey()
-        hk.start_process(self._mark_hole)
+        hotkey.hook(Key.LMB, self._mark_hole)
 
         self.timeline = []
 
@@ -78,7 +74,7 @@ class Recorder(IMode):
             else:
                 logging.warning("Took too much time to record")
 
-        hk.stop()
+        hotkey.free(Key.LMB)
 
         if config.get("edit_recorder_mode"):
             logging.info("moving to nearest coord in recording")
