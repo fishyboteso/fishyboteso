@@ -75,9 +75,10 @@ class FullAuto(IEngine):
 
         if not is_eso_active():
             logging.info("Waiting for eso window to be active...")
-            wait_until(is_eso_active)
-            logging.info("starting in 2 secs...")
-            time.sleep(2)
+            wait_until(lambda: is_eso_active() or not self.start)
+            if self.start:
+                logging.info("starting in 2 secs...")
+                time.sleep(2)
 
         # noinspection PyBroadException
         try:
