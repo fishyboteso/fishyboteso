@@ -12,7 +12,7 @@ from tkinter.filedialog import asksaveasfile
 from fishy.engine.fullautofisher.mode import player
 from fishy.helper import helper
 
-from fishy.helper.helper import empty_function
+from fishy.helper.helper import empty_function, log_raise
 
 from fishy.helper.popup import PopUp
 from playsound import playsound
@@ -36,7 +36,10 @@ class Recorder(IMode):
         self.timeline = []
 
     def _mark_hole(self):
-        coods = self.engine.get_coods()
+        coods = self.engine.get_coords()
+        if not coods:
+            logging.warning("QR not found, couldn't record hole")
+            return
         self.timeline.append(("check_fish", coods))
         playsound(helper.manifest_file("beep.wav"), False)
         logging.info("check_fish")
@@ -47,8 +50,12 @@ class Recorder(IMode):
         if config.get("edit_recorder_mode"):
             logging.info("moving to nearest coord in recording")
             old_timeline = player.get_rec_file()
-            start_from = player.find_nearest(old_timeline, self.engine.get_coods())
-            self.engine.move_to(start_from[2])
+            coords = self.engine.get_coords()
+            if not coords:
+                log_raise("QR not found")
+            start_from = player.find_nearest(old_timeline, coords)
+            if not self.engine.move_to(start_from[2]):
+                log_raise("QR not found")
 
         logging.info("starting, press LMB to mark hole")
         hk = HotKey()
@@ -58,9 +65,11 @@ class Recorder(IMode):
 
         while self.engine.start:
             start_time = time.time()
-            coods = None
-            while not coods:
-                coods = self.engine.get_coods()
+            coods = self.engine.get_coords()
+            if not coods:
+                time.sleep(0.1)
+                continue
+
             self.timeline.append(("move_to", (coods[0], coods[1])))
 
             time_took = time.time() - start_time
@@ -73,7 +82,13 @@ class Recorder(IMode):
 
         if config.get("edit_recorder_mode"):
             logging.info("moving to nearest coord in recording")
-            end = player.find_nearest(old_timeline, self.engine.get_coods())
+
+            # todo allow the user the chance to wait for qr
+            coords = self.engine.get_coords()
+            if not coords:
+                log_raise("QR not found")
+
+            end = player.find_nearest(old_timeline, coords)
             self.engine.move_to(end[2])
             part1 = old_timeline[:start_from[0]]
             part2 = old_timeline[end[0]:]

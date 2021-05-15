@@ -1,6 +1,7 @@
 import logging
 import math
 import pickle
+import time
 from pprint import pprint
 
 import typing
@@ -58,6 +59,7 @@ class Player(IMode):
         self._init()
         while self.engine.start:
             self._loop()
+            time.sleep(0.1)
         logging.info("player stopped")
 
     def _init(self):
@@ -66,16 +68,26 @@ class Player(IMode):
             log_raise("data not found, can't start")
         logging.info("starting player")
 
-        self.i = find_nearest(self.timeline, self.engine.get_coods())[0]
+        coords = self.engine.get_coords()
+        if not coords:
+            log_raise("QR not found")
+
+        self.i = find_nearest(self.timeline, coords)[0]
 
     def _loop(self):
         action = self.timeline[self.i]
 
         if action[0] == "move_to":
-            self.engine.move_to(action[1])
+            if not self.engine.move_to(action[1]):
+                return
         elif action[0] == "check_fish":
-            self.engine.move_to(action[1])
-            self.engine.rotate_to(action[1][2])
+            if not self.engine.move_to(action[1]):
+                return
+
+            if not self.engine.rotate_to(action[1][2]):
+                return
+
+            # todo swap the order of below two lines
             fishing_event.subscribe()
             fishing_mode.subscribers.append(self._hole_complete_callback)
             # scan for fish hole
@@ -92,6 +104,9 @@ class Player(IMode):
             fishing_event.unsubscribe()
             fishing_mode.subscribers.remove(self._hole_complete_callback)
 
+        self.next()
+
+    def next(self):
         self.i += 1 if self.forward else -1
         if self.i >= len(self.timeline):
             self.forward = False

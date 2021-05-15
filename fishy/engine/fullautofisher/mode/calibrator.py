@@ -75,7 +75,7 @@ class Calibrator(IMode):
     def _walk_calibrate(self):
         walking_time = 3
 
-        coods = self.engine.get_coods()
+        coods = self.engine.get_coords()
         if coods is None:
             return
 
@@ -86,7 +86,7 @@ class Calibrator(IMode):
         kb.release('w')
         time.sleep(0.5)
 
-        coods = self.engine.get_coods()
+        coods = self.engine.get_coords()
         if coods is None:
             return
         x2, y2, rot2 = coods
@@ -100,7 +100,7 @@ class Calibrator(IMode):
 
         rotate_times = 50
 
-        coods = self.engine.get_coods()
+        coods = self.engine.get_coords()
         if coods is None:
             return
         _, _, rot2 = coods
@@ -109,7 +109,7 @@ class Calibrator(IMode):
             mse.move(FullAuto.rotate_by, 0)
             time.sleep(0.05)
 
-        coods = self.engine.get_coods()
+        coods = self.engine.get_coords()
         if coods is None:
             return
         x3, y3, rot3 = coods

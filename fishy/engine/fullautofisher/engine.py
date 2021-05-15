@@ -121,20 +121,21 @@ class FullAuto(IEngine):
             self.start = False
         Thread(target=func).start()
 
-    def get_coods(self):
+    def get_coords(self):
+        """
+        There is chance that this function give None instead of a QR.
+        Need to handle manually
+        todo find a better way of handling None: switch from start bool to state which knows
+        todo its waiting for qr which doesn't block the engine when commanded to close
+        """
         img = self.window.processed_image(func=image_pre_process)
         return get_values_from_image(img)
 
-    def move_to(self, target):
-        if target is None:
-            logging.error("set target first")
-            return
+    def move_to(self, target) -> bool:
+        current = self.get_coords()
+        if not current:
+            return False
 
-        if not self.calibrator.all_calibrated():
-            logging.error("you need to calibrate first")
-            return
-
-        current = self.get_coods()
         print(f"Moving from {(current[0], current[1])} to {target}")
         move_vec = target[0] - current[0], target[1] - current[1]
 
@@ -142,12 +143,13 @@ class FullAuto(IEngine):
         print(f"distance: {dist}")
         if dist < 5e-05:
             print("distance very small skipping")
-            return
+            return True
 
         target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0])) + 90
         from_angle = current[2]
 
-        self.rotate_to(target_angle, from_angle)
+        if not self.rotate_to(target_angle, from_angle):
+            return False
 
         walking_time = dist / self.calibrator.move_factor
         print(f"walking for {walking_time}")
@@ -155,10 +157,14 @@ class FullAuto(IEngine):
         time.sleep(walking_time)
         kb.release('w')
         print("done")
+        return True
 
-    def rotate_to(self, target_angle, from_angle=None):
+    def rotate_to(self, target_angle, from_angle=None) -> bool:
         if from_angle is None:
-            _, _, from_angle = self.get_coods()
+            coords = self.get_coords()
+            if not coords:
+                return False
+            _, _, from_angle = coords
 
         if target_angle < 0:
             target_angle = 360 + target_angle
@@ -179,7 +185,9 @@ class FullAuto(IEngine):
             mse.move(sign(rotate_times) * FullAuto.rotate_by * -1, 0)
             time.sleep(0.05)
 
-    def look_for_hole(self):
+        return True
+
+    def look_for_hole(self) -> bool:
         self._hole_found_flag = False
 
         if FishingMode.CurrentMode == fishing_mode.State.LOOKING:
