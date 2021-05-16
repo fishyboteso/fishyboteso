@@ -79,7 +79,6 @@ def start_semifisher_config(gui: 'GUI'):
     def save():
         gui.config.set("action_key", action_key_entry.get(), False)
         gui.config.set("collect_key", collect_key_entry.get(), False)
-        gui.config.set("borderless", borderless.instate(['selected']), False)
         gui.config.set("jitter", jitter.instate(['selected']), False)
         gui.config.set("sound_notification", sound.instate(['selected']), False)
         gui.config.save_config()
@@ -111,29 +110,25 @@ def start_semifisher_config(gui: 'GUI'):
         gui._notify_check['state'] = tk.NORMAL
         gui._notify.set(is_subbed[0])
 
-    ttk.Label(controls_frame, text="Fullscreen: ").grid(row=1, column=0, pady=(5, 5))
-    borderless = ttk.Checkbutton(controls_frame, var=tk.BooleanVar(value=config.get("borderless")))
-    borderless.grid(row=1, column=1)
-
-    ttk.Label(controls_frame, text="Action Key:").grid(row=2, column=0)
+    ttk.Label(controls_frame, text="Action Key:").grid(row=1, column=0)
     action_key_entry = ttk.Entry(controls_frame, justify=tk.CENTER)
-    action_key_entry.grid(row=2, column=1)
+    action_key_entry.grid(row=1, column=1)
     action_key_entry.insert(0, config.get("action_key", "e"))
     action_key_entry.bind("<KeyRelease>", del_entry_key)
 
-    ttk.Label(controls_frame, text="Looting Key:").grid(row=4, column=0, pady=(5, 5))
+    ttk.Label(controls_frame, text="Looting Key:").grid(row=3, column=0, pady=(5, 5))
     collect_key_entry = ttk.Entry(controls_frame, justify=tk.CENTER)
-    collect_key_entry.grid(row=4, column=1, pady=(5, 5))
+    collect_key_entry.grid(row=3, column=1, pady=(5, 5))
     collect_key_entry.insert(0, config.get("collect_key", "r"))
     collect_key_entry.bind("<KeyRelease>", del_entry_key)
 
-    ttk.Label(controls_frame, text="Sound Notification: ").grid(row=5, column=0, pady=(5, 5))
+    ttk.Label(controls_frame, text="Sound Notification: ").grid(row=4, column=0, pady=(5, 5))
     sound = ttk.Checkbutton(controls_frame, var=tk.BooleanVar(value=config.get("sound_notification")))
-    sound.grid(row=5, column=1)
+    sound.grid(row=4, column=1)
 
-    ttk.Label(controls_frame, text="Human-Like Delay: ").grid(row=6, column=0, pady=(5, 5))
+    ttk.Label(controls_frame, text="Human-Like Delay: ").grid(row=5, column=0, pady=(5, 5))
     jitter = ttk.Checkbutton(controls_frame, var=tk.BooleanVar(value=config.get("jitter")))
-    jitter.grid(row=6, column=1)
+    jitter.grid(row=5, column=1)
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()
@@ -142,5 +137,5 @@ def start_semifisher_config(gui: 'GUI'):
 if __name__ == '__main__':
     from fishy.gui import GUI
     gui = GUI(lambda: IEngineHandler())
-    gui.call_in_thread(lambda: start_fullfisher_config(gui))
+    gui.call_in_thread(lambda: start_semifisher_config(gui))
     gui.create()
