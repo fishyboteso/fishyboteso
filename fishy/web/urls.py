@@ -15,6 +15,7 @@ session = domain + "/api/session"
 terms = domain + "/terms.html"
 discord = domain + "/api/discord"
 beta = domain + "/api/beta"
+ping = domain + "/api/ping"
 
 
 def get_notification_page(uid):
