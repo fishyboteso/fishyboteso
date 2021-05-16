@@ -141,3 +141,9 @@ def has_beta():
         return False
 
     return response.json()["beta"]
+
+
+@fallback(None)
+def ping():
+    body = {"uid": config.get("uid"), "apiversion": apiversion}
+    requests.post(urls.ping, params=body)

@@ -12,6 +12,8 @@ from fishy import gui, helper, web
 from fishy.constants import chalutier, lam2
 from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui import GUI, splash, update_dialog
+from fishy.helper import hotkey
+from fishy.helper.active_poll import active
 from fishy.helper.config import config
 from fishy.helper.hotkey.hotkey_process import hotkey
 
@@ -67,6 +69,7 @@ def initialize(window_to_hide):
 
 
 def main():
+    active.init()
     config.init()
     splash.start()
     hotkey.init()
@@ -90,10 +93,12 @@ def main():
     initialize(window_to_hide)
 
     gui_window.start()
+    active.start()
 
     bot.start_event_handler()
     config.stop()
     hotkey.stop()
+    active.stop()
 
 
 if __name__ == "__main__":
