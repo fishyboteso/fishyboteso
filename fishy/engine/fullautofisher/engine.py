@@ -89,7 +89,7 @@ class FullAuto(IEngine):
             if self.window.crop is None:
                 log_raise("FishyQR not found")
 
-            if not self.calibrator.all_calibrated():
+            if not (type(self.mode) is Calibrator) and not self.calibrator.all_calibrated():
                 log_raise("you need to calibrate first")
 
             self.fisher.toggle_start()
