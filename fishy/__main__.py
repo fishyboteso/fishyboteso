@@ -15,6 +15,7 @@ from fishy.gui import GUI, splash, update_dialog
 from fishy.helper import hotkey
 from fishy.helper.active_poll import active
 from fishy.helper.config import config
+from fishy.helper.hotkey.hotkey_process import hotkey
 
 
 def check_window_name(title):
@@ -71,6 +72,8 @@ def main():
     active.init()
     config.init()
     splash.start()
+    hotkey.init()
+
     print("launching please wait...")
 
     pil_logger = logging.getLogger('PIL')
@@ -84,7 +87,7 @@ def main():
     bot = EngineEventHandler(lambda: gui_window)
     gui_window = GUI(lambda: bot)
 
-    hotkey.initalize()
+    hotkey.start()
 
     logging.info(f"Fishybot v{fishy.__version__}")
     initialize(window_to_hide)
@@ -94,6 +97,7 @@ def main():
 
     bot.start_event_handler()
     config.stop()
+    hotkey.stop()
     active.stop()
 
 
