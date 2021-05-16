@@ -25,7 +25,6 @@ class WindowServer:
     """
     Screen = None
     windowOffset = None
-    titleOffset = None
     hwnd = None
     status = Status.STOPPED
 
@@ -40,9 +39,6 @@ def init():
         rect = win32gui.GetWindowRect(WindowServer.hwnd)
         client_rect = win32gui.GetClientRect(WindowServer.hwnd)
         WindowServer.windowOffset = math.floor(((rect[2] - rect[0]) - client_rect[2]) / 2)
-        WindowServer.titleOffset = ((rect[3] - rect[1]) - client_rect[3]) - WindowServer.windowOffset
-        if config.get("borderless"):
-            WindowServer.titleOffset = 0
         WindowServer.status = Status.RUNNING
     except pywintypes.error:
         logging.error("Game window not found")
@@ -59,8 +55,13 @@ def loop():
     temp_screen = np.array(ImageGrab.grab(bbox=bbox))
 
     rect = win32gui.GetWindowRect(WindowServer.hwnd)
+    client_rect = win32gui.GetClientRect(WindowServer.hwnd)
+
+    fullscreen = GetSystemMetrics(1) == (rect[3] - rect[1])
+    titleOffset = ((rect[3] - rect[1]) - client_rect[3]) - WindowServer.windowOffset if not fullscreen else 0
+
     crop = (
-        rect[0] + WindowServer.windowOffset, rect[1] + WindowServer.titleOffset, rect[2] - WindowServer.windowOffset,
+        rect[0] + WindowServer.windowOffset, rect[1] + titleOffset, rect[2] - WindowServer.windowOffset,
         rect[3] - WindowServer.windowOffset)
 
     WindowServer.Screen = temp_screen[crop[1]:crop[3], crop[0]:crop[2]]
