@@ -96,7 +96,9 @@ class FullAuto(IEngine):
             fishing_event.unsubscribe()
             if self.show_crop:
                 self.start_show()
-            self.stop_on_inactive()
+
+            if config.get("tabout_stop", 1):
+                self.stop_on_inactive()
 
             self.mode.run()
 

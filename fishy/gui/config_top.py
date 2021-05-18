@@ -48,30 +48,46 @@ def start_fullfisher_config(gui: 'GUI'):
         config.set("full_auto_mode", mode_var.get())
         edit_cb['state'] = "normal" if config.get("full_auto_mode", 0) == FullAutoMode.Recorder.value else "disable"
 
-    def edit_mode_changed():
-        config.set("edit_recorder_mode", edit_var.get())
-
     file_name_label = tk.StringVar(value=file_name())
     mode_var = tk.IntVar(value=config.get("full_auto_mode", 0))
     edit_var = tk.IntVar(value=config.get("edit_recorder_mode", 0))
+    tabout_var = tk.IntVar(value=config.get("tabout_stop", 1))
+    row = 0
 
-    ttk.Button(controls_frame, text="Calibrate", command=start_calibrate).grid(row=0, column=0, columnspan=2, pady=(5, 5))
+    ttk.Label(controls_frame, text="Calibration: ").grid(row=row, column=0, pady=(5, 0))
+    ttk.Button(controls_frame, text="RUN", command=start_calibrate).grid(row=row, column=1)
 
-    ttk.Label(controls_frame, text="Mode: ").grid(row=1, column=0, pady=(5, 0))
-    ttk.Radiobutton(controls_frame, text="Player", variable=mode_var, value=FullAutoMode.Player.value, command=mode_command).grid(row=1, column=1, sticky="w")
-    ttk.Radiobutton(controls_frame, text="Recorder", variable=mode_var, value=FullAutoMode.Recorder.value, command=mode_command).grid(row=2, column=1, sticky="w", pady=(0, 5))
+    row += 1
 
-    ttk.Label(controls_frame, text="Edit Mode: ").grid(row=3, column=0, pady=(5, 5))
+    ttk.Label(controls_frame, text="Mode: ").grid(row=row, column=0, rowspan=2)
+    ttk.Radiobutton(controls_frame, text="Player", variable=mode_var, value=FullAutoMode.Player.value, command=mode_command).grid(row=row, column=1, sticky="w", pady=(5, 0))
+    row += 1
+    ttk.Radiobutton(controls_frame, text="Recorder", variable=mode_var, value=FullAutoMode.Recorder.value, command=mode_command).grid(row=2, column=1, sticky="w")
+
+    row += 1
+
+    ttk.Label(controls_frame, text="Edit Mode: ").grid(row=row, column=0)
     edit_state = tk.NORMAL if config.get("full_auto_mode", 0) == FullAutoMode.Recorder.value else tk.DISABLED
-    edit_cb = ttk.Checkbutton(controls_frame, variable=edit_var, state=edit_state, command=edit_mode_changed)
-    edit_cb.grid(row=3, column=1, pady=(5, 5))
+    edit_cb = ttk.Checkbutton(controls_frame, variable=edit_var, state=edit_state, command=lambda: config.set("edit_recorder_mode", edit_var.get()))
+    edit_cb.grid(row=row, column=1, pady=(5, 0))
 
-    ttk.Button(controls_frame, text="Select fishy file", command=select_file).grid(row=4, column=0, columnspan=2, pady=(5, 0))
-    ttk.Label(controls_frame, textvariable=file_name_label).grid(row=5, column=0, columnspan=2, pady=(0, 5))
+    row += 1
 
-    ttk.Label(controls_frame, text="Use semi-fisher config for rest").grid(row=6, column=0, columnspan=2, pady=(15, 5))
+    ttk.Label(controls_frame, text="Tabout Stop: ").grid(row=row, column=0)
+    ttk.Checkbutton(controls_frame, variable=tabout_var, command=lambda: config.set("tabout_stop", tabout_var.get())).grid(row=row, column=1, pady=(5, 0))
 
-    controls_frame.pack(padx=(5, 5), pady=(5, 5))
+    row += 1
+
+    ttk.Label(controls_frame, text="Fishy file: ").grid(row=row, column=0, rowspan=2)
+    ttk.Button(controls_frame, text="Select", command=select_file).grid(row=row, column=1, pady=(5, 0))
+    row += 1
+    ttk.Label(controls_frame, textvariable=file_name_label).grid(row=row, column=1, columnspan=2)
+
+    row += 1
+
+    ttk.Label(controls_frame, text="Use semi-fisher config for rest").grid(row=row, column=0, columnspan=2, pady=(20, 0))
+
+    controls_frame.pack(padx=(5, 5), pady=(5, 10))
     top.start()
 
 
