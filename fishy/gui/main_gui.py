@@ -110,7 +110,8 @@ def _create(gui: 'GUI'):
     gui._engine_select = ttk.OptionMenu(start_frame, gui._engine_var, last_started, *labels)
     gui._engine_select.pack(side=tk.LEFT)
 
-    gui._config_button = ttk.Button(start_frame, text="⚙", width=0, command=lambda: engines[gui._engine_var.get()][0]())
+    gui._config_button = ttk.Button(start_frame, text="⚙", width=0,
+                                    command=lambda: engines[gui._engine_var.get()].config())
     gui._config_button.pack(side=tk.RIGHT)
 
     gui._start_button = ttk.Button(start_frame, text=gui._get_start_stop_text(), width=25,
