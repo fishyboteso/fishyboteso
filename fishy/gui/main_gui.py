@@ -87,7 +87,7 @@ def _create(gui: 'GUI'):
     menubar.add_cascade(label="Debug", menu=debug_menu)
 
     help_menu = tk.Menu(menubar, tearoff=0)
-    help_menu.add_command(label="Need Help?", command=lambda: helper.open_web("http://discord.definex.in"))
+    help_menu.add_command(label="Need Help?", command=lambda: helper.open_web("https://github.com/fishyboteso/fishyboteso/wiki"))
     help_menu.add_command(label="Donate", command=lambda: helper.open_web("https://paypal.me/AdamSaudagar"))
     menubar.add_cascade(label="Help", menu=help_menu)
 
