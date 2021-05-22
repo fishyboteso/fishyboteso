@@ -50,5 +50,5 @@ class GUIFuncs:
     def start_engine(self):
         def start_engine():
             config.set("last_started", self.gui._engine_var.get())
-            self.gui.engines[self.gui._engine_var.get()][1]()
+            self.gui.engines[self.gui._engine_var.get()].start()
         self.gui.call_in_thread(start_engine)

@@ -46,10 +46,15 @@ class Recorder(IMode):
         start_from = None
         if config.get("edit_recorder_mode"):
             logging.info("moving to nearest coord in recording")
+
             old_timeline = player.get_rec_file()
+            if not old_timeline:
+                log_raise("Edit mode selected, but no fishy file selected")
+
             coords = self.engine.get_coords()
             if not coords:
                 log_raise("QR not found")
+
             start_from = player.find_nearest(old_timeline, coords)
             if not self.engine.move_to(start_from[2]):
                 log_raise("QR not found")
@@ -103,10 +108,10 @@ class Recorder(IMode):
             button[0] = _button
             top.quit_top()
 
-        selected_text = f"\n\nSelected: {os.path.basename(config.get('full_auto_rec_file'))}" if config.get('full_auto_rec_file') else ""
+        selected_text = f"\n\nSelected: {os.path.basename(config.get('full_auto_rec_file'))}" if config.get('edit_recorder_mode') else ""
         ttk.Label(controls_frame, text=f"Do you want to save the recording?{selected_text}").grid(row=0, column=0, columnspan=3, pady=(0, 5))
 
-        _overwrite = tk.NORMAL if config.get("full_auto_rec_file") else tk.DISABLED
+        _overwrite = tk.NORMAL if config.get("edit_recorder_mode") else tk.DISABLED
         ttk.Button(controls_frame, text="Overwrite", command=lambda: button_pressed(0), state=_overwrite).grid(row=1, column=0, pady=(5, 0))
         ttk.Button(controls_frame, text="Save As", command=lambda: button_pressed(1)).grid(row=1, column=1)
         ttk.Button(controls_frame, text="Cancel", command=lambda: button_pressed(2)).grid(row=1, column=2)

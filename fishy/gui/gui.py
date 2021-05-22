@@ -4,6 +4,7 @@ import threading
 import tkinter as tk
 import uuid
 from typing import Any, Callable, Dict, Optional
+from dataclasses import dataclass
 
 from ttkthemes import ThemedTk
 
@@ -16,6 +17,12 @@ from ..helper.config import config
 from ..helper.helper import wait_until
 from . import main_gui
 from .log_config import GUIStreamHandler
+
+
+@dataclass
+class EngineRunner:
+    config: Callable
+    start: Callable
 
 
 class GUI:
@@ -58,13 +65,13 @@ class GUI:
     @property
     def engines(self):
         engines = {
-            "Semi Fisher": [lambda: config_top.start_semifisher_config(self),  # start config function
-                            self.engine.toggle_semifisher],  # start engine function
+            "Semi Fisher": EngineRunner(lambda: config_top.start_semifisher_config(self),
+                                        self.engine.toggle_semifisher),
+
+            "Full-Auto Fisher": EngineRunner(lambda: config_top.start_fullfisher_config(self),
+                                             self.engine.toggle_fullfisher)
         }
 
-        if web.has_beta():
-            engines["Full-Auto Fisher"] = [lambda: config_top.start_fullfisher_config(self),
-                                           self.engine.toggle_fullfisher]
         return engines
 
     def create(self):
