@@ -81,9 +81,9 @@ class Calibrator(IMode):
 
         x1, y1, rot1 = coods
 
-        kb.press('w')
+        kb.press('d')
         time.sleep(walking_time)
-        kb.release('w')
+        kb.release('d')
         time.sleep(0.5)
 
         coods = self.engine.get_coords()

@@ -156,9 +156,9 @@ class FullAuto(IEngine):
 
         walking_time = dist / self.calibrator.move_factor
         print(f"walking for {walking_time}")
-        kb.press('w')
+        kb.press('d')
         time.sleep(walking_time)
-        kb.release('w')
+        kb.release('d')
         print("done")
         return True
 
