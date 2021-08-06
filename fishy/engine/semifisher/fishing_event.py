@@ -32,6 +32,7 @@ class FishEvent:
     # initialize these
     action_key = 'e'
     collect_key = 'r'
+    walk_key = 'w'
     spell_1 = '1'
     spell_2 = '1'
     spell_3 = '1'
@@ -78,6 +79,7 @@ def init():
     FishEvent.spell_3 = config.get("spell_3", "3")
     FishEvent.spell_4 = config.get("spell_4", "4")
     FishEvent.spell_5 = config.get("spell_5", "5")
+    FishEvent.walk_key = config.get("walk_key", "w")
 
 def unsubscribe():
     if fisher_callback in fishing_mode.subscribers:
@@ -200,23 +202,31 @@ def try_fighting():
     #     logging.info("Still fighting after 3 loops.... lets just die instead")
 
     # if we detect enemies, perform a simple one bar routine to clear them out
+    
     # i think this is a good idea but i dont know how to stop it recursing
+    
     fight_loop_timeout = 0
     # while FishingMode.CurrentMode == State.FIGHT and fight_loop_timeout != 3:
     logging.info("Character is fighting, attempting to clear mobs! Loop " + str((fight_loop_timeout + 1)))
 
-
-    _fishing_sleep(0.5)
+    # combat loop, i put a HoT spell first to ensure survival but its not necessary
+    _fishing_sleep(0.1)
     keyboard.press_and_release(FishEvent.spell_1)
-    _fishing_sleep(0.5)
+    _fishing_sleep(0.7)
     keyboard.press_and_release(FishEvent.spell_2)
-    _fishing_sleep(0.5)
+    _fishing_sleep(0.7)
     keyboard.press_and_release(FishEvent.spell_3)
-    _fishing_sleep(0.5)
+    _fishing_sleep(0.7)
     keyboard.press_and_release(FishEvent.spell_4)
-    _fishing_sleep(0.5)
+    _fishing_sleep(0.1)
+    # loot any kills
+    keyboard.press_and_release(FishEvent.action_key)
+    _fishing_sleep(0.01)
+    keyboard.press_and_release(FishEvent.action_key)
+    _fishing_sleep(0.1)
     fight_loop_timeout =+ 1
+    return
 
-    if FishingMode.CurrentMode == State.FIGHT or fight_loop_timeout == 3:
+    if FishingMode.CurrentMode == State.FIGHT and fight_loop_timeout == 3:
         logging.info("Still fighting after 3 loops.... lets just die instead")
         return

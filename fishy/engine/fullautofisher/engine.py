@@ -136,32 +136,37 @@ class FullAuto(IEngine):
         return get_values_from_image(img)
 
     def move_to(self, target) -> bool:
-        current = self.get_coords()
-        if not current:
-            return False
+        cancel_states = [fishing_mode.State.FIGHT, fishing_mode.State.REELIN,
+                        fishing_mode.State.FISHING]
+        if FishingMode.CurrentMode not in cancel_states:
+            current = self.get_coords()
+            if not current:
+                return False
 
-        print(f"Moving from {(current[0], current[1])} to {target}")
-        move_vec = target[0] - current[0], target[1] - current[1]
+            print(f"Moving from {(current[0], current[1])} to {target}")
+            move_vec = target[0] - current[0], target[1] - current[1]
 
-        dist = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2)
-        print(f"distance: {dist}")
-        if dist < 5e-05:
-            print("distance very small skipping")
+            dist = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2)
+            print(f"distance: {dist}")
+            if dist < 5e-05:
+                print("distance very small skipping")
+                return True
+
+            target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0])) + 90
+            from_angle = current[2]
+
+            if not self.rotate_to(target_angle, from_angle):
+                return False
+
+            walking_time = dist / self.calibrator.move_factor
+            print(f"walking for {walking_time}")
+            kb.press(fishing_event.FishEvent.walk_key)
+            time.sleep(walking_time)
+            kb.release(fishing_event.FishEvent.walk_key)
+            print("done")
             return True
-
-        target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0])) + 90
-        from_angle = current[2]
-
-        if not self.rotate_to(target_angle, from_angle):
+        else:
             return False
-
-        walking_time = dist / self.calibrator.move_factor
-        print(f"walking for {walking_time}")
-        kb.press('d')
-        time.sleep(walking_time)
-        kb.release('d')
-        print("done")
-        return True
 
     def rotate_to(self, target_angle, from_angle=None) -> bool:
         if from_angle is None:

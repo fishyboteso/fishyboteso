@@ -51,6 +51,7 @@ def start_fullfisher_config(gui: 'GUI'):
         gui.config.set("spell_3", spell_3.get(), False)
         gui.config.set("spell_4", spell_4.get(), False)
         gui.config.set("spell_5", spell_5.get(), False)
+        gui.config.set("walk_key", walk_key.get(), False)
         gui.config.save_config()
 
     def del_entry_key(event):
@@ -95,6 +96,14 @@ def start_fullfisher_config(gui: 'GUI'):
     ttk.Button(controls_frame, text="Select", command=select_file).grid(row=row, column=1, pady=(5, 0))
     row += 1
     ttk.Label(controls_frame, textvariable=file_name_label).grid(row=row, column=1, columnspan=2)
+
+    row += 1
+
+    ttk.Label(controls_frame, text="Move Key: ").grid(row=row, column=0, rowspan=2, pady=(5, 5))
+    walk_key = ttk.Entry(controls_frame, justify=tk.CENTER)
+    walk_key.grid(row=row, column=1, pady=(5, 5))
+    walk_key.insert(0, config.get("walk_key", "w"))
+    walk_key.bind("<KeyRelease>", del_entry_key)
 
     row += 1
 
