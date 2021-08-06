@@ -47,6 +47,10 @@ def start_fullfisher_config(gui: 'GUI'):
 
     def save():
         gui.config.set("spell_1", spell_1.get(), False)
+        gui.config.set("spell_2", spell_2.get(), False)
+        gui.config.set("spell_3", spell_3.get(), False)
+        gui.config.set("spell_4", spell_4.get(), False)
+        gui.config.set("spell_5", spell_5.get(), False)
         gui.config.save_config()
 
     def del_entry_key(event):
@@ -56,7 +60,7 @@ def start_fullfisher_config(gui: 'GUI'):
     top = PopUp(save, gui._root, background=gui._root["background"])
     controls_frame = ttk.Frame(top)
     top.title("Config")
-    
+
     file_name_label = tk.StringVar(value=file_name())
     mode_var = tk.IntVar(value=config.get("full_auto_mode", 0))
     edit_var = tk.IntVar(value=config.get("edit_recorder_mode", 0))
@@ -96,9 +100,41 @@ def start_fullfisher_config(gui: 'GUI'):
 
     ttk.Label(controls_frame, text="Spell 1: ").grid(row=row, column=0, rowspan=2, pady=(5, 5))
     spell_1 = ttk.Entry(controls_frame, justify=tk.CENTER)
-    spell_1.grid(row=row, column=1, pady=(25, 5))
+    spell_1.grid(row=row, column=1, pady=(5, 5))
     spell_1.insert(0, config.get("spell_1", "1"))
     spell_1.bind("<KeyRelease>", del_entry_key)
+
+    row += 1
+
+    ttk.Label(controls_frame, text="Spell 2: ").grid(row=row, column=0, rowspan=2, pady=(5, 5))
+    spell_2 = ttk.Entry(controls_frame, justify=tk.CENTER)
+    spell_2.grid(row=row, column=1, pady=(5, 5))
+    spell_2.insert(0, config.get("spell_2", "2"))
+    spell_2.bind("<KeyRelease>", del_entry_key)
+
+    row += 1
+
+    ttk.Label(controls_frame, text="Spell 3: ").grid(row=row, column=0, rowspan=2, pady=(5, 5))
+    spell_3 = ttk.Entry(controls_frame, justify=tk.CENTER)
+    spell_3.grid(row=row, column=1, pady=(5, 5))
+    spell_3.insert(0, config.get("spell_3", "3"))
+    spell_3.bind("<KeyRelease>", del_entry_key)
+
+    row += 1
+
+    ttk.Label(controls_frame, text="Spell 4: ").grid(row=row, column=0, rowspan=2, pady=(5, 5))
+    spell_4 = ttk.Entry(controls_frame, justify=tk.CENTER)
+    spell_4.grid(row=row, column=1, pady=(5, 5))
+    spell_4.insert(0, config.get("spell_4", "4"))
+    spell_4.bind("<KeyRelease>", del_entry_key)
+
+    row += 1
+
+    ttk.Label(controls_frame, text="Spell 5: ").grid(row=row, column=0, rowspan=2, pady=(5, 5))
+    spell_5 = ttk.Entry(controls_frame, justify=tk.CENTER)
+    spell_5.grid(row=row, column=1, pady=(5, 5))
+    spell_5.insert(0, config.get("spell_5", "5"))
+    spell_5.bind("<KeyRelease>", del_entry_key)
 
     row += 1
 

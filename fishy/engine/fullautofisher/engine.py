@@ -87,7 +87,8 @@ class FullAuto(IEngine):
 
             self.window.crop = get_qr_location(self.window.get_capture())
             if self.window.crop is None:
-                log_raise("FishyQR not found")
+                log_raise("FishyQR not found, attempting rotate_back")
+                self.rotate_back()
 
             if not (type(self.mode) is Calibrator) and not self.calibrator.all_calibrated():
                 log_raise("you need to calibrate first")
@@ -193,7 +194,9 @@ class FullAuto(IEngine):
     def look_for_hole(self) -> bool:
         self._hole_found_flag = False
 
-        if FishingMode.CurrentMode == fishing_mode.State.LOOKING:
+        if FishingMode.CurrentMode != fishing_mode.State.LOOKING:
+            return False
+        else:
             return True
 
         def found_hole(e):

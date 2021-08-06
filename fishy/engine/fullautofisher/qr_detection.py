@@ -8,6 +8,8 @@ from pyzbar.pyzbar import decode
 
 from fishy.helper.helper import get_documents
 
+# temp fix for qr loss
+from pynput import mouse 
 
 def get_qr_location(og_img):
     """
@@ -37,13 +39,23 @@ def get_qr_location(og_img):
 
 # noinspection PyBroadException
 def get_values_from_image(img):
+    retry_counter = 0
     try:
         for qr in decode(img):
             vals = qr.data.decode('utf-8').split(",")
-            return float(vals[0]), float(vals[1]), float(vals[2])
+            if not vals:
+                if retry_counter < 5:
+                    logging.error("FishyQR not found, wiggling mouse")
+                    mmover = mouse.Controller()
+                    mmover.move(0, -FullAuto.rotate_by)
+                    time.sleep(0.05)
+                    self._curr_rotate_y -= 0.05
+                    retry_counter += 1
+                else:
+                    return None
+            else:
+                return float(vals[0]), float(vals[1]), float(vals[2])
 
-        logging.error("FishyQR not found")
-        return None
     except Exception:
         logging.error("Couldn't read coods, make sure 'crop' calibration is correct")
         cv2.imwrite(os.path.join(get_documents(), "fishy_failed_reads", f"{datetime.now()}.jpg"), img)
