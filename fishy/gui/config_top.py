@@ -19,9 +19,6 @@ if typing.TYPE_CHECKING:
 
 
 def start_fullfisher_config(gui: 'GUI'):
-    top = PopUp(helper.empty_function, gui._root, background=gui._root["background"])
-    controls_frame = ttk.Frame(top)
-    top.title("Config")
 
     def file_name():
         file = config.get("full_auto_rec_file", None)
@@ -48,6 +45,18 @@ def start_fullfisher_config(gui: 'GUI'):
         config.set("full_auto_mode", mode_var.get())
         edit_cb['state'] = "normal" if config.get("full_auto_mode", 0) == FullAutoMode.Recorder.value else "disable"
 
+    def save():
+        gui.config.set("spell_1", spell_1.get(), False)
+        gui.config.save_config()
+
+    def del_entry_key(event):
+        event.widget.delete(0, "end")
+        event.widget.insert(0, str(event.char))
+
+    top = PopUp(save, gui._root, background=gui._root["background"])
+    controls_frame = ttk.Frame(top)
+    top.title("Config")
+    
     file_name_label = tk.StringVar(value=file_name())
     mode_var = tk.IntVar(value=config.get("full_auto_mode", 0))
     edit_var = tk.IntVar(value=config.get("edit_recorder_mode", 0))
@@ -82,6 +91,14 @@ def start_fullfisher_config(gui: 'GUI'):
     ttk.Button(controls_frame, text="Select", command=select_file).grid(row=row, column=1, pady=(5, 0))
     row += 1
     ttk.Label(controls_frame, textvariable=file_name_label).grid(row=row, column=1, columnspan=2)
+
+    row += 1
+
+    ttk.Label(controls_frame, text="Spell 1: ").grid(row=row, column=0, rowspan=2, pady=(5, 5))
+    spell_1 = ttk.Entry(controls_frame, justify=tk.CENTER)
+    spell_1.grid(row=row, column=1, pady=(25, 5))
+    spell_1.insert(0, config.get("spell_1", "1"))
+    spell_1.bind("<KeyRelease>", del_entry_key)
 
     row += 1
 
@@ -145,6 +162,7 @@ def start_semifisher_config(gui: 'GUI'):
     ttk.Label(controls_frame, text="Human-Like Delay: ").grid(row=5, column=0, pady=(5, 5))
     jitter = ttk.Checkbutton(controls_frame, var=tk.BooleanVar(value=config.get("jitter")))
     jitter.grid(row=5, column=1)
+
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
     top.start()
