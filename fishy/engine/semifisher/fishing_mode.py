@@ -1,4 +1,5 @@
 from enum import Enum
+import logging
 
 subscribers = []
 
@@ -42,19 +43,30 @@ class FishingMode:
     PrevMode = State.IDLE
 
 
-def loop(rgb):
+def loop(rgb, currentmode=FishingMode.CurrentMode):
     """
     Executed in the start of the main loop in fishy.py
     Changes modes, calls mode events (callbacks) when mode is changed
 
     :param rgb: rgb read by the bot
     """
-    FishingMode.CurrentMode = State.IDLE
+    # FishingMode.CurrentMode = State.IDLE
     for s in State:
+
         if all(rgb == Colors[s]):
+            # logging.error("state found")
+            FishingMode.PrevMode = FishingMode.CurrentMode
+            # logging.error("PrevMode set to {0}".format(FishingMode.CurrentMode))
             FishingMode.CurrentMode = s
-
-    if FishingMode.CurrentMode != FishingMode.PrevMode:
-        _notify(FishingMode.CurrentMode)
-
-    FishingMode.PrevMode = FishingMode.CurrentMode
+            # logging.error("state set to {0}".format(s))
+            
+            if FishingMode.CurrentMode != FishingMode.PrevMode:
+                logging.error("state change, notify({0}). previous: {1}".format(FishingMode.CurrentMode, FishingMode.PrevMode))
+                _notify(FishingMode.CurrentMode)
+            else:
+                # logging.error("State did not change, prev: {0} current {0}".format(FishingMode.CurrentMode, FishingMode.PrevMode))
+                pass
+        else:
+            # logging.error("state was not found, rgb: {}".format(rgb))
+            # FishingMode.CurrentMode = State.IDLE
+            pass

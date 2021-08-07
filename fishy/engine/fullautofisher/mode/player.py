@@ -47,6 +47,7 @@ def find_nearest(timeline, current):
 
 
 class Player(IMode):
+
     def __init__(self, engine: 'FullAuto'):
         self.recording = False
         self.engine = engine
@@ -80,16 +81,7 @@ class Player(IMode):
 
         fishing_mode.subscribers.append(self._hole_complete_callback)
         fishing_event.subscribe()
-        if FishingMode.CurrentMode != State.FIGHT:
-            if action[0] == "move_to":
-                if not self.engine.move_to(action[1]):
-                    return
-            elif action[0] == "check_fish":
-                if not self.engine.move_to(action[1]):
-                    return
 
-                if not self.engine.rotate_to(action[1][2]):
-                    return
         # scan for fish hole
         logging.info("scanning")
         # if found start fishing and wait for hole to complete
@@ -102,7 +94,17 @@ class Player(IMode):
             logging.info("busy now...")
         else:
             logging.info("no hole found")
-    
+
+        # if FishingMode.CurrentMode not in self.cancel_states:
+        if action[0] == "move_to":
+            if not self.engine.move_to(action[1]):
+                return
+        elif action[0] == "check_fish":
+            if not self.engine.move_to(action[1]):
+                return
+        else:
+            if not self.engine.rotate_to(action[1][2]):
+                return
 
         # continue when hole completes
         fishing_mode.subscribers.remove(self._hole_complete_callback)

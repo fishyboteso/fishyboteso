@@ -37,6 +37,8 @@ def image_pre_process(img):
     img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
     return img
 
+cancel_states = [fishing_mode.State.FIGHT, fishing_mode.State.REELIN,
+                        fishing_mode.State.FISHING, fishing_mode.State.LOOKING]
 
 class FullAuto(IEngine):
     rotate_by = 30
@@ -54,6 +56,7 @@ class FullAuto(IEngine):
         self.show_crop = False
 
         self.mode = None
+        self.scan_counter = 0
 
     def run(self):
 
@@ -88,13 +91,13 @@ class FullAuto(IEngine):
             self.window.crop = get_qr_location(self.window.get_capture())
             if self.window.crop is None:
                 log_raise("FishyQR not found, attempting rotate_back")
-                self.rotate_back()
+                # self.rotate_back()
 
             if not (type(self.mode) is Calibrator) and not self.calibrator.all_calibrated():
                 log_raise("you need to calibrate first")
 
             self.fisher.toggle_start()
-            fishing_event.unsubscribe()
+            
             if self.show_crop:
                 self.start_show()
 
@@ -102,6 +105,7 @@ class FullAuto(IEngine):
                 self.stop_on_inactive()
 
             self.mode.run()
+            # fishing_event.unsubscribe()
 
         except Exception:
             traceback.print_exc()
@@ -136,29 +140,34 @@ class FullAuto(IEngine):
         return get_values_from_image(img)
 
     def move_to(self, target) -> bool:
-        cancel_states = [fishing_mode.State.FIGHT, fishing_mode.State.REELIN,
-                        fishing_mode.State.FISHING]
-        if FishingMode.CurrentMode not in cancel_states:
-            current = self.get_coords()
-            if not current:
-                return False
+        logging.info("engine.move_to()")
+        current = self.get_coords()
+        if not current:
+            return False
 
-            print(f"Moving from {(current[0], current[1])} to {target}")
-            move_vec = target[0] - current[0], target[1] - current[1]
+        print(f"Moving from {(current[0], current[1])} to {target}")
+        move_vec = target[0] - current[0], target[1] - current[1]
 
-            dist = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2)
-            print(f"distance: {dist}")
-            if dist < 5e-05:
-                print("distance very small skipping")
-                return True
+        dist = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2)
+        print(f"distance: {dist}")
+        if dist < 5e-05 and self.scan_counter <= 4:
+        # if dist < 5e-05:
+            print("distance very small skipped {} move".format(self.scan_counter + 1))
+            self.scan_counter += 1
+            return True
+        else:
+            logging.info("move_to() not skipped")
+            self.scan_counter = 0
+            pass
 
-            target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0])) + 90
-            from_angle = current[2]
+        target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0])) + 90
+        from_angle = current[2]
 
-            if not self.rotate_to(target_angle, from_angle):
-                return False
+        if not self.rotate_to(target_angle, from_angle):
+            return False
 
-            walking_time = dist / self.calibrator.move_factor
+        walking_time = dist / self.calibrator.move_factor
+        while FishingMode.CurrentMode not in cancel_states:
             print(f"walking for {walking_time}")
             kb.press(fishing_event.FishEvent.walk_key)
             time.sleep(walking_time)
@@ -166,9 +175,11 @@ class FullAuto(IEngine):
             print("done")
             return True
         else:
-            return False
+            pass
 
     def rotate_to(self, target_angle, from_angle=None) -> bool:
+        logging.info("engine.rotate_to()")
+        # while FishingMode.CurrentMode not in cancel_states:
         if from_angle is None:
             coords = self.get_coords()
             if not coords:
@@ -191,44 +202,56 @@ class FullAuto(IEngine):
         print(f"rotate_times: {rotate_times}")
 
         for _ in range(abs(rotate_times)):
-            mse.move(sign(rotate_times) * FullAuto.rotate_by * -1, 0)
-            time.sleep(0.05)
-
+            if FishingMode.CurrentMode not in cancel_states:
+                mse.move(sign(rotate_times) * FullAuto.rotate_by * -1, 0)
+                time.sleep(0.05)
+            else:
+                logging.info("state is {}, stopping rotate_to()".format(FishingMode.CurrentMode))
+                return False
         return True
 
-    def look_for_hole(self) -> bool:
-        self._hole_found_flag = False
 
-        if FishingMode.CurrentMode != fishing_mode.State.LOOKING:
-            return False
-        else:
-            return True
+    def look_for_hole(self) -> bool:
+
+        self._hole_found_flag = False
 
         def found_hole(e):
             if e == fishing_mode.State.LOOKING:
                 self._hole_found_flag = True
+                fishing_mode.subscribers.append(found_hole)
+                return 
+            else:
+                pass
 
-        fishing_mode.subscribers.append(found_hole)
+        if FishingMode.CurrentMode == fishing_mode.State.LOOKING:
+            self._hole_found_flag = True
+            return self._hole_found_flag
+        # else:
+        #     return True
+        else:
+            t = 0
+            while not self._hole_found_flag and t <= 1.25:
+                if FishingMode.CurrentMode not in cancel_states:
+                    mse.move(0, FullAuto.rotate_by)
+                    time.sleep(0.005)
+                    t += 0.05
+            while not self._hole_found_flag and t > 0:
+                if FishingMode.CurrentMode not in cancel_states:
+                    mse.move(0, -FullAuto.rotate_by)
+                    time.sleep(0.005)
+                    t -= 0.05
 
-        t = 0
-        while not self._hole_found_flag and t <= 1.25:
-            mse.move(0, FullAuto.rotate_by)
-            time.sleep(0.05)
-            t += 0.05
-        while not self._hole_found_flag and t > 0:
-            mse.move(0, -FullAuto.rotate_by)
-            time.sleep(0.05)
-            t -= 0.05
-
-        self._curr_rotate_y = t
-        fishing_mode.subscribers.remove(found_hole)
-        return self._hole_found_flag
+            self._curr_rotate_y = t
+            # fishing_mode.subscribers.remove(found_hole)
+            return self._hole_found_flag
 
     def rotate_back(self):
+        logging.info("engine rotate_back()")
         while self._curr_rotate_y > 0.01:
-            mse.move(0, -FullAuto.rotate_by)
-            time.sleep(0.05)
-            self._curr_rotate_y -= 0.05
+            if FishingMode.CurrentMode not in cancel_states:
+                mse.move(0, -FullAuto.rotate_by)
+                time.sleep(0.05)
+                self._curr_rotate_y -= 0.05
 
     def toggle_start(self):
         self.start = not self.start

@@ -7,7 +7,7 @@ import logging
 import random
 import time
 
-import keyboard
+import keyboard, mouse
 from playsound import playsound
 
 from fishy import web
@@ -39,6 +39,10 @@ class FishEvent:
     spell_4 = '1'
     spell_5 = '1'
     sound = False
+    fight_loop_timeout = 0
+    fight_loop_inprogress = False
+    cancel_states = [fishing_mode.State.FIGHT, fishing_mode.State.REELIN,
+                        fishing_mode.State.FISHING, fishing_mode.State.LOOKING]
 
 
 def _fishing_sleep(waittime, lower_limit_ms=16, upper_limit_ms=2500):
@@ -80,6 +84,9 @@ def init():
     FishEvent.spell_4 = config.get("spell_4", "4")
     FishEvent.spell_5 = config.get("spell_5", "5")
     FishEvent.walk_key = config.get("walk_key", "w")
+    FishEvent.recorder = config.get("edit_recorder_mode", "0")
+    FishEvent.cancel_states = [fishing_mode.State.FIGHT, fishing_mode.State.REELIN,
+                        fishing_mode.State.FISHING, fishing_mode.State.LOOKING]
 
 def unsubscribe():
     if fisher_callback in fishing_mode.subscribers:
@@ -91,7 +98,7 @@ def subscribe():
         fishing_mode.subscribers.append(fisher_callback)
 
         if FishingMode.CurrentMode == State.LOOKING or State.FIGHT:
-            fisher_callback(FishingMode.CurrentMode)
+            return fisher_callback(FishingMode.CurrentMode)
 
 
 def fisher_callback(event: State):
@@ -119,23 +126,29 @@ def fisher_callback(event: State):
 
 
 def on_idle():
-    if FishEvent.previousState in (State.FISHING, State.REELIN):
+    if FishEvent.previousState in FishEvent.cancel_states:
         logging.info("FISHING INTERRUPTED")
         _sound_and_send_fishy_data()
+        return
 
 
 def on_depleted():
     logging.info("HOLE DEPLETED")
     _sound_and_send_fishy_data()
+    return
 
 
 @if_eso_is_focused
 def on_looking():
     """
     presses e to throw the fishing rod
+    not sure why sometimes it does not come out and change state
     """
-    _fishing_sleep(0.0)
+    logging.info("mysterious stop")
+    _fishing_sleep(1)
     keyboard.press_and_release(FishEvent.action_key)
+    _fishing_sleep(0.1)
+    # keyboard.press_and_release(FishEvent.action_key)
 
 
 def on_user_interact(msg):
@@ -181,23 +194,28 @@ def on_loot():
 
 
 @if_eso_is_focused
-def try_fighting():
+def try_fighting(fight_loop_timeout=FishEvent.fight_loop_timeout):
 
+    # mostly working
     # if fight_loop_timeout < 3 and FishingMode.CurrentMode == State.FIGHT:
 
-    #     logging.info("FIGHTING START " + str(fight_loop_timeout + 1))
+    #     logging.info("FIGHTING START " + str(FishEvent.fight_loop_timeout + 1))
     #     _fishing_sleep(0.5)
     #     keyboard.press_and_release(FishEvent.spell_1)
-    #     _fishing_sleep(0.5)
+    #     _fishing_sleep(1.5)
     #     keyboard.press_and_release(FishEvent.spell_2)
-    #     _fishing_sleep(0.5)
+    #     _fishing_sleep(1.2)
     #     keyboard.press_and_release(FishEvent.spell_3)
-    #     _fishing_sleep(0.5)
+    #     _fishing_sleep(1.2)
     #     keyboard.press_and_release(FishEvent.spell_4)
     #     _fishing_sleep(0.5)
-    #     fight_loop_timeout =+ 1
-    #     logging.info("FIGHTING END " + str(fight_loop_timeout + 1))
+    #     keyboard.press_and_release(FishEvent.action_key)
+    #     _fishing_sleep(0.5)
+    #     keyboard.press_and_release(FishEvent.action_key)
+    #     _fishing_sleep(0.5)
+    #     logging.info("FIGHTING END " + str(FishEvent.fight_loop_timeout + 1))
     #     _fishing_sleep(0)
+    #     FishEvent.fight_loop_timeout += 1
     # else:
     #     logging.info("Still fighting after 3 loops.... lets just die instead")
 
@@ -205,28 +223,60 @@ def try_fighting():
     
     # i think this is a good idea but i dont know how to stop it recursing
     
-    fight_loop_timeout = 0
+    # fight_loop_timeout = 0
+    # fight_loop_inprogress = False
     # while FishingMode.CurrentMode == State.FIGHT and fight_loop_timeout != 3:
-    logging.info("Character is fighting, attempting to clear mobs! Loop " + str((fight_loop_timeout + 1)))
+    # logging.info("Character is fighting, attempting to clear mobs! Loop " + str((fight_loop_timeout + 1)))
 
-    # combat loop, i put a HoT spell first to ensure survival but its not necessary
-    _fishing_sleep(0.1)
-    keyboard.press_and_release(FishEvent.spell_1)
-    _fishing_sleep(0.7)
-    keyboard.press_and_release(FishEvent.spell_2)
-    _fishing_sleep(0.7)
-    keyboard.press_and_release(FishEvent.spell_3)
-    _fishing_sleep(0.7)
-    keyboard.press_and_release(FishEvent.spell_4)
-    _fishing_sleep(0.1)
-    # loot any kills
-    keyboard.press_and_release(FishEvent.action_key)
-    _fishing_sleep(0.01)
-    keyboard.press_and_release(FishEvent.action_key)
-    _fishing_sleep(0.1)
-    fight_loop_timeout =+ 1
-    return
+    # while FishingMode.CurrentMode == State.FIGHT:
+    if FishingMode.CurrentMode == State.FIGHT:
+    # if fight_loop_inprogress == False:
+        # set progress flag
+        # fight_loop_inprogress = True
+        # try to pick up loot quickly
+        # combat loop, i put a HoT spell first to ensure survival but its not necessary
+        _fishing_sleep(0.5)
+        spells = ['spell_1', 'spell_2', 'spell_3', 'spell_4', 'spell_5']
+        for action in spells:
+            logging.info("casting {}".format(action))
+            _fishing_sleep(0.1)
+            mouse.click('left')
+            _fishing_sleep(0.2)
+            keyboard.press_and_release('FishEvent.{}'.format(action))
+            _fishing_sleep(0.5)
+            keyboard.press_and_release(FishEvent.action_key)
+            _fishing_sleep(0.2)
+            keyboard.press_and_release(FishEvent.action_key)
+            FishEvent.fight_loop_timeout += 1
 
-    if FishingMode.CurrentMode == State.FIGHT and fight_loop_timeout == 3:
-        logging.info("Still fighting after 3 loops.... lets just die instead")
-        return
+            # keyboard.press_and_release(FishEvent.spell_1)
+            # _fishing_sleep(1.5)
+            # keyboard.press_and_release(FishEvent.spell_2)
+            # _fishing_sleep(1.2)
+            # keyboard.press_and_release(FishEvent.spell_3)
+            # _fishing_sleep(1.2)
+            # keyboard.press_and_release(FishEvent.spell_4)
+            # _fishing_sleep(0.5)
+            # logging.info("FIGHTING END " + str(FishEvent.fight_loop_timeout + 1))
+            # _fishing_sleep(0)
+        # mark progress
+        # fight_loop_inprogress = False
+        # loot any kills
+        # keyboard.press_and_release(FishEvent.action_key)
+        # _fishing_sleep(0.01)
+        # keyboard.press_and_release(FishEvent.action_key)
+        # _fishing_sleep(0.1)
+        
+
+    # else:
+    #     logging.info("fight loop in progress")
+
+    # else:
+    #     logging.info("fight loop complete")
+    #     fight_loop_inprogress = False
+
+    # if FishingMode.CurrentMode == State.FIGHT and FishEvent.fight_loop_timeout == 3:
+    #     logging.info("Still fighting after 3 loops.... lets just die instead")
+    #     return
+    # else:
+    #     return
