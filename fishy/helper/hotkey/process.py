@@ -8,9 +8,10 @@ import mouse
 class Key(Enum):
     F9 = "f9"
     LMB = "left"
+    RMB = "right"
 
 
-mouse_buttons = [Key.LMB]
+mouse_buttons = [Key.LMB, Key.RMB]
 
 
 def _mouse_callback(queue):

@@ -150,15 +150,15 @@ class FullAuto(IEngine):
 
         dist = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2)
         print(f"distance: {dist}")
-        if dist < 5e-05 and self.scan_counter <= 4:
-        # if dist < 5e-05:
-            print("distance very small skipped {} move".format(self.scan_counter + 1))
-            self.scan_counter += 1
-            return True
-        else:
-            logging.info("move_to() not skipped")
-            self.scan_counter = 0
-            pass
+        # if dist < 5e-05 and self.scan_counter <= 4:
+        # # if dist < 5e-05:
+        #     print("distance very small skipped {} move".format(self.scan_counter + 1))
+        #     self.scan_counter += 1
+        #     return True
+        # else:
+        #     logging.info("move_to() not skipped")
+        #     self.scan_counter = 0
+        #     pass
 
         target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0])) + 90
         from_angle = current[2]
@@ -204,7 +204,7 @@ class FullAuto(IEngine):
         for _ in range(abs(rotate_times)):
             if FishingMode.CurrentMode not in cancel_states:
                 mse.move(sign(rotate_times) * FullAuto.rotate_by * -1, 0)
-                time.sleep(0.05)
+                time.sleep(0.005)
             else:
                 logging.info("state is {}, stopping rotate_to()".format(FishingMode.CurrentMode))
                 return False

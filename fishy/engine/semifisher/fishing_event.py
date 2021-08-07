@@ -147,6 +147,7 @@ def on_looking():
     logging.info("mysterious stop")
     _fishing_sleep(1)
     keyboard.press_and_release(FishEvent.action_key)
+    logging.info("more mysterious stop")
     _fishing_sleep(0.1)
     # keyboard.press_and_release(FishEvent.action_key)
 
@@ -228,6 +229,8 @@ def try_fighting(fight_loop_timeout=FishEvent.fight_loop_timeout):
     # while FishingMode.CurrentMode == State.FIGHT and fight_loop_timeout != 3:
     # logging.info("Character is fighting, attempting to clear mobs! Loop " + str((fight_loop_timeout + 1)))
 
+    spells = [FishEvent.spell_1, FishEvent.spell_2,
+        FishEvent.spell_3, FishEvent.spell_4, FishEvent.spell_5]
     # while FishingMode.CurrentMode == State.FIGHT:
     if FishingMode.CurrentMode == State.FIGHT:
     # if fight_loop_inprogress == False:
@@ -236,13 +239,14 @@ def try_fighting(fight_loop_timeout=FishEvent.fight_loop_timeout):
         # try to pick up loot quickly
         # combat loop, i put a HoT spell first to ensure survival but its not necessary
         _fishing_sleep(0.5)
-        spells = ['spell_1', 'spell_2', 'spell_3', 'spell_4', 'spell_5']
+
         for action in spells:
-            logging.info("casting {}".format(action))
+            # action = 
+            logging.info("casting {}".format(str(action)))
             _fishing_sleep(0.1)
             mouse.click('left')
             _fishing_sleep(0.2)
-            keyboard.press_and_release('FishEvent.{}'.format(action))
+            keyboard.press_and_release(action)
             _fishing_sleep(0.5)
             keyboard.press_and_release(FishEvent.action_key)
             _fishing_sleep(0.2)

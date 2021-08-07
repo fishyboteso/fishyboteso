@@ -34,16 +34,45 @@ class Recorder(IMode):
         self.timeline = []
 
     def _mark_hole(self):
-        coods = self.engine.get_coords()
-        if not coods:
+        coords = self.engine.get_coords()
+        if not coords:
             logging.warning("QR not found, couldn't record hole")
             return
-        self.timeline.append(("check_fish", coods))
+        self.timeline.append(("check_fish", coords))
         logging.info("check_fish")
+
+    def _mark_waypoint(self):
+        coords = self.engine.get_coords()
+
+        # time_took = time.time() - start_time
+        # if time_took <= Recorder.recording_fps:
+        #     time.sleep(Recorder.recording_fps - time_took)
+        # else:
+        #     logging.warning("Took too much time to record")
+
+        # if config.get("edit_recorder_mode"):
+        #     logging.info("moving to nearest coord in recording")
+
+        #     # todo allow the user the chance to wait for qr
+        #     coords = self.engine.get_coords()
+        #     if not coords:
+        #         log_raise("QR not found")
+
+        #     end = player.find_nearest(old_timeline, coords)
+        #     self.engine.move_to(end[2])
+        #     part1 = old_timeline[:start_from[0]]
+        #     part2 = old_timeline[end[0]:]
+        #     self.timeline = part1 + self.timeline + part2
+        if not coords:
+            logging.warning("QR not found, couldn't record hole")
+            return
+        self.timeline.append(("move_to", (coords[0], coords[1])))
+        logging.info("move_to")
 
     def run(self):
         old_timeline: Optional[List] = None
         start_from = None
+
         if config.get("edit_recorder_mode"):
             logging.info("moving to nearest coord in recording")
 
@@ -58,43 +87,21 @@ class Recorder(IMode):
             start_from = player.find_nearest(old_timeline, coords)
             if not self.engine.move_to(start_from[2]):
                 log_raise("QR not found")
-
-        logging.info("starting, press LMB to mark hole")
-        hotkey.hook(Key.LMB, self._mark_hole)
+        else:
+            pass
 
         self.timeline = []
 
+        logging.info("starting...")
+        logging.info("""press LMB to mark hole
+            or RMB to mark a waypoint""")
         while self.engine.start:
-            start_time = time.time()
-            coods = self.engine.get_coords()
-            if not coods:
-                time.sleep(0.1)
-                continue
-
-            self.timeline.append(("move_to", (coods[0], coods[1])))
-
-            time_took = time.time() - start_time
-            if time_took <= Recorder.recording_fps:
-                time.sleep(Recorder.recording_fps - time_took)
-            else:
-                logging.warning("Took too much time to record")
-
-        hotkey.free(Key.LMB)
-
-        if config.get("edit_recorder_mode"):
-            logging.info("moving to nearest coord in recording")
-
-            # todo allow the user the chance to wait for qr
-            coords = self.engine.get_coords()
-            if not coords:
-                log_raise("QR not found")
-
-            end = player.find_nearest(old_timeline, coords)
-            self.engine.move_to(end[2])
-            part1 = old_timeline[:start_from[0]]
-            part2 = old_timeline[end[0]:]
-            self.timeline = part1 + self.timeline + part2
-
+            hotkey.hook(Key.LMB, self._mark_hole)
+            hotkey.hook(Key.RMB, self._mark_waypoint)
+        else:
+            hotkey.free(Key.LMB)
+            hotkey.free(Key.RMB)
+        
         self._ask_to_save()
 
     def _open_save_popup(self):
@@ -148,3 +155,6 @@ class Recorder(IMode):
         config.set("full_auto_rec_file", file.name)
         logging.info(f"saved {os.path.basename(file.name)} recording, and loaded it in player")
         file.close()
+
+
+
