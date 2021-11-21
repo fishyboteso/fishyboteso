@@ -107,7 +107,10 @@ def fisher_callback(event: State):
 
 
 def on_idle():
-    if FishEvent.previousState in (State.FISHING, State.REELIN):
+    if FishEvent.previousState == State.REELIN:
+        logging.info("HOLE DEPLETED")
+        _sound_and_send_fishy_data()
+    elif FishEvent.previousState == State.FISHING:
         logging.info("FISHING INTERRUPTED")
         _sound_and_send_fishy_data()
 

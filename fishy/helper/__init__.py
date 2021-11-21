@@ -5,5 +5,5 @@ from .helper import (addon_exists, create_shortcut, create_shortcut_first,
                      install_addon, install_thread_excepthook, manifest_file,
                      not_implemented, open_web, playsound_multiple,
                      remove_addon, restart, unhandled_exception_logging,
-                     update)
+                     update, install_required_addons)
 from .luaparser import sv_color_extract

@@ -9,13 +9,14 @@ import win32gui
 
 import fishy
 from fishy import gui, helper, web
-from fishy.constants import chalutier, lam2
+from fishy.constants import chalutier, lam2, fishyqr, libgps
 from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui import GUI, splash, update_dialog
 from fishy.helper import hotkey
 from fishy.helper.active_poll import active
 from fishy.helper.config import config
 from fishy.helper.hotkey.hotkey_process import hotkey
+from fishy.helper.migration import Migration
 
 
 def check_window_name(title):
@@ -28,6 +29,8 @@ def check_window_name(title):
 
 # noinspection PyBroadException
 def initialize(window_to_hide):
+    Migration.migrate()
+
     helper.create_shortcut_first()
     helper.initialize_uid()
 
@@ -62,10 +65,7 @@ def initialize(window_to_hide):
         helper.install_thread_excepthook()
         sys.excepthook = helper.unhandled_exception_logging
 
-    if not config.get("addoninstalled", 0) or helper.get_addonversion(chalutier[0]) < chalutier[2]:
-        helper.install_addon(*chalutier)
-        helper.install_addon(*lam2)
-    config.set("addoninstalled", helper.get_addonversion(chalutier[0]))
+    helper.install_required_addons()
 
 
 def main():

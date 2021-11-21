@@ -9,6 +9,15 @@ from pyzbar.pyzbar import decode, ZBarSymbol
 from fishy.helper.helper import get_documents
 
 
+def image_pre_process(img):
+    scale_percent = 100  # percent of original size
+    width = int(img.shape[1] * scale_percent / 100)
+    height = int(img.shape[0] * scale_percent / 100)
+    dim = (width, height)
+    img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+    return img
+
+
 def get_qr_location(og_img):
     """
     code from https://stackoverflow.com/a/45770227/4512396
@@ -41,7 +50,7 @@ def get_values_from_image(img):
     try:
         for qr in decode(img, symbols=[ZBarSymbol.QRCODE]):
             vals = qr.data.decode('utf-8').split(",")
-            return float(vals[0]), float(vals[1]), float(vals[2])
+            return tuple(float(v) for v in vals)
 
         logging.error("FishyQR not found")
         return None

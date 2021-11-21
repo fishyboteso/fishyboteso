@@ -17,21 +17,6 @@ class State(Enum):
     DEAD     = 15
 
 
-Colors = {
-    State.IDLE     : [255, 255, 255],
-    State.LOOKAWAY : [ 76,   0,  76],
-    State.LOOKING  : [101,  69,   0],
-    State.DEPLETED : [  0,  76,  76],
-    State.NOBAIT   : [255, 204,   0],
-    State.FISHING  : [ 75, 156, 213],
-    State.REELIN   : [  0, 204,   0],
-    State.LOOT     : [  0,   0, 204],
-    State.INVFULL  : [  0,   0,  51],
-    State.FIGHT    : [204,   0,   0],
-    State.DEAD     : [ 51,  51,  51]
-}
-
-
 def _notify(event):
     for subscriber in subscribers:
         subscriber(event)
@@ -42,17 +27,12 @@ class FishingMode:
     PrevMode = State.IDLE
 
 
-def loop(rgb):
+def loop(state_num: int):
     """
     Executed in the start of the main loop in fishy.py
     Changes modes, calls mode events (callbacks) when mode is changed
-
-    :param rgb: rgb read by the bot
     """
-    FishingMode.CurrentMode = State.IDLE
-    for s in State:
-        if all(rgb == Colors[s]):
-            FishingMode.CurrentMode = s
+    FishingMode.CurrentMode = State(state_num)
 
     if FishingMode.CurrentMode != FishingMode.PrevMode:
         _notify(FishingMode.CurrentMode)

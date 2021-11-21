@@ -1,4 +1,3 @@
-import math
 import logging
 import math
 import time
@@ -16,8 +15,8 @@ from fishy.engine.fullautofisher.mode.calibrator import Calibrator
 from fishy.engine.fullautofisher.mode.imode import FullAutoMode
 from fishy.engine.fullautofisher.mode.player import Player
 from fishy.engine.fullautofisher.mode.recorder import Recorder
-from fishy.engine.fullautofisher.qr_detection import (get_qr_location,
-                                                      get_values_from_image)
+from fishy.engine.common.qr_detection import (get_qr_location,
+                                              get_values_from_image, image_pre_process)
 from fishy.engine.semifisher import fishing_event, fishing_mode
 from fishy.engine.semifisher.fishing_mode import FishingMode
 from fishy.helper import helper, hotkey
@@ -27,15 +26,6 @@ from fishy.helper.helper import sign
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
-
-
-def image_pre_process(img):
-    scale_percent = 100  # percent of original size
-    width = int(img.shape[1] * scale_percent / 100)
-    height = int(img.shape[0] * scale_percent / 100)
-    dim = (width, height)
-    img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
-    return img
 
 
 class FullAuto(IEngine):
@@ -56,12 +46,6 @@ class FullAuto(IEngine):
         self.mode = None
 
     def run(self):
-
-        addons_req = [libgps, lam2, fishyqr]
-        for addon in addons_req:
-            if not helper.addon_exists(*addon):
-                helper.install_addon(*addon)
-
         self.gui.bot_started(True)
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
 

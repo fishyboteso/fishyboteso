@@ -1,5 +1,6 @@
 import logging
 import math
+import traceback
 from enum import Enum
 from threading import Thread
 
@@ -75,10 +76,15 @@ def loop_end():
     cv2.waitKey(25)
 
 
+# noinspection PyBroadException
 def run():
     # todo use config
     while WindowServer.status == Status.RUNNING:
-        loop()
+        try:
+            loop()
+        except Exception:
+            traceback.print_exc()
+            WindowServer.status = Status.CRASHED
     loop_end()
 
 

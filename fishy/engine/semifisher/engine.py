@@ -4,14 +4,16 @@ import typing
 from threading import Thread
 from typing import Callable, Optional
 
+import cv2
+
+from fishy.helper.helper import log_raise
 from playsound import playsound
 
 from fishy.engine.common.IEngine import IEngine
+from fishy.engine.common.qr_detection import get_qr_location, get_values_from_image, image_pre_process
 from fishy.engine.common.window import WindowClient
 from fishy.engine.semifisher import fishing_event, fishing_mode
 from fishy.engine.semifisher.fishing_event import FishEvent
-from fishy.engine.semifisher.fishing_mode import Colors, FishingMode
-from fishy.engine.semifisher.pixel_loc import PixelLoc
 from fishy.helper import helper
 from fishy.helper.luaparser import sv_color_extract
 
@@ -22,7 +24,7 @@ if typing.TYPE_CHECKING:
 class SemiFisherEngine(IEngine):
     def __init__(self, gui_ref: Optional['Callable[[], GUI]']):
         super().__init__(gui_ref)
-        self.fishPixWindow = None
+        self.window = None
 
     def run(self):
         """
@@ -30,34 +32,43 @@ class SemiFisherEngine(IEngine):
         code explained in comments in detail
         """
         fishing_event.init()
-        self.fishPixWindow = WindowClient()
+        self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="semifisher debug")
 
         # check for game window and stuff
         self.gui.bot_started(True)
-
-        sv_color_extract(Colors)
 
         if self.get_gui:
             logging.info("Starting the bot engine, look at the fishing hole to start fishing")
             Thread(target=self._wait_and_check).start()
 
-        while self.start and WindowClient.running():
-            capture = self.fishPixWindow.get_capture()
+        self.window.crop = get_qr_location(self.window.get_capture())
+        if self.window.crop is None:
+            log_raise("FishyQR not found")
 
+        while self.start and WindowClient.running():
+            capture = self.window.processed_image(func=image_pre_process)
+
+            # if window server crashed
             if capture is None:
-                # if window server crashed
                 self.gui.bot_started(False)
                 self.toggle_start()
                 continue
 
-            self.fishPixWindow.crop = PixelLoc.val
-            fishing_mode.loop(capture[0][0])
+            # crop qr and get the values from it
+            values = get_values_from_image(capture)
+            if values is None:
+                self.gui.bot_started(False)
+                self.toggle_start()
+                continue
+
+            fishing_mode.loop(values[3])
             time.sleep(0.1)
 
+        self.window.show(False)
         logging.info("Fishing engine stopped")
         self.gui.bot_started(False)
         fishing_event.unsubscribe()
-        self.fishPixWindow.destory()
+        self.window.destory()
 
     def _wait_and_check(self):
         time.sleep(10)
@@ -71,7 +82,7 @@ class SemiFisherEngine(IEngine):
             t = 0
             while t < 10.0:
                 t += freq
-                logging.debug(str(FishingMode.CurrentMode) + ":" + str(self.fishPixWindow.get_capture()[0][0]))
+                logging.debug(str(FishingMode.CurrentMode) + ":" + str(self.window.get_capture()[0][0]))
                 time.sleep(freq)
 
         logging.debug("Will display pixel values for 10 seconds")
