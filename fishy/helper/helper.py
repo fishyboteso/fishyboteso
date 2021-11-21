@@ -22,6 +22,8 @@ from win32gui import GetForegroundWindow, GetWindowText
 
 import fishy
 from fishy import web
+from fishy.constants import libgps, lam2, fishyqr
+from fishy.helper.config import config
 
 
 def playsound_multiple(path, count=2):
@@ -190,17 +192,34 @@ def get_addonversion(name, url=None, v=None):
     return 0
 
 
+def install_required_addons(force=False):
+    addons_req = [libgps, lam2, fishyqr]
+    addon_version = config.get("addon_version", {})
+    installed = False
+    for addon in addons_req:
+        if force or (addon_exists(*addon) and
+                     (addon[0] not in addon_version or (
+                             addon[0] in addon_version and addon_version[addon[0]] < addon[2]))):
+            remove_addon(*addon)
+            install_addon(*addon)
+            addon_version[addon[0]] = addon[2]
+            installed = True
+    config.set("addon_version", addon_version)
+    if installed:
+        logging.info("Please make sure to enable \"Allow outdated addons\" in ESO")
+
+
 # noinspection PyBroadException
 def install_addon(name, url, v=None):
     try:
         r = requests.get(url, stream=True)
         z = ZipFile(BytesIO(r.content))
         z.extractall(path=get_addondir())
-        logging.info("Add-On " + name +
-                     " installed successfully!\nPlease make sure to enable \"Allow outdated addons\" in ESO")
+        logging.info("Add-On " + name + " installed successfully!")
         return 0
     except Exception:
         logging.error("Could not install Add-On " + name + ", try doing it manually")
+        traceback.print_exc()
         return 1
 
 

@@ -1,2 +1,4 @@
+from fishy import constants
+
 from fishy.__main__ import main
-__version__ = "0.5.2"
+__version__ = constants.version

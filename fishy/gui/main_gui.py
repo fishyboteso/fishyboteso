@@ -9,7 +9,7 @@ from ttkthemes import ThemedTk
 from fishy import helper
 from fishy.web import web
 
-from ..constants import chalutier, lam2
+from ..constants import chalutier, lam2, fishyqr
 from ..helper.config import config
 from .discord_login import discord_login
 from ..helper.hotkey.hotkey_process import hotkey
@@ -59,15 +59,13 @@ def _create(gui: 'GUI'):
         filemenu.add_command(label="Update", command=helper.update)
 
     def installer():
-        if filemenu.entrycget(4, 'label') == "Remove Chalutier":
-            if helper.remove_addon(chalutier[0]) == 0:
-                filemenu.entryconfigure(4, label="Install Chalutier")
+        if filemenu.entrycget(4, 'label') == "Remove FishyQR":
+            if helper.remove_addon(fishyqr[0]) == 0:
+                filemenu.entryconfigure(4, label="Install FishyQR")
         else:
-            r = helper.install_addon(*chalutier)
-            r += helper.install_addon(*lam2)
-            if r == 0:
-                filemenu.entryconfigure(4, label="Remove Chalutier")
-    chaEntry = "Remove Chalutier" if helper.addon_exists(chalutier[0]) else "Install Chalutier"
+            helper.install_required_addons(True)
+            filemenu.entryconfigure(4, label="Remove FishyQR")
+    chaEntry = "Remove FishyQR" if helper.addon_exists(fishyqr[0]) else "Install FishyQR"
     filemenu.add_command(label=chaEntry, command=installer)
     menubar.add_cascade(label="Options", menu=filemenu)
 

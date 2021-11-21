@@ -46,12 +46,6 @@ class FullAuto(IEngine):
         self.mode = None
 
     def run(self):
-
-        addons_req = [libgps, lam2, fishyqr]
-        for addon in addons_req:
-            if not helper.addon_exists(*addon):
-                helper.install_addon(*addon)
-
         self.gui.bot_started(True)
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
 
