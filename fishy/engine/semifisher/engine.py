@@ -5,6 +5,7 @@ from threading import Thread
 from typing import Callable, Optional
 
 import cv2
+from fishy.engine.semifisher.fishing_mode import FishingMode
 
 from fishy.helper.helper import log_raise
 from playsound import playsound
@@ -74,7 +75,7 @@ class SemiFisherEngine(IEngine):
         time.sleep(10)
         if not FishEvent.FishingStarted and self.start:
             logging.warning("Doesn't look like fishing has started \n"
-                            "Check out #read-me-first on our discord channel to troubleshoot the issue")
+                            "Check out #faqs on our discord channel to troubleshoot the issue")
 
     def show_pixel_vals(self):
         def show():
