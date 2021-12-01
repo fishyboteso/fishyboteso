@@ -44,7 +44,7 @@ class SemiFisherEngine(IEngine):
 
         self.window.crop = get_qr_location(self.window.get_capture())
         if self.window.crop is None:
-            log_raise("FishyQR not found")
+            log_raise("FishyQR not found, try to drag it around and try again")
 
         while self.start and WindowClient.running():
             capture = self.window.processed_image(func=image_pre_process)

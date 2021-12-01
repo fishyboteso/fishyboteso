@@ -52,7 +52,7 @@ def get_values_from_image(img):
             vals = qr.data.decode('utf-8').split(",")
             return tuple(float(v) for v in vals)
 
-        logging.error("FishyQR not found")
+        logging.error("FishyQR not found, try to drag it around and try again")
         return None
     except Exception:
         logging.error("Couldn't read coods, make sure 'crop' calibration is correct")

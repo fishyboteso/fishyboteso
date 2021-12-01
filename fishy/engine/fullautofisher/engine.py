@@ -71,7 +71,7 @@ class FullAuto(IEngine):
 
             self.window.crop = get_qr_location(self.window.get_capture())
             if self.window.crop is None:
-                log_raise("FishyQR not found")
+                log_raise("FishyQR not found, try to drag it around and try again")
 
             if not (type(self.mode) is Calibrator) and not self.calibrator.all_calibrated():
                 log_raise("you need to calibrate first")
@@ -116,7 +116,7 @@ class FullAuto(IEngine):
         todo its waiting for qr which doesn't block the engine when commanded to close
         """
         img = self.window.processed_image(func=image_pre_process)
-        return get_values_from_image(img)
+        return get_values_from_image(img)[:3]
 
     def move_to(self, target) -> bool:
         current = self.get_coords()
@@ -177,27 +177,17 @@ class FullAuto(IEngine):
     def look_for_hole(self) -> bool:
         self._hole_found_flag = False
 
-        if FishingMode.CurrentMode == fishing_mode.State.LOOKING:
-            return True
-
-        def found_hole(e):
-            if e == fishing_mode.State.LOOKING:
-                self._hole_found_flag = True
-
-        fishing_mode.subscribers.append(found_hole)
+        valid_states = [fishing_mode.State.LOOKING, fishing_mode.State.FISHING]
 
         t = 0
-        while not self._hole_found_flag and t <= 1.25:
-            mse.move(0, FullAuto.rotate_by)
+        while not self._hole_found_flag and t <= 2.5:
+            direction = -1 if t > 1.25 else 1
+            mse.move(0, FullAuto.rotate_by*direction)
             time.sleep(0.05)
             t += 0.05
-        while not self._hole_found_flag and t > 0:
-            mse.move(0, -FullAuto.rotate_by)
-            time.sleep(0.05)
-            t -= 0.05
+            self._hole_found_flag = FishingMode.CurrentMode in valid_states
 
         self._curr_rotate_y = t
-        fishing_mode.subscribers.remove(found_hole)
         return self._hole_found_flag
 
     def rotate_back(self):

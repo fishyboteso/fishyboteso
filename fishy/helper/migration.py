@@ -10,7 +10,6 @@ from .config import config
 class Migration:
     @staticmethod
     def up_to_0_5_3():
-        helper.remove_addon(*chalutier)
         config.delete("addoninstalled")
 
     @staticmethod
