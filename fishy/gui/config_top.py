@@ -48,10 +48,12 @@ def start_fullfisher_config(gui: 'GUI'):
         config.set("full_auto_mode", mode_var.get())
         edit_cb['state'] = "normal" if config.get("full_auto_mode", 0) == FullAutoMode.Recorder.value else "disable"
 
+    # todo repetitive code fix
     file_name_label = tk.StringVar(value=file_name())
     mode_var = tk.IntVar(value=config.get("full_auto_mode", 0))
     edit_var = tk.IntVar(value=config.get("edit_recorder_mode", 0))
     tabout_var = tk.IntVar(value=config.get("tabout_stop", 1))
+    look_for_hole = tk.IntVar(value=config.get("look_for_hole", 1))
     row = 0
 
     ttk.Label(controls_frame, text="Calibration: ").grid(row=row, column=0, pady=(5, 0))
@@ -75,6 +77,11 @@ def start_fullfisher_config(gui: 'GUI'):
 
     ttk.Label(controls_frame, text="Tabout Stop: ").grid(row=row, column=0)
     ttk.Checkbutton(controls_frame, variable=tabout_var, command=lambda: config.set("tabout_stop", tabout_var.get())).grid(row=row, column=1, pady=(5, 0))
+
+    row += 1
+
+    ttk.Label(controls_frame, text="Look for hole: ").grid(row=row, column=0)
+    ttk.Checkbutton(controls_frame, variable=look_for_hole, command=lambda: config.set("look_for_hole", look_for_hole.get())).grid(row=row, column=1, pady=(5, 0))
 
     row += 1
 

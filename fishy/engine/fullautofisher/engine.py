@@ -35,7 +35,6 @@ class FullAuto(IEngine):
         from fishy.engine.fullautofisher.test import Test
 
         super().__init__(gui_ref)
-        self._hole_found_flag = False
         self._curr_rotate_y = 0
 
         self.fisher = SemiFisherEngine(None)
@@ -175,20 +174,22 @@ class FullAuto(IEngine):
         return True
 
     def look_for_hole(self) -> bool:
-        self._hole_found_flag = False
-
         valid_states = [fishing_mode.State.LOOKING, fishing_mode.State.FISHING]
+        _hole_found_flag = FishingMode.CurrentMode in valid_states
+
+        if not config.get("look_for_hole", 1):
+            return _hole_found_flag
 
         t = 0
-        while not self._hole_found_flag and t <= 2.5:
+        while not _hole_found_flag and t <= 2.5:
             direction = -1 if t > 1.25 else 1
             mse.move(0, FullAuto.rotate_by*direction)
             time.sleep(0.05)
             t += 0.05
-            self._hole_found_flag = FishingMode.CurrentMode in valid_states
+            _hole_found_flag = FishingMode.CurrentMode in valid_states
 
         self._curr_rotate_y = t
-        return self._hole_found_flag
+        return _hole_found_flag
 
     def rotate_back(self):
         while self._curr_rotate_y > 0.01:
