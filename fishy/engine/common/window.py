@@ -83,8 +83,8 @@ class WindowClient:
 
         if func is None:
             return img
-        else:
-            return func(img)
+
+        return func(img)
 
     def show(self, to_show, resize=None, func=None):
         """

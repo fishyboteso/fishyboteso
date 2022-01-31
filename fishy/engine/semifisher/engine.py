@@ -32,51 +32,55 @@ class SemiFisherEngine(IEngine):
         Starts the fishing
         code explained in comments in detail
         """
-        fishing_event.init()
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="semifisher debug")
-
-        # check for game window and stuff
-        self.gui.bot_started(True)
 
         if self.get_gui:
             logging.info("Starting the bot engine, look at the fishing hole to start fishing")
             Thread(target=self._wait_and_check).start()
 
         self.window.crop = get_qr_location(self.window.get_capture())
-        if self.window.crop is None:
-            log_raise("FishyQR not found, try to drag it around and try again")
+        if not self.window.crop:
+            logging.error("FishyQR not found, try to drag it around and try again")
+            return
 
-        while self.start and WindowClient.running():
+        fishing_event.init()
+        skip_count = 0
+        while self.state == 1 and WindowClient.running():
             capture = self.window.processed_image(func=image_pre_process)
 
             # if window server crashed
-            if capture is None:
-                self.gui.bot_started(False)
-                self.toggle_start()
+            if not capture:
+                logging.error("Couldn't capture window stopping engine")
+                self.turn_off()
                 continue
 
             # crop qr and get the values from it
             values = get_values_from_image(capture)
-            if values is None:
-                self.gui.bot_started(False)
-                self.toggle_start()
-                continue
+            # if fishyqr fails to get read multiple times, stop the bot
+            if not values:
+                skip_count += 1
+                logging.error(f"Couldn't read values from FishyQR, skipping {skip_count}/5")
+                if skip_count >= 5:
+                    logging.error("Stopping engine...")
+                    self.turn_off()
+                    continue
+            else:
+                skip_count = 0
 
-            fishing_mode.loop(values[3])
+            if values:
+                fishing_mode.loop(values[3])
             time.sleep(0.1)
 
-        self.window.show(False)
         logging.info("Fishing engine stopped")
-        self.gui.bot_started(False)
         fishing_event.unsubscribe()
-        self.window.destory()
 
     def _wait_and_check(self):
         time.sleep(10)
-        if not FishEvent.FishingStarted and self.start:
+        if not FishEvent.FishingStarted and self.state == 1:
             logging.warning("Doesn't look like fishing has started \n"
                             "Check out #faqs on our discord channel to troubleshoot the issue")
 
+    # TODO: remove this, no longer needed
     def show_pixel_vals(self):
         def show():
             freq = 0.5
@@ -89,15 +93,6 @@ class SemiFisherEngine(IEngine):
         logging.debug("Will display pixel values for 10 seconds")
         time.sleep(5)
         Thread(target=show, args=()).start()
-
-    def toggle_start(self):
-        self.start = not self.start
-        if self.start:
-            self.thread = Thread(target=self.run)
-            self.thread.start()
-            playsound(helper.manifest_file("beep.wav"), False)
-        else:
-            helper.playsound_multiple(helper.manifest_file("beep.wav"))
 
 
 if __name__ == '__main__':
