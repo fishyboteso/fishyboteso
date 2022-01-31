@@ -9,7 +9,6 @@ import d3dshot
 import pywintypes
 import win32api
 import win32gui
-from d3dshot import D3DShot
 from ctypes import windll
 
 from fishy.helper.config import config
@@ -29,7 +28,7 @@ class WindowServer:
     windowOffset = None
     hwnd = None
     status = Status.STOPPED
-    d3: D3DShot = None
+    d3: d3dshot.D3DShot = None
     monitor_top_left = None
 
 
