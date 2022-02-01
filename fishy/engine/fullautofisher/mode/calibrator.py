@@ -75,25 +75,25 @@ class Calibrator(IMode):
     def _walk_calibrate(self):
         walking_time = 3
 
-        coods = self.engine.get_coords()
-        if coods is None:
+        coords = self.engine.get_coords()
+        if coords is None:
             return
 
-        x1, y1, rot1 = coods
+        x1, y1, rot1 = coords
 
         kb.press('w')
         time.sleep(walking_time)
         kb.release('w')
         time.sleep(0.5)
 
-        coods = self.engine.get_coords()
-        if coods is None:
+        coords = self.engine.get_coords()
+        if coords is None:
             return
-        x2, y2, rot2 = coods
+        x2, y2, rot2 = coords
 
         move_factor = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) / walking_time
         _update_factor("move_factor", move_factor)
-        logging.info("walk calibrate done")
+        logging.info(f"walk calibrate done, move_factor: {move_factor}")
 
     def _rotate_calibrate(self):
         from fishy.engine.fullautofisher.engine import FullAuto
@@ -119,7 +119,7 @@ class Calibrator(IMode):
 
         rot_factor = (rot3 - rot2) / rotate_times
         _update_factor("rot_factor", rot_factor)
-        logging.info("rotate calibrate done")
+        logging.info(f"rotate calibrate done, rot_factor: {rot_factor}")
 
     def run(self):
         self._walk_calibrate()

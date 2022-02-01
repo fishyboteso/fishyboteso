@@ -7,7 +7,6 @@ from threading import Thread
 import cv2
 from pynput import keyboard, mouse
 
-from fishy.constants import fishyqr, lam2, libgps
 from fishy.engine import SemiFisherEngine
 from fishy.engine.common.IEngine import IEngine
 from fishy.engine.common.window import WindowClient
@@ -19,10 +18,9 @@ from fishy.engine.common.qr_detection import (get_qr_location,
                                               get_values_from_image, image_pre_process)
 from fishy.engine.semifisher import fishing_event, fishing_mode
 from fishy.engine.semifisher.fishing_mode import FishingMode
-from fishy.helper import helper, hotkey
+from fishy.helper import hotkey
 from fishy.helper.config import config
-from fishy.helper.helper import log_raise, wait_until, is_eso_active
-from fishy.helper.helper import sign
+from fishy.helper.helper import wait_until, is_eso_active, sign
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
@@ -45,7 +43,6 @@ class FullAuto(IEngine):
         self.mode = None
 
     def run(self):
-        self.gui.bot_started(True)
         self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
 
         self.mode = None
@@ -55,7 +52,11 @@ class FullAuto(IEngine):
             self.mode = Player(self)
         elif FullAutoMode(config.get("full_auto_mode", 0)) == FullAutoMode.Recorder:
             self.mode = Recorder(self)
+        else:
+            logging.error("not a valid mode selected")
+            return
 
+        # block thread until game window becomes active
         if not is_eso_active():
             logging.info("Waiting for eso window to be active...")
             wait_until(lambda: is_eso_active() or not self.start)
@@ -63,37 +64,34 @@ class FullAuto(IEngine):
                 logging.info("starting in 2 secs...")
                 time.sleep(2)
 
+        if not self._pre_run_checks():
+            return
+
+        if config.get("tabout_stop", 1):
+            self.stop_on_inactive()
+
         # noinspection PyBroadException
         try:
-            if self.window.get_capture() is None:
-                log_raise("Game window not found")
-
-            self.window.crop = get_qr_location(self.window.get_capture())
-            if self.window.crop is None:
-                log_raise("FishyQR not found, try to drag it around and try again")
-
-            if not (type(self.mode) is Calibrator) and not self.calibrator.all_calibrated():
-                log_raise("you need to calibrate first")
-
-            self.fisher.toggle_start()
-            fishing_event.unsubscribe()
-            if self.show_crop:
-                self.start_show()
-
-            if config.get("tabout_stop", 1):
-                self.stop_on_inactive()
-
             self.mode.run()
-
         except Exception:
+            logging.error("exception occurred while running full auto mode")
             traceback.print_exc()
-            self.start = False
 
-        self.gui.bot_started(False)
-        self.window.show(False)
-        logging.info("Quitting")
-        self.window.destory()
-        self.fisher.toggle_start()
+    def _pre_run_checks(self):
+        if self.window.get_capture() is None:
+            logging.error("Game window not found")
+            return False
+
+        self.window.crop = get_qr_location(self.window.get_capture())
+        if self.window.crop is None:
+            logging.error("FishyQR not found, try to drag it around and try again")
+            return False
+
+        if not (type(self.mode) is Calibrator) and not self.calibrator.all_calibrated():
+            logging.error("you need to calibrate first")
+            return False
+
+        return True
 
     def start_show(self):
         def func():
@@ -103,8 +101,10 @@ class FullAuto(IEngine):
 
     def stop_on_inactive(self):
         def func():
-            wait_until(lambda: not is_eso_active())
-            self.start = False
+            logging.info("stop on inactive started")
+            wait_until(lambda: not is_eso_active() or self.start != 1)
+            self.turn_off()
+            logging.info("stop on inactive stopped")
         Thread(target=func).start()
 
     def get_coords(self):
@@ -143,6 +143,7 @@ class FullAuto(IEngine):
         time.sleep(walking_time)
         kb.release('w')
         print("done")
+        # todo: maybe check if it reached the destination before returning true?
         return True
 
     def rotate_to(self, target_angle, from_angle=None) -> bool:
@@ -177,6 +178,7 @@ class FullAuto(IEngine):
         valid_states = [fishing_mode.State.LOOKING, fishing_mode.State.FISHING]
         _hole_found_flag = FishingMode.CurrentMode in valid_states
 
+        # if vertical movement is disabled
         if not config.get("look_for_hole", 1):
             return _hole_found_flag
 

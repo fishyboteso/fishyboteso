@@ -29,15 +29,18 @@ class IEngine:
 
         return self.get_gui().funcs
 
+    @property
+    def start(self):
+        return self.state == 1
+
     def toggle_start(self):
-        if self.state == 1:
-            self.turn_off()
-        elif self.state == 0:
+        if self.state == 0:
+            self.turn_on()
+        else:
             self.turn_on()
 
     def turn_on(self):
         self.state = 1
-        playsound(helper.manifest_file("beep.wav"), False)
         self.thread = Thread(target=self._crash_safe)
         self.thread.start()
 
@@ -46,8 +49,12 @@ class IEngine:
         this method only signals the thread to close using start flag,
         its the responsibility of the thread to shut turn itself off
         """
-        self.state = 2
-        helper.playsound_multiple(helper.manifest_file("beep.wav"))
+        if self.state == 1:
+            logging.info("turning off...")
+            self.state = 2
+        else:
+            logging.error("engine already signaled to turn off")
+            # todo: implement force turn off on repeated calls
 
     # noinspection PyBroadException
     def _crash_safe(self):
