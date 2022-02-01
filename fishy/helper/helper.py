@@ -157,7 +157,7 @@ def create_shortcut(anti_ghosting: bool):
 
         logging.info("Shortcut created")
     except Exception:
-        traceback.print_exc()
+        print_exc()
         logging.error("Couldn't create shortcut")
 
 
@@ -219,7 +219,7 @@ def install_addon(name, url, v=None):
         return 0
     except Exception:
         logging.error("Could not install Add-On " + name + ", try doing it manually")
-        traceback.print_exc()
+        print_exc()
         return 1
 
 
@@ -276,3 +276,8 @@ def kill_thread(thread):
     if res > 1:
         ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
         print('Exception raise failure')
+        
+        
+def print_exc():
+    logging.error(traceback.format_exc())
+    traceback.print_exc()

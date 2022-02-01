@@ -20,7 +20,7 @@ kb = keyboard.Controller()
 offset = 0
 
 
-def get_crop_coods(window):
+def get_crop_coords(window):
     img = window.get_capture()
     img = cv2.inRange(img, 0, 1)
 
@@ -36,6 +36,8 @@ def get_crop_coods(window):
             cv2.drawContours(mask, cnt, i, 255, -1)
             x, y, w, h = cv2.boundingRect(cnt[i])
             return x, y + offset, x + w, y + h - offset
+
+    return None
 
 
 def _update_factor(key, value):

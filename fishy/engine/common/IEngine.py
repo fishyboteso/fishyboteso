@@ -10,6 +10,7 @@ from playsound import playsound
 from fishy.engine.common.window import WindowClient
 from fishy.gui.funcs import GUIFuncsMock
 from fishy.helper import helper
+from fishy.helper.helper import print_exc
 
 if typing.TYPE_CHECKING:
     from fishy.gui import GUI
@@ -39,7 +40,7 @@ class IEngine:
         if self.state == 0:
             self.turn_on()
         else:
-            self.turn_on()
+            self.turn_off()
 
     def turn_on(self):
         self.state = 1
@@ -65,7 +66,7 @@ class IEngine:
         try:
             self.run()
         except Exception:
-            traceback.print_exc()
+            print_exc()
         self.state = 0
         self.gui.bot_started(False)
         self.window.destroy()

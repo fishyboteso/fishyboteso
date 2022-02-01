@@ -2,19 +2,18 @@ import ctypes
 import logging
 import os
 import sys
-import traceback
 
 import win32con
 import win32gui
 
 import fishy
 from fishy import gui, helper, web
-from fishy.constants import chalutier, lam2, fishyqr, libgps
 from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui import GUI, splash, update_dialog
 from fishy.helper import hotkey
 from fishy.helper.active_poll import active
 from fishy.helper.config import config
+from fishy.helper.helper import print_exc
 from fishy.helper.hotkey.hotkey_process import hotkey
 from fishy.helper.migration import Migration
 
@@ -58,7 +57,7 @@ def initialize(window_to_hide):
             if update_now:
                 helper.auto_upgrade()
     except Exception:
-        logging.error(traceback.format_exc())
+        print_exc()
 
     if not config.get("debug", False) and check_window_name(win32gui.GetWindowText(window_to_hide)):
         win32gui.ShowWindow(window_to_hide, win32con.SW_HIDE)
@@ -76,10 +75,10 @@ def main():
 
     print("launching please wait...")
 
-    pil_logger = logging.getLogger('PIL')
-    pil_logger.setLevel(logging.INFO)
-
-    # todo set log level info for d3dshot too
+    info_logger = ["comtypes", "PIL"]
+    for i in info_logger:
+        pil_logger = logging.getLogger(i)
+        pil_logger.setLevel(logging.INFO)
 
     window_to_hide = win32gui.GetForegroundWindow()
 

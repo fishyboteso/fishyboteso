@@ -12,6 +12,7 @@ import win32gui
 from ctypes import windll
 
 from fishy.helper.config import config
+from fishy.helper.helper import print_exc
 
 
 class Status(Enum):
@@ -92,7 +93,7 @@ def run():
         try:
             loop()
         except Exception:
-            traceback.print_exc()
+            print_exc()
             WindowServer.status = Status.CRASHED
 
     if WindowServer.status == Status.CRASHED:

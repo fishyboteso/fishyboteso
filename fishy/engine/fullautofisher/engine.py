@@ -20,7 +20,7 @@ from fishy.engine.semifisher import fishing_event, fishing_mode
 from fishy.engine.semifisher.fishing_mode import FishingMode
 from fishy.helper import hotkey
 from fishy.helper.config import config
-from fishy.helper.helper import wait_until, is_eso_active, sign
+from fishy.helper.helper import wait_until, is_eso_active, sign, print_exc
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
@@ -73,7 +73,7 @@ class FullAuto(IEngine):
             self.mode.run()
         except Exception:
             logging.error("exception occurred while running full auto mode")
-            traceback.print_exc()
+            print_exc()
 
     def _pre_run_checks(self):
         if self.window.get_capture() is None:
@@ -99,10 +99,11 @@ class FullAuto(IEngine):
 
     def stop_on_inactive(self):
         def func():
-            logging.info("stop on inactive started")
-            wait_until(lambda: not is_eso_active() or self.start != 1)
-            self.turn_off()
-            logging.info("stop on inactive stopped")
+            logging.debug("stop on inactive started")
+            wait_until(lambda: not is_eso_active() or not self.start)
+            if self.start and not is_eso_active():
+                self.turn_off()
+            logging.debug("stop on inactive stopped")
         Thread(target=func).start()
 
     def get_coords(self):
@@ -113,7 +114,8 @@ class FullAuto(IEngine):
         todo its waiting for qr which doesn't block the engine when commanded to close
         """
         img = self.window.processed_image(func=image_pre_process)
-        return get_values_from_image(img)[:3]
+        values = get_values_from_image(img)
+        return values[:3] if values else None
 
     def move_to(self, target) -> bool:
         current = self.get_coords()

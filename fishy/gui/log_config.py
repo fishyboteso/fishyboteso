@@ -12,6 +12,9 @@ class GUIStreamHandler(StreamHandler):
         self.gui = gui
 
     def emit(self, record):
+        # todo implement verbose/debug option to show more info
+        # formatter = Formatter('%(name)s - %(levelname)s - %(message)s')
+        # self.setFormatter(formatter)
         msg = self.format(record)
         self.gui.call_in_thread(lambda: _write_to_console(self.gui, msg))
 

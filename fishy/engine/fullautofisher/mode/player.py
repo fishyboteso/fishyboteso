@@ -75,6 +75,7 @@ class Player(IMode):
 
         self.i = find_nearest(self.timeline, coords)[0]
         logging.info("starting player")
+        return True
 
     def _loop(self):
         action = self.timeline[self.i]

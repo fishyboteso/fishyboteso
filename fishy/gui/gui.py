@@ -8,10 +8,9 @@ from dataclasses import dataclass
 
 from ttkthemes import ThemedTk
 
-from fishy.engine.common.event_handler import EngineEventHandler, IEngineHandler
+from fishy.engine.common.event_handler import IEngineHandler
 from fishy.gui import config_top
 from fishy.gui.funcs import GUIFuncs
-from fishy.web import web
 
 from ..helper.config import config
 from ..helper.helper import wait_until

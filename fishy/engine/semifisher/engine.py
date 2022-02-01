@@ -12,6 +12,7 @@ from fishy.engine.common.qr_detection import get_qr_location, get_values_from_im
 from fishy.engine.common.window import WindowClient
 from fishy.engine.semifisher import fishing_event, fishing_mode
 from fishy.engine.semifisher.fishing_event import FishEvent
+from fishy.helper.helper import print_exc
 
 if typing.TYPE_CHECKING:
     from fishy.gui import GUI
@@ -31,7 +32,12 @@ class SemiFisherEngine(IEngine):
             logging.info("Starting the bot engine, look at the fishing hole to start fishing")
             Thread(target=self._wait_and_check).start()
 
-        self.window.crop = get_qr_location(self.window.get_capture())
+        capture = self.window.get_capture()
+        if capture is None:
+            logging.error("couldn't get game capture")
+            return
+
+        self.window.crop = get_qr_location(capture)
         if not self.window.crop:
             logging.error("FishyQR not found, try to drag it around and try again")
             return
@@ -42,7 +48,7 @@ class SemiFisherEngine(IEngine):
             self._engine_loop()
         except Exception:
             logging.error("exception occurred while running engine loop")
-            traceback.print_exc()
+            print_exc()
 
         fishing_event.unsubscribe()
 
@@ -52,7 +58,7 @@ class SemiFisherEngine(IEngine):
             capture = self.window.processed_image(func=image_pre_process)
 
             # if window server crashed
-            if not capture:
+            if capture is None:
                 logging.error("Couldn't capture window stopping engine")
                 return
 
@@ -61,9 +67,8 @@ class SemiFisherEngine(IEngine):
             # if fishyqr fails to get read multiple times, stop the bot
             if not values:
                 skip_count += 1
-                logging.error(f"Couldn't read values from FishyQR, skipping {skip_count}/5")
                 if skip_count >= 5:
-                    logging.error("Stopping engine...")
+                    logging.error("Couldn't read values from FishyQR, Stopping engine...")
                     return
             else:
                 skip_count = 0

@@ -38,7 +38,7 @@ def get_qr_location(og_img):
             cv2.drawContours(mask, cnt, i, 255, -1)
             x, y, w, h = cv2.boundingRect(cnt[i])
             qr_result = decode(og_img[y:h + y, x:w + x],
-                symbols=[ZBarSymbol.QRCODE])
+                               symbols=[ZBarSymbol.QRCODE])
             if qr_result:
                 valid_crops.append(((x, y, x + w, y + h), area))
 
