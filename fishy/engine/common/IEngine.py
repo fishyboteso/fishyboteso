@@ -4,8 +4,10 @@ import typing
 from threading import Thread
 from typing import Callable
 
+import cv2
 from playsound import playsound
 
+from fishy.engine.common.window import WindowClient
 from fishy.gui.funcs import GUIFuncsMock
 from fishy.helper import helper
 
@@ -58,6 +60,7 @@ class IEngine:
 
     # noinspection PyBroadException
     def _crash_safe(self):
+        self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="fishy debug")
         self.gui.bot_started(True)
         try:
             self.run()
@@ -65,6 +68,7 @@ class IEngine:
             traceback.print_exc()
         self.state = 0
         self.gui.bot_started(False)
+        self.window.destroy()
 
     def run(self):
         raise NotImplementedError

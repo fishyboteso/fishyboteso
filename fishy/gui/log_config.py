@@ -12,7 +12,6 @@ class GUIStreamHandler(StreamHandler):
         self.gui = gui
 
     def emit(self, record):
-        self.setLevel(logging.INFO)
         msg = self.format(record)
         self.gui.call_in_thread(lambda: _write_to_console(self.gui, msg))
 

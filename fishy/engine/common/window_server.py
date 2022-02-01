@@ -84,20 +84,21 @@ def loop():
         WindowServer.status = Status.CRASHED
 
 
-def loop_end():
-    cv2.waitKey(25)
-
-
 # noinspection PyBroadException
 def run():
     # todo use config
+    logging.debug("window server started")
     while WindowServer.status == Status.RUNNING:
         try:
             loop()
         except Exception:
             traceback.print_exc()
             WindowServer.status = Status.CRASHED
-    loop_end()
+
+    if WindowServer.status == Status.CRASHED:
+        logging.debug("window server crashed")
+    elif WindowServer.status == Status.STOPPED:
+        logging.debug("window server stopped")
 
 
 def start():

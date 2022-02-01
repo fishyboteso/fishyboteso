@@ -28,7 +28,7 @@ class WindowClient:
             window_server.start()
         WindowClient.clients.append(self)
 
-    def destory(self):
+    def destroy(self):
         if self in WindowClient.clients:
             WindowClient.clients.remove(self)
         if len(WindowClient.clients) == 0:

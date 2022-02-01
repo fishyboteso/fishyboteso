@@ -79,6 +79,8 @@ def main():
     pil_logger = logging.getLogger('PIL')
     pil_logger.setLevel(logging.INFO)
 
+    # todo set log level info for d3dshot too
+
     window_to_hide = win32gui.GetForegroundWindow()
 
     if not gui.check_eula():

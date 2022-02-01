@@ -43,8 +43,6 @@ class FullAuto(IEngine):
         self.mode = None
 
     def run(self):
-        self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
-
         self.mode = None
         if config.get("calibrate", False):
             self.mode = Calibrator(self)
@@ -198,12 +196,6 @@ class FullAuto(IEngine):
             mse.move(0, -FullAuto.rotate_by)
             time.sleep(0.05)
             self._curr_rotate_y -= 0.05
-
-    def toggle_start(self):
-        self.start = not self.start
-        if self.start:
-            self.thread = Thread(target=self.run)
-            self.thread.start()
 
 
 if __name__ == '__main__':

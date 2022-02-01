@@ -5,6 +5,7 @@ from fishy.engine import SemiFisherEngine
 from fishy.engine.fullautofisher.engine import FullAuto
 
 
+# to test only gui without engine code interfering
 class IEngineHandler:
     def __init__(self):
         ...
@@ -58,7 +59,11 @@ class EngineEventHandler(IEngineHandler):
 
     def quit(self):
         def func():
-            self.semi_fisher_engine.start = False
+            if self.semi_fisher_engine.start:
+                self.semi_fisher_engine.turn_off()
+            if self.full_fisher_engine.start:
+                self.semi_fisher_engine.turn_off()
+
             self.event_handler_running = False
 
         self.event.append(func)
