@@ -71,6 +71,8 @@ class EngineEventHandler(IEngineHandler):
         self.quit_me()
 
     def stop(self):
+        self.semi_fisher_engine.join()
+        self.full_fisher_engine.join()
         if self.update_flag:
             auto_update.update_now(self.to_version)
 

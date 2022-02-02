@@ -23,7 +23,7 @@ class IEngine:
         # 0 - off, 1 - running, 2 - quitting
         self.state = 0
         self.window = None
-        self.thread = None
+        self.thread: Thread = None
 
     @property
     def gui(self):
@@ -46,6 +46,10 @@ class IEngine:
         self.state = 1
         self.thread = Thread(target=self._crash_safe)
         self.thread.start()
+
+    def join(self):
+        if self.thread:
+            self.thread.join()
 
     def turn_off(self):
         """
