@@ -36,7 +36,7 @@ def initialize(window_to_hide):
 
     if new_session is None:
         logging.error("Couldn't create a session, some features might not work")
-    print(f"created session {new_session}")
+    logging.debug(f"created session {new_session}")
 
     try:
         is_admin = os.getuid() == 0
@@ -54,6 +54,8 @@ def initialize(window_to_hide):
 
 
 def main():
+    print("launching please wait...")
+
     config.init()
     if not gui.check_eula():
         return
@@ -67,12 +69,10 @@ def main():
         finish_splash()
         update_dialog.check_update(gui_window)
 
-    print("launching please wait...")
-
     info_logger = ["comtypes", "PIL"]
     for i in info_logger:
-        pil_logger = logging.getLogger(i)
-        pil_logger.setLevel(logging.INFO)
+        _logger = logging.getLogger(i)
+        _logger.setLevel(logging.INFO)
 
     window_to_hide = win32gui.GetForegroundWindow()
 

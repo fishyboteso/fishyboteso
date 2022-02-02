@@ -122,13 +122,13 @@ class FullAuto(IEngine):
         if not current:
             return False
 
-        print(f"Moving from {(current[0], current[1])} to {target}")
+        logging.debug(f"Moving from {(current[0], current[1])} to {target}")
         move_vec = target[0] - current[0], target[1] - current[1]
 
         dist = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2)
-        print(f"distance: {dist}")
+        logging.debug(f"distance: {dist}")
         if dist < 5e-05:
-            print("distance very small skipping")
+            logging.debug("distance very small skipping")
             return True
 
         target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0])) + 90
@@ -138,11 +138,11 @@ class FullAuto(IEngine):
             return False
 
         walking_time = dist / self.calibrator.move_factor
-        print(f"walking for {walking_time}")
+        logging.debug(f"walking for {walking_time}")
         kb.press('w')
         time.sleep(walking_time)
         kb.release('w')
-        print("done")
+        logging.debug("done")
         # todo: maybe check if it reached the destination before returning true?
         return True
 
@@ -157,7 +157,7 @@ class FullAuto(IEngine):
             target_angle = 360 + target_angle
         while target_angle > 360:
             target_angle -= 360
-        print(f"Rotating from {from_angle} to {target_angle}")
+        logging.debug(f"Rotating from {from_angle} to {target_angle}")
 
         angle_diff = target_angle - from_angle
 
@@ -166,7 +166,7 @@ class FullAuto(IEngine):
 
         rotate_times = int(angle_diff / self.calibrator.rot_factor) * -1
 
-        print(f"rotate_times: {rotate_times}")
+        logging.debug(f"rotate_times: {rotate_times}")
 
         for _ in range(abs(rotate_times)):
             mse.move(sign(rotate_times) * FullAuto.rotate_by * -1, 0)

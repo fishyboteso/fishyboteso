@@ -2,6 +2,8 @@ import logging
 import typing
 from logging import StreamHandler, Formatter
 
+from fishy.helper.config import config
+
 if typing.TYPE_CHECKING:
     from . import GUI
 
@@ -12,9 +14,9 @@ class GUIStreamHandler(StreamHandler):
         self.gui = gui
 
     def emit(self, record):
-        # todo implement verbose/debug option to show more info
-        # formatter = Formatter('%(name)s - %(levelname)s - %(message)s')
-        # self.setFormatter(formatter)
+        formatter = Formatter('%(levelname)s - %(message)s')
+        self.setFormatter(formatter)
+        self.setLevel(logging.DEBUG if config.get("debug", False) else logging.INFO)
         msg = self.format(record)
         self.gui.call_in_thread(lambda: _write_to_console(self.gui, msg))
 
