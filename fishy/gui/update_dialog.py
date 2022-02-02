@@ -43,8 +43,10 @@ def _show(gui, currentversion, newversion, returns):
     top.start()
 
 
-def check_update(gui):
+def check_update(gui, manual_check=False):
     if not auto_update.upgrade_avail() or config.get("dont_ask_update", False):
+        if manual_check:
+            logging.info("No update is available.")
         return
 
     cv, hv = auto_update.versions()

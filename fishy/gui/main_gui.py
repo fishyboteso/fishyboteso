@@ -4,6 +4,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import typing
 
+from fishy.gui import update_dialog
 from ttkthemes import ThemedTk
 
 from fishy import helper
@@ -56,8 +57,11 @@ def _create(gui: 'GUI'):
     dark_mode_var.set(int(config.get('dark_mode', True)))
     filemenu.add_checkbutton(label="Dark Mode", command=_toggle_mode,
                              variable=dark_mode_var)
-    if config.get("dont_ask_update", False):
-        filemenu.add_command(label="Update", command=lambda: helper.update(gui))
+
+    def update():
+        config.delete("dont_ask_update")
+        update_dialog.check_update(gui, True)
+    filemenu.add_command(label="Update", command=update)
 
     def installer():
         if filemenu.entrycget(4, 'label') == "Remove FishyQR":

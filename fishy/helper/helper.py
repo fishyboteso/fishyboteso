@@ -232,13 +232,6 @@ def log_raise(msg):
     raise Exception(msg)
 
 
-def update(gui):
-    from .config import config
-
-    config.delete("dont_ask_update")
-    update_dialog.check_update(gui)
-
-
 def is_eso_active():
     return GetWindowText(GetForegroundWindow()) == "Elder Scrolls Online"
 
