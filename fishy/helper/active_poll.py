@@ -1,3 +1,5 @@
+import logging
+
 from event_scheduler import EventScheduler
 from fishy.web import web
 
@@ -13,11 +15,14 @@ class active:
 
         active._scheduler = EventScheduler()
         active._scheduler.start()
+        logging.debug("active scheduler initialized")
 
     @staticmethod
     def start():
         active._scheduler.enter_recurring(60, 1, web.ping)
+        logging.debug("active scheduler started")
 
     @staticmethod
     def stop():
         active._scheduler.stop(hard_stop=True)
+        logging.debug("active scheduler stopped")

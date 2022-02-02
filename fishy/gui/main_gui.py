@@ -57,7 +57,7 @@ def _create(gui: 'GUI'):
     filemenu.add_checkbutton(label="Dark Mode", command=_toggle_mode,
                              variable=dark_mode_var)
     if config.get("dont_ask_update", False):
-        filemenu.add_command(label="Update", command=helper.update)
+        filemenu.add_command(label="Update", command=lambda: helper.update(gui))
 
     def installer():
         if filemenu.entrycget(4, 'label') == "Remove FishyQR":
@@ -82,7 +82,6 @@ def _create(gui: 'GUI'):
         logging.debug("Restart to update the changes")
 
     debug_menu.add_checkbutton(label="Keep Console", command=keep_console, variable=debug_var)
-    debug_menu.add_command(label="Restart", command=helper.restart)
     menubar.add_cascade(label="Debug", menu=debug_menu)
 
     help_menu = tk.Menu(menubar, tearoff=0)

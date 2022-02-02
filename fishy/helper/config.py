@@ -57,14 +57,17 @@ class Config:
 
         else:
             self._config_dict = dict()
+        logging.debug("config initialized")
 
     def start_backup_scheduler(self):
         self._create_backup()
         self._scheduler.start()
         self._scheduler.enter_recurring(5 * 60, 1, self._create_backup)
+        logging.debug("scheduler started")
 
     def stop(self):
         self._scheduler.stop(True)
+        logging.debug("config stopped")
 
     def _create_backup(self):
         with open(temp_file, 'w') as f:

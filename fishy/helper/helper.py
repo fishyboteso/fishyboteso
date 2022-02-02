@@ -15,6 +15,7 @@ from zipfile import ZipFile
 
 import requests
 import winshell
+from fishy.gui import update_dialog
 from playsound import playsound
 from win32com.client import Dispatch
 from win32comext.shell import shell, shellcon
@@ -64,19 +65,6 @@ def open_web(website):
     """
     logging.debug("opening web, please wait...")
     Thread(target=lambda: webbrowser.open(website, new=2)).start()
-
-
-def initialize_uid():
-    from .config import config
-
-    if config.get("uid") is not None:
-        return
-
-    new_uid = web.register_user()
-    if new_uid is not None:
-        config.set("uid", new_uid)
-    else:
-        logging.error("Couldn't register uid, some features might not work")
 
 
 def _create_new_uid():
@@ -239,20 +227,16 @@ def get_documents():
     return shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
 
 
-def restart():
-    os.execl(sys.executable, *([sys.executable] + sys.argv))
-
-
 def log_raise(msg):
     logging.error(msg)
     raise Exception(msg)
 
 
-def update():
+def update(gui):
     from .config import config
 
     config.delete("dont_ask_update")
-    restart()
+    update_dialog.check_update(gui)
 
 
 def is_eso_active():

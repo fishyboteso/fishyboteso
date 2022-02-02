@@ -31,9 +31,9 @@ def initialize(window_to_hide):
     Migration.migrate()
 
     helper.create_shortcut_first()
-    helper.initialize_uid()
 
     new_session = web.get_session()
+
     if new_session is None:
         logging.error("Couldn't create a session, some features might not work")
     print(f"created session {new_session}")
@@ -58,9 +58,9 @@ def main():
     if not gui.check_eula():
         return
 
+    finish_splash = splash.start()
     config.start_backup_scheduler()
     active.init()
-    finish_splash = splash.start()
     hotkey.init()
 
     def on_gui_load():

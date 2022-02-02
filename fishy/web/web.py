@@ -1,3 +1,5 @@
+import logging
+
 import requests
 from whatsmyip.ip import get_ip
 from whatsmyip.providers import GoogleDnsProvider
@@ -112,24 +114,48 @@ def unsub():
     return result["success"]
 
 
-@fallback(None)
 def get_session(lazy=True):
     global _session_id
 
+    # lazy loading logic
     if lazy and _session_id is not None:
         return _session_id
 
-    body = {"uid": config.get("uid"), "apiversion": apiversion}
+    # check if user has uid
+    uid = config.get("uid")
+
+    # then create session
+    if uid:
+        _session_id, online = _create_new_session(uid)
+    # if not, create new id then try creating session again
+    else:
+        uid = register_user()
+        logging.debug("New User, generated new uid")
+        if uid:
+            _session_id, online = _create_new_session(uid)
+        else:
+            online = False
+
+    # when the user is already registered but session is not created as uid is not found
+    if online and not _session_id:
+        logging.error("user not found, generating new uid.. contact dev if you don't want to loose data")
+        new_uid = register_user()
+        _session_id, online = _create_new_session(new_uid)
+        config.set("uid", new_uid)
+        config.set("old_uid", uid)
+
+    return _session_id
+
+
+@fallback((None, False))
+def _create_new_session(uid):
+    body = {"uid": uid, "apiversion": apiversion}
     response = requests.post(urls.session, params=body)
 
     if response.status_code == 405:
-        config.delete("uid")
-        helper.restart()
-        return None
+        return None, True
 
-    _session_id = response.json()["session_id"]
-    return _session_id
-
+    return response.json()["session_id"], True
 
 @fallback(False)
 def has_beta():
