@@ -1,6 +1,7 @@
+import logging
 import time
 import tkinter as tk
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 
 from PIL import Image, ImageTk
 
@@ -8,12 +9,14 @@ from fishy.helper import helper
 from fishy.helper.config import config
 
 
-def show(win_loc):
+def show(win_loc, q):
+    logging.debug("started splash process")
     dim = (300, 200)
     top = tk.Tk()
 
     top.overrideredirect(True)
     top.lift()
+    top.attributes('-topmost', True)
 
     top.title("Loading...")
     top.resizable(False, False)
@@ -32,9 +35,20 @@ def show(win_loc):
     top.geometry("{}x{}+{}+{}".format(dim[0], dim[1], int(loc[0]) + int(dim[0] / 2), int(loc[1]) + int(dim[1] / 2)))
 
     top.update()
-    time.sleep(3)
+    q.get()
+    time.sleep(0.2)
     top.destroy()
+    logging.debug("ended splash process")
+
+
+def create_finish(q):
+    def finish():
+        q.put("stop")
+
+    return finish
 
 
 def start():
-    Process(target=show, args=(config.get("win_loc"),)).start()
+    q = Queue()
+    Process(target=show, args=(config.get("win_loc"), q,)).start()
+    return create_finish(q)

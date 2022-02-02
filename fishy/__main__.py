@@ -70,7 +70,7 @@ def initialize(window_to_hide):
 def main():
     active.init()
     config.init()
-    splash.start()
+    finish_splash = splash.start()
     hotkey.init()
 
     print("launching please wait...")
@@ -86,7 +86,7 @@ def main():
         return
 
     bot = EngineEventHandler(lambda: gui_window)
-    gui_window = GUI(lambda: bot)
+    gui_window = GUI(lambda: bot, finish_splash)
 
     hotkey.start()
 
@@ -96,7 +96,8 @@ def main():
     gui_window.start()
     active.start()
 
-    bot.start_event_handler()
+    bot.start_event_handler()   # main thread loop
+
     config.stop()
     hotkey.stop()
     active.stop()

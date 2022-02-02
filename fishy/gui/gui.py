@@ -25,9 +25,10 @@ class EngineRunner:
 
 
 class GUI:
-    def __init__(self, get_engine: Callable[[], IEngineHandler]):
+    def __init__(self, get_engine: Callable[[], IEngineHandler], on_ready: Callable):
         self.funcs = GUIFuncs(self)
         self.get_engine = get_engine
+        self.on_ready = on_ready
 
         self.config = config
         self._start_restart = False

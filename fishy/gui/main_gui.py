@@ -31,6 +31,7 @@ def _create(gui: 'GUI'):
     engines = gui.engines
 
     gui._root = ThemedTk(theme="equilux", background=True)
+    gui._root.attributes('-alpha', 0.0)
     gui._root.title("Fishybot for Elder Scrolls Online")
     gui._root.iconbitmap(helper.manifest_file('icon.ico'))
 
@@ -138,6 +139,9 @@ def _create(gui: 'GUI'):
 
     gui._root.protocol("WM_DELETE_WINDOW", set_destroy)
     gui._destroyed = False
+    gui._root.update()
+    gui.on_ready()
+    gui._root.after(0, gui._root.attributes, "-alpha", 1.0)
 
     while True:
         gui._root.update()
