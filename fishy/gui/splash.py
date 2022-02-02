@@ -2,6 +2,7 @@ import logging
 import time
 import tkinter as tk
 from multiprocessing import Process, Queue
+from threading import Thread
 
 from PIL import Image, ImageTk
 
@@ -34,9 +35,17 @@ def show(win_loc, q):
     loc = (win_loc or default_loc).split("+")[1:]
     top.geometry("{}x{}+{}+{}".format(dim[0], dim[1], int(loc[0]) + int(dim[0] / 2), int(loc[1]) + int(dim[1] / 2)))
 
-    top.update()
-    q.get()
-    time.sleep(0.2)
+    def waiting():
+        q.get()
+        time.sleep(0.2)
+        running[0] = False
+    Thread(target=waiting).start()
+
+    running = [True]
+    while running[0]:
+        top.update()
+        time.sleep(0.1)
+
     top.destroy()
     logging.debug("ended splash process")
 
