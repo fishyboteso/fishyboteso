@@ -15,7 +15,7 @@ from fishy.gui.funcs import GUIFuncs
 from ..helper.config import config
 from ..helper.helper import wait_until
 from . import main_gui
-from .log_config import GUIStreamHandler
+from .log_config import GuiLogger
 
 
 @dataclass
@@ -51,12 +51,6 @@ class GUI:
 
         self._notify = None
         self.login = None
-
-        root_logger = logging.getLogger('')
-        root_logger.setLevel(logging.DEBUG)
-        logging.getLogger('urllib3').setLevel(logging.WARNING)
-        new_console = GUIStreamHandler(self)
-        root_logger.addHandler(new_console)
 
     @property
     def engine(self):
@@ -99,3 +93,17 @@ class GUI:
 
     def _get_start_stop_text(self):
         return "STOP (F9)" if self._bot_running else "START (F9)"
+
+    def write_to_console(self, msg):
+        if not self._console:
+            return
+
+        numlines = self._console.index('end - 1 line').split('.')[0]
+        self._console['state'] = 'normal'
+        if int(numlines) >= 50:  # delete old lines
+            self._console.delete(1.0, 2.0)
+        if self._console.index('end-1c') != '1.0':  # new line for each log
+            self._console.insert('end', '\n')
+        self._console.insert('end', msg)
+        self._console.see("end")  # scroll to bottom
+        self._console['state'] = 'disabled'

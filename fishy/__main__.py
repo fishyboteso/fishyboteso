@@ -7,13 +7,13 @@ import win32con
 import win32gui
 
 import fishy
-from fishy import gui, helper, web
+from fishy.gui import GUI, splash, update_dialog, check_eula
+from fishy import helper, web
 from fishy.engine.common.event_handler import EngineEventHandler
-from fishy.gui import GUI, splash, update_dialog
-from fishy.helper import hotkey, auto_update
+from fishy.gui.log_config import GuiLogger
+from fishy.helper import hotkey
 from fishy.helper.active_poll import active
 from fishy.helper.config import config
-from fishy.helper.helper import print_exc
 from fishy.helper.hotkey.hotkey_process import hotkey
 from fishy.helper.migration import Migration
 
@@ -57,34 +57,31 @@ def main():
     print("launching please wait...")
 
     config.init()
-    if not gui.check_eula():
+    if not check_eula():
         return
 
     finish_splash = splash.start()
+    logger = GuiLogger()
     config.start_backup_scheduler()
     active.init()
     hotkey.init()
 
     def on_gui_load():
         finish_splash()
-        update_dialog.check_update(gui_window)
-
-    info_logger = ["comtypes", "PIL"]
-    for i in info_logger:
-        _logger = logging.getLogger(i)
-        _logger.setLevel(logging.INFO)
+        update_dialog.check_update(gui)
+        logger.connect(gui)
 
     window_to_hide = win32gui.GetForegroundWindow()
 
-    bot = EngineEventHandler(lambda: gui_window)
-    gui_window = GUI(lambda: bot, on_gui_load)
+    bot = EngineEventHandler(lambda: gui)
+    gui = GUI(lambda: bot, on_gui_load)
 
     hotkey.start()
 
     logging.info(f"Fishybot v{fishy.__version__}")
     initialize(window_to_hide)
 
-    gui_window.start()
+    gui.start()
     active.start()
 
     bot.start_event_handler()   # main thread loop

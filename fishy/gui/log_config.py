@@ -1,33 +1,36 @@
 import logging
-import typing
 from logging import StreamHandler, Formatter
 
 from fishy.helper.config import config
 
-if typing.TYPE_CHECKING:
-    from . import GUI
 
-
-class GUIStreamHandler(StreamHandler):
-    def __init__(self, gui):
+class GuiLogger(StreamHandler):
+    def __init__(self):
         StreamHandler.__init__(self)
-        self.gui = gui
 
-    def emit(self, record):
+        self.renderer = None
+        self._temp_buffer = []
+
         formatter = Formatter('%(levelname)s - %(message)s')
         self.setFormatter(formatter)
+        logging_config = {"comtypes": logging.INFO,
+                          "PIL": logging.INFO,
+                          "urllib3": logging.WARNING,
+                          "": logging.DEBUG}
+        for name, level in logging_config.items():
+            _logger = logging.getLogger(name)
+            _logger.setLevel(level)
         self.setLevel(logging.DEBUG if config.get("debug", False) else logging.INFO)
+        logging.getLogger("").addHandler(self)
+
+    def emit(self, record):
         msg = self.format(record)
-        self.gui.call_in_thread(lambda: _write_to_console(self.gui, msg))
+        if self.renderer:
+            self.renderer(msg)
+        else:
+            self._temp_buffer.append(msg)
 
-
-def _write_to_console(root: 'GUI', msg):
-    numlines = root._console.index('end - 1 line').split('.')[0]
-    root._console['state'] = 'normal'
-    if int(numlines) >= 50:  # delete old lines
-        root._console.delete(1.0, 2.0)
-    if root._console.index('end-1c') != '1.0':  # new line for each log
-        root._console.insert('end', '\n')
-    root._console.insert('end', msg)
-    root._console.see("end")  # scroll to bottom
-    root._console['state'] = 'disabled'
+    def connect(self, gui):
+        self.renderer = lambda m: gui.call_in_thread(lambda: gui.write_to_console(m))
+        while self._temp_buffer:
+            self.renderer(self._temp_buffer.pop(0))
