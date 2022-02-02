@@ -89,7 +89,7 @@ class WindowClient:
     def show(self, to_show, resize=None, func=None):
         """
         Displays the processed image for debugging purposes
-        :param ready_img: send ready image, just show the `ready_img` directly
+        :param to_show: false to destroy the window
         :param resize: scale the image to make small images more visible
         :param func: function to process the image
         """

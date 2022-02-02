@@ -1,6 +1,5 @@
 import logging
 import time
-import traceback
 import typing
 from threading import Thread
 from typing import Callable, Optional

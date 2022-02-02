@@ -1,17 +1,14 @@
 import logging
 import math
-import traceback
 from enum import Enum
 from threading import Thread
 
-import cv2
 import d3dshot
 import pywintypes
 import win32api
 import win32gui
 from ctypes import windll
 
-from fishy.helper.config import config
 from fishy.helper.helper import print_exc
 
 
@@ -38,6 +35,7 @@ def init():
     Executed once before the main loop,
     Finds the game window, and calculates the offset to remove the title bar
     """
+    # noinspection PyUnresolvedReferences
     try:
         WindowServer.hwnd = win32gui.FindWindow(None, "Elder Scrolls Online")
 

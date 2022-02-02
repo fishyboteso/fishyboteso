@@ -10,7 +10,7 @@ from ttkthemes import ThemedTk
 from fishy import helper
 from fishy.web import web
 
-from ..constants import chalutier, lam2, fishyqr
+from ..constants import fishyqr
 from ..helper.config import config
 from .discord_login import discord_login
 from ..helper.hotkey.hotkey_process import hotkey
@@ -131,7 +131,7 @@ def _create(gui: 'GUI'):
 
     hotkey.hook(Key.F9, gui.funcs.start_engine)
 
-    # noinspection PyProtectedMember
+    # noinspection PyProtectedMember,PyUnresolvedReferences
     def set_destroy():
         if gui._bot_running:
             if not tk.messagebox.askyesno(title="Quit?", message="Bot engine running. Quit Anyway?"):

@@ -26,6 +26,7 @@ def discord_login(gui: 'GUI'):
         top.destroy()
         top_running[0] = False
 
+    # noinspection PyUnresolvedReferences
     def check():
         code = int(login_code.get()) if login_code.get().isdigit() else 0
         if web.login(config.get("uid"), code):

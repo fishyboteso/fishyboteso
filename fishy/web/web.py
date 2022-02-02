@@ -4,8 +4,6 @@ import requests
 from whatsmyip.ip import get_ip
 from whatsmyip.providers import GoogleDnsProvider
 
-from fishy import helper
-
 from ..constants import apiversion
 from ..helper.config import config
 from . import urls
@@ -88,8 +86,6 @@ def sub():
 @fallback((False, False))
 def is_subbed():
     """
-    :param uid:
-    :param lazy:
     :return: Tuple[is_subbed, success]
     """
 
@@ -102,8 +98,8 @@ def is_subbed():
     if response.status_code != 200:
         return False, False
 
-    is_subbed = response.json()["subbed"]
-    return is_subbed, True
+    _is_subbed = response.json()["subbed"]
+    return _is_subbed, True
 
 
 @fallback(None)

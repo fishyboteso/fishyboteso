@@ -1,4 +1,3 @@
-import logging
 import queue
 import threading
 import tkinter as tk
@@ -15,7 +14,6 @@ from fishy.gui.funcs import GUIFuncs
 from ..helper.config import config
 from ..helper.helper import wait_until
 from . import main_gui
-from .log_config import GuiLogger
 
 
 @dataclass

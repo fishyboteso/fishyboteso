@@ -1,15 +1,12 @@
 import logging
-import traceback
 import typing
 from threading import Thread
 from typing import Callable
 
 import cv2
-from playsound import playsound
 
 from fishy.engine.common.window import WindowClient
 from fishy.gui.funcs import GUIFuncsMock
-from fishy.helper import helper
 from fishy.helper.helper import print_exc
 
 if typing.TYPE_CHECKING:
@@ -23,7 +20,7 @@ class IEngine:
         # 0 - off, 1 - running, 2 - quitting
         self.state = 0
         self.window = None
-        self.thread: Thread = None
+        self.thread = None
 
     @property
     def gui(self):

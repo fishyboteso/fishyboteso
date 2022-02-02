@@ -1,10 +1,8 @@
 import logging
 import math
 import time
-import traceback
 from threading import Thread
 
-import cv2
 from pynput import keyboard, mouse
 
 from fishy.engine import SemiFisherEngine
@@ -16,9 +14,8 @@ from fishy.engine.fullautofisher.mode.player import Player
 from fishy.engine.fullautofisher.mode.recorder import Recorder
 from fishy.engine.common.qr_detection import (get_qr_location,
                                               get_values_from_image, image_pre_process)
-from fishy.engine.semifisher import fishing_event, fishing_mode
+from fishy.engine.semifisher import fishing_mode
 from fishy.engine.semifisher.fishing_mode import FishingMode
-from fishy.helper import hotkey
 from fishy.helper.config import config
 from fishy.helper.helper import wait_until, is_eso_active, sign, print_exc
 
@@ -201,8 +198,6 @@ class FullAuto(IEngine):
 
 
 if __name__ == '__main__':
-    logging.getLogger("").setLevel(logging.DEBUG)
-    hotkey.initalize()
     # noinspection PyTypeChecker
     bot = FullAuto(None)
     bot.toggle_start()

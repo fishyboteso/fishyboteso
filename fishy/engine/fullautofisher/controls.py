@@ -4,6 +4,8 @@ from pynput.keyboard import Key
 
 from fishy.helper import hotkey
 
+# todo: unused code remove it
+
 
 def get_controls(controls: 'Controls'):
     controls = [

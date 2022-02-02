@@ -1,12 +1,6 @@
-import logging
-import os
-from datetime import datetime
-
 import cv2
 import numpy as np
 from pyzbar.pyzbar import decode, ZBarSymbol
-
-from fishy.helper.helper import get_documents
 
 
 def image_pre_process(img):
