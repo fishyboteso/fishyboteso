@@ -3,6 +3,7 @@ config.py
 Saves configuration in file as json file
 """
 import json
+import logging
 import os
 # path to save the configuration file
 from typing import Optional
@@ -46,17 +47,18 @@ class Config:
                 self._config_dict = json.loads(open(filename()).read())
             except json.JSONDecodeError:
                 try:
-                    print("Config file got corrupted, trying to restore backup")
+                    logging.warning("Config file got corrupted, trying to restore backup")
                     self._config_dict = json.loads(open(temp_file).read())
                     self.save_config()
                 except (FileNotFoundError, json.JSONDecodeError):
-                    print("couldn't restore, creating new")
+                    logging.warning("couldn't restore, creating new")
                     os.remove(filename())
                     self._config_dict = dict()
 
         else:
             self._config_dict = dict()
 
+    def start_backup_scheduler(self):
         self._create_backup()
         self._scheduler.start()
         self._scheduler.enter_recurring(5 * 60, 1, self._create_backup)
@@ -67,7 +69,7 @@ class Config:
     def _create_backup(self):
         with open(temp_file, 'w') as f:
             f.write(json.dumps(self._config_dict))
-        print("created backup")
+        logging.debug("created backup")
 
     def _sort_dict(self):
         tmpdict = dict()
@@ -92,6 +94,10 @@ class config:
     def init():
         config._instance = Config()
         config._instance.initialize()
+
+    @staticmethod
+    def start_backup_scheduler():
+        config._instance.start_backup_scheduler()
 
     @staticmethod
     def stop():

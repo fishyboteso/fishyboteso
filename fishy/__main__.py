@@ -68,8 +68,12 @@ def initialize(window_to_hide):
 
 
 def main():
-    active.init()
     config.init()
+    if not gui.check_eula():
+        return
+
+    config.start_backup_scheduler()
+    active.init()
     finish_splash = splash.start()
     hotkey.init()
 
@@ -81,9 +85,6 @@ def main():
         pil_logger.setLevel(logging.INFO)
 
     window_to_hide = win32gui.GetForegroundWindow()
-
-    if not gui.check_eula():
-        return
 
     bot = EngineEventHandler(lambda: gui_window)
     gui_window = GUI(lambda: bot, finish_splash)
@@ -98,9 +99,9 @@ def main():
 
     bot.start_event_handler()   # main thread loop
 
-    config.stop()
     hotkey.stop()
     active.stop()
+    config.stop()
 
 
 if __name__ == "__main__":
