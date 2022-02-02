@@ -88,13 +88,12 @@ def upgrade_avail():
     return _get_current_version() < _get_highest_version(index, pkg)
 
 
-def auto_upgrade():
+def update_now(version):
     """
     public function,
     compares current version with the latest version (from web),
     if current version is older, then it updates and restarts the script
     """
-    version = _hr_version(_get_highest_version(index, pkg))
     logging.info(f"Updating to v{version}, Please Wait...")
     subprocess.call(["python", '-m', 'pip', 'install', '--upgrade', 'fishy', '--user'])
     execl(sys.executable, *([sys.executable, '-m', 'fishy'] + sys.argv[1:]))

@@ -1,4 +1,3 @@
-from .auto_update import auto_upgrade, upgrade_avail, versions
 from .config import Config
 from .helper import (addon_exists, create_shortcut, create_shortcut_first,
                      get_addonversion, get_savedvarsdir, initialize_uid,

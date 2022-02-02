@@ -10,7 +10,7 @@ import fishy
 from fishy import gui, helper, web
 from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui import GUI, splash, update_dialog
-from fishy.helper import hotkey
+from fishy.helper import hotkey, auto_update
 from fishy.helper.active_poll import active
 from fishy.helper.config import config
 from fishy.helper.helper import print_exc
@@ -45,20 +45,6 @@ def initialize(window_to_hide):
     if is_admin:
         logging.info("Running with admin privileges")
 
-    try:
-        if helper.upgrade_avail() and not config.get("dont_ask_update", False):
-            cv, hv = helper.versions()
-            update_now, dont_ask_update = update_dialog.start(cv, hv)
-            if dont_ask_update:
-                config.set("dont_ask_update", dont_ask_update)
-            else:
-                config.delete("dont_ask_update")
-
-            if update_now:
-                helper.auto_upgrade()
-    except Exception:
-        print_exc()
-
     if not config.get("debug", False) and check_window_name(win32gui.GetWindowText(window_to_hide)):
         win32gui.ShowWindow(window_to_hide, win32con.SW_HIDE)
         helper.install_thread_excepthook()
@@ -77,6 +63,10 @@ def main():
     finish_splash = splash.start()
     hotkey.init()
 
+    def on_gui_load():
+        finish_splash()
+        update_dialog.check_update(gui_window)
+
     print("launching please wait...")
 
     info_logger = ["comtypes", "PIL"]
@@ -87,7 +77,7 @@ def main():
     window_to_hide = win32gui.GetForegroundWindow()
 
     bot = EngineEventHandler(lambda: gui_window)
-    gui_window = GUI(lambda: bot, finish_splash)
+    gui_window = GUI(lambda: bot, on_gui_load)
 
     hotkey.start()
 
@@ -102,6 +92,7 @@ def main():
     hotkey.stop()
     active.stop()
     config.stop()
+    bot.stop()
 
 
 if __name__ == "__main__":

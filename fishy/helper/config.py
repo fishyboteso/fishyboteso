@@ -92,8 +92,9 @@ class config:
 
     @staticmethod
     def init():
-        config._instance = Config()
-        config._instance.initialize()
+        if not config._instance:
+            config._instance = Config()
+            config._instance.initialize()
 
     @staticmethod
     def start_backup_scheduler():
