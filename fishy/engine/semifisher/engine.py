@@ -21,6 +21,7 @@ class SemiFisherEngine(IEngine):
     def __init__(self, gui_ref: Optional['Callable[[], GUI]']):
         super().__init__(gui_ref)
         self.window = None
+        self.name = "SemiFisher"
 
     def run(self):
         """

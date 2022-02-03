@@ -30,6 +30,7 @@ class FullAuto(IEngine):
         from fishy.engine.fullautofisher.test import Test
 
         super().__init__(gui_ref)
+        self.name = "FullAuto"
         self._curr_rotate_y = 0
 
         self.fisher = SemiFisherEngine(None)

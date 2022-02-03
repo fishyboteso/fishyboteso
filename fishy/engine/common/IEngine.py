@@ -21,6 +21,7 @@ class IEngine:
         self.state = 0
         self.window = None
         self.thread = None
+        self.name = "default"
 
     @property
     def gui(self):
@@ -46,6 +47,7 @@ class IEngine:
 
     def join(self):
         if self.thread:
+            logging.debug(f"waiting for {self.name} engine")
             self.thread.join()
 
     def turn_off(self):
@@ -54,23 +56,26 @@ class IEngine:
         its the responsibility of the thread to shut turn itself off
         """
         if self.state == 1:
-            logging.info("turning off...")
+            logging.debug(f"sending turn off signal to {self.name} engine")
             self.state = 2
         else:
-            logging.error("engine already signaled to turn off")
+            logging.debug(f"{self.name} engine already signaled to turn off ")
             # todo: implement force turn off on repeated calls
 
     # noinspection PyBroadException
     def _crash_safe(self):
-        self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="fishy debug")
+        logging.debug(f"starting {self.name} engine thread")
+        self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name=f"{self.name} debug")
         self.gui.bot_started(True)
         try:
             self.run()
         except Exception:
+            logging.error(f"Unhandled exception occurred while running {self.name} engine")
             print_exc()
         self.state = 0
         self.gui.bot_started(False)
         self.window.destroy()
+        logging.debug(f"{self.name} engine thread safely exiting")
 
     def run(self):
         raise NotImplementedError
