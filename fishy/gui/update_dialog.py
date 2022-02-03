@@ -1,11 +1,22 @@
+import logging
 import tkinter as tk
-from multiprocessing import Manager, Process
 
-from fishy import helper
+from fishy.helper import helper, auto_update
+from fishy.helper.config import config
+from fishy.helper.popup import PopUp
 
 
-def show(currentversion, newversion, returns):
-    top = tk.Tk()
+def _show(gui, currentversion, newversion, returns):
+
+    def _clickYes():
+        returns[0], returns[1] = True, False
+        top.quit_top()
+
+    def _clickNo():
+        returns[0], returns[1] = False, bool(cbVar.get())
+        top.quit_top()
+
+    top = PopUp(helper.empty_function, gui._root)
     top.title("A wild fishy update appeared!")
     top.iconbitmap(helper.manifest_file('icon.ico'))
 
@@ -19,14 +30,6 @@ def show(currentversion, newversion, returns):
     top.update()
     buttonWidth = int(dialogLabel.winfo_width() / 2) - 20
 
-    def _clickYes():
-        returns[0], returns[1] = True, False
-        top.destroy()
-
-    def _clickNo():
-        returns[0], returns[1] = False, bool(cbVar.get())
-        top.destroy()
-
     pixelVirtual = tk.PhotoImage(width=1, height=1)  # trick to use buttonWidth as pixels, not #symbols
     dialogBtnNo = tk.Button(top, text="No " + str(chr(10005)), fg='red4', command=_clickNo, image=pixelVirtual,
                             width=buttonWidth, compound="c")
@@ -37,14 +40,23 @@ def show(currentversion, newversion, returns):
     dialogBtnYes.focus_set()
 
     top.protocol('WM_DELETE_WINDOW', _clickNo)
-
-    top.update()
-    top.mainloop()
+    top.start()
 
 
-def start(currentversion, newversion):
-    returns = Manager().dict()
-    p = Process(target=show, args=(currentversion, newversion, returns))
-    p.start()
-    p.join()
-    return returns[0], returns[1]
+def check_update(gui, manual_check=False):
+    if not auto_update.upgrade_avail() or config.get("dont_ask_update", False):
+        if manual_check:
+            logging.info("No update is available.")
+        return
+
+    cv, hv = auto_update.versions()
+    returns = [None, None]
+    _show(gui, cv, hv, returns)
+    [update_now, dont_ask_update] = returns
+    if dont_ask_update:
+        config.set("dont_ask_update", dont_ask_update)
+    else:
+        config.delete("dont_ask_update")
+
+    if update_now:
+        gui.engine.set_update(hv)

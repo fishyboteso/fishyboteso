@@ -21,7 +21,6 @@ from win32comext.shell import shell, shellcon
 from win32gui import GetForegroundWindow, GetWindowText
 
 import fishy
-from fishy import web
 from fishy.constants import libgps, lam2, fishyqr
 from fishy.helper.config import config
 
@@ -64,19 +63,6 @@ def open_web(website):
     """
     logging.debug("opening web, please wait...")
     Thread(target=lambda: webbrowser.open(website, new=2)).start()
-
-
-def initialize_uid():
-    from .config import config
-
-    if config.get("uid") is not None:
-        return
-
-    new_uid = web.register_user()
-    if new_uid is not None:
-        config.set("uid", new_uid)
-    else:
-        logging.error("Couldn't register uid, some features might not work")
 
 
 def _create_new_uid():
@@ -141,8 +127,8 @@ def create_shortcut(anti_ghosting: bool):
         desktop = winshell.desktop()
         path = os.path.join(desktop, "Fishybot ESO.lnk")
 
-        shell = Dispatch('WScript.Shell')
-        shortcut = shell.CreateShortCut(path)
+        _shell = Dispatch('WScript.Shell')
+        shortcut = _shell.CreateShortCut(path)
 
         if anti_ghosting:
             shortcut.TargetPath = r"C:\Windows\System32\cmd.exe"
@@ -157,7 +143,7 @@ def create_shortcut(anti_ghosting: bool):
 
         logging.info("Shortcut created")
     except Exception:
-        traceback.print_exc()
+        print_exc()
         logging.error("Couldn't create shortcut")
 
 
@@ -182,6 +168,7 @@ def addon_exists(name, url=None, v=None):
 def get_addonversion(name, url=None, v=None):
     if addon_exists(name):
         txt = name + ".txt"
+        # noinspection PyBroadException
         try:
             with open(os.path.join(get_addondir(), name, txt)) as f:
                 for line in f:
@@ -219,7 +206,7 @@ def install_addon(name, url, v=None):
         return 0
     except Exception:
         logging.error("Could not install Add-On " + name + ", try doing it manually")
-        traceback.print_exc()
+        print_exc()
         return 1
 
 
@@ -239,20 +226,9 @@ def get_documents():
     return shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
 
 
-def restart():
-    os.execl(sys.executable, *([sys.executable] + sys.argv))
-
-
 def log_raise(msg):
     logging.error(msg)
     raise Exception(msg)
-
-
-def update():
-    from .config import config
-
-    config.delete("dont_ask_update")
-    restart()
 
 
 def is_eso_active():
@@ -264,9 +240,9 @@ def _get_id(thread):
     # returns id of the respective thread
     if hasattr(thread, '_thread_id'):
         return thread._thread_id
-    for id, thread in threading._active.items():
+    for _id, thread in threading._active.items():
         if thread is thread:
-            return id
+            return _id
 
 
 def kill_thread(thread):
@@ -276,3 +252,8 @@ def kill_thread(thread):
     if res > 1:
         ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
         print('Exception raise failure')
+        
+        
+def print_exc():
+    logging.error(traceback.format_exc())
+    traceback.print_exc()

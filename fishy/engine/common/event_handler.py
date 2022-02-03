@@ -1,10 +1,13 @@
 import logging
 import time
 
+from fishy.helper import auto_update
+
 from fishy.engine import SemiFisherEngine
 from fishy.engine.fullautofisher.engine import FullAuto
 
 
+# to test only gui without engine code interfering
 class IEngineHandler:
     def __init__(self):
         ...
@@ -21,7 +24,10 @@ class IEngineHandler:
     def check_pixel_val(self):
         ...
 
-    def quit(self):
+    def set_update(self, version):
+        ...
+
+    def quit_me(self):
         ...
 
 
@@ -30,6 +36,9 @@ class EngineEventHandler(IEngineHandler):
         super().__init__()
         self.event_handler_running = True
         self.event = []
+
+        self.update_flag = False
+        self.to_version = ""
 
         self.semi_fisher_engine = SemiFisherEngine(gui_ref)
         self.full_fisher_engine = FullAuto(gui_ref)
@@ -56,9 +65,24 @@ class EngineEventHandler(IEngineHandler):
 
         self.event.append(func)
 
-    def quit(self):
+    def set_update(self, version):
+        self.to_version = version
+        self.update_flag = True
+        self.quit_me()
+
+    def stop(self):
+        self.semi_fisher_engine.join()
+        self.full_fisher_engine.join()
+        if self.update_flag:
+            auto_update.update_now(self.to_version)
+
+    def quit_me(self):
         def func():
-            self.semi_fisher_engine.start = False
+            if self.semi_fisher_engine.start:
+                self.semi_fisher_engine.turn_off()
+            if self.full_fisher_engine.start:
+                self.semi_fisher_engine.turn_off()
+
             self.event_handler_running = False
 
         self.event.append(func)

@@ -19,6 +19,7 @@ class PopUp(Toplevel):
         super().__init__(*args, **kwargs)
         self.running = True
         self.quit_callback = quit_callback
+        self.protocol("WM_DELETE_WINDOW", self.quit_top)
 
     def quit_top(self):
         self.quit_callback()
@@ -26,7 +27,6 @@ class PopUp(Toplevel):
         self.running = False
 
     def start(self):
-        self.protocol("WM_DELETE_WINDOW", self.quit_top)
         self.grab_set()
         center(self)
         while self.running:

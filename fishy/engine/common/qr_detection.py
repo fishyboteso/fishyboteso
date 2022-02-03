@@ -1,12 +1,6 @@
-import logging
-import os
-from datetime import datetime
-
 import cv2
 import numpy as np
 from pyzbar.pyzbar import decode, ZBarSymbol
-
-from fishy.helper.helper import get_documents
 
 
 def image_pre_process(img):
@@ -38,7 +32,7 @@ def get_qr_location(og_img):
             cv2.drawContours(mask, cnt, i, 255, -1)
             x, y, w, h = cv2.boundingRect(cnt[i])
             qr_result = decode(og_img[y:h + y, x:w + x],
-                symbols=[ZBarSymbol.QRCODE])
+                               symbols=[ZBarSymbol.QRCODE])
             if qr_result:
                 valid_crops.append(((x, y, x + w, y + h), area))
 
@@ -47,14 +41,7 @@ def get_qr_location(og_img):
 
 # noinspection PyBroadException
 def get_values_from_image(img):
-    try:
-        for qr in decode(img, symbols=[ZBarSymbol.QRCODE]):
-            vals = qr.data.decode('utf-8').split(",")
-            return tuple(float(v) for v in vals)
-
-        logging.error("FishyQR not found, try to drag it around and try again")
-        return None
-    except Exception:
-        logging.error("Couldn't read coods, make sure 'crop' calibration is correct")
-        cv2.imwrite(os.path.join(get_documents(), "fishy_failed_reads", f"{datetime.now()}.jpg"), img)
-        return None
+    for qr in decode(img, symbols=[ZBarSymbol.QRCODE]):
+        vals = qr.data.decode('utf-8').split(",")
+        return tuple(float(v) for v in vals)
+    return None

@@ -38,29 +38,29 @@ def _normalize_version(v):
     return rv
 
 
-def _get_highest_version(index, pkg):
+def _get_highest_version(_index, _pkg):
     """
     Crawls web for latest version name then returns latest version
-    :param index: website to check
-    :param pkg: package name
+    :param _index: website to check
+    :param _pkg: package name
     :return: latest version normalized
     """
-    url = "{}/{}/".format(index, pkg)
+    url = "{}/{}/".format(_index, _pkg)
     html = urllib.request.urlopen(url)
     if html.getcode() != 200:
         raise Exception  # not found
     soup = BeautifulSoup(html.read(), "html.parser")
-    versions = []
+    _versions = []
     for link in soup.find_all('a'):
         text = link.get_text()
         try:
-            version = re.search(pkg + r'-(.*)\.tar\.gz', text).group(1)
-            versions.append(_normalize_version(version))
+            version = re.search(_pkg + r'-(.*)\.tar\.gz', text).group(1)
+            _versions.append(_normalize_version(version))
         except AttributeError:
             pass
-    if len(versions) == 0:
+    if len(_versions) == 0:
         raise Exception  # no version
-    return max(versions)
+    return max(_versions)
 
 
 def _get_current_version():
@@ -88,13 +88,12 @@ def upgrade_avail():
     return _get_current_version() < _get_highest_version(index, pkg)
 
 
-def auto_upgrade():
+def update_now(version):
     """
     public function,
     compares current version with the latest version (from web),
     if current version is older, then it updates and restarts the script
     """
-    version = _hr_version(_get_highest_version(index, pkg))
     logging.info(f"Updating to v{version}, Please Wait...")
     subprocess.call(["python", '-m', 'pip', 'install', '--upgrade', 'fishy', '--user'])
     execl(sys.executable, *([sys.executable, '-m', 'fishy'] + sys.argv[1:]))

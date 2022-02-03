@@ -9,7 +9,7 @@ class Test:
         self.target = None
 
     # noinspection PyProtectedMember
-    def print_coods(self):
+    def print_coords(self):
         logging.info(self.engine.get_coords())
 
     def set_target(self):

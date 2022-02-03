@@ -2,8 +2,7 @@ import logging
 
 from fishy.helper.auto_update import _normalize_version
 
-from fishy.constants import chalutier, version
-from fishy.helper import helper
+from fishy.constants import version
 from .config import config
 
 

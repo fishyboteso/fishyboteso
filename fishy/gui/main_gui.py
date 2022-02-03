@@ -4,12 +4,13 @@ import tkinter as tk
 import tkinter.ttk as ttk
 import typing
 
+from fishy.gui import update_dialog
 from ttkthemes import ThemedTk
 
 from fishy import helper
 from fishy.web import web
 
-from ..constants import chalutier, lam2, fishyqr
+from ..constants import fishyqr
 from ..helper.config import config
 from .discord_login import discord_login
 from ..helper.hotkey.hotkey_process import hotkey
@@ -31,6 +32,7 @@ def _create(gui: 'GUI'):
     engines = gui.engines
 
     gui._root = ThemedTk(theme="equilux", background=True)
+    gui._root.attributes('-alpha', 0.0)
     gui._root.title("Fishybot for Elder Scrolls Online")
     gui._root.iconbitmap(helper.manifest_file('icon.ico'))
 
@@ -55,8 +57,11 @@ def _create(gui: 'GUI'):
     dark_mode_var.set(int(config.get('dark_mode', True)))
     filemenu.add_checkbutton(label="Dark Mode", command=_toggle_mode,
                              variable=dark_mode_var)
-    if config.get("dont_ask_update", False):
-        filemenu.add_command(label="Update", command=helper.update)
+
+    def update():
+        config.delete("dont_ask_update")
+        update_dialog.check_update(gui, True)
+    filemenu.add_command(label="Update", command=update)
 
     def installer():
         if filemenu.entrycget(4, 'label') == "Remove FishyQR":
@@ -81,7 +86,6 @@ def _create(gui: 'GUI'):
         logging.debug("Restart to update the changes")
 
     debug_menu.add_checkbutton(label="Keep Console", command=keep_console, variable=debug_var)
-    debug_menu.add_command(label="Restart", command=helper.restart)
     menubar.add_cascade(label="Debug", menu=debug_menu)
 
     help_menu = tk.Menu(menubar, tearoff=0)
@@ -127,7 +131,7 @@ def _create(gui: 'GUI'):
 
     hotkey.hook(Key.F9, gui.funcs.start_engine)
 
-    # noinspection PyProtectedMember
+    # noinspection PyProtectedMember,PyUnresolvedReferences
     def set_destroy():
         if gui._bot_running:
             if not tk.messagebox.askyesno(title="Quit?", message="Bot engine running. Quit Anyway?"):
@@ -139,6 +143,10 @@ def _create(gui: 'GUI'):
     gui._root.protocol("WM_DELETE_WINDOW", set_destroy)
     gui._destroyed = False
 
+    gui._root.update()
+    gui._clear_function_queue()
+    gui._root.after(0, gui._root.attributes, "-alpha", 1.0)
+    gui.on_ready()
     while True:
         gui._root.update()
         gui._clear_function_queue()
@@ -148,6 +156,6 @@ def _create(gui: 'GUI'):
             gui._start_restart = False
             gui.create()
         if gui._destroyed:
-            gui.engine.quit()
+            gui.engine.quit_me()
             break
         time.sleep(0.01)

@@ -1,3 +1,4 @@
+import logging
 import time
 from multiprocessing import Process, Queue
 from threading import Thread
@@ -69,10 +70,11 @@ class HotKey:
     def start(self):
         self.process.start()
         self.event.start()
+        logging.debug("hotkey process started")
 
     def stop(self):
         self.inq.put("stop")
         self.outq.put("stop")
         self.process.join()
         self.event.join()
-        print("hotkey process ended")
+        logging.debug("hotkey process ended")

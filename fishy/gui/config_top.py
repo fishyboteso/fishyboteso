@@ -2,20 +2,15 @@ import logging
 import os
 import tkinter as tk
 import tkinter.ttk as ttk
-import typing
 from tkinter.filedialog import askopenfilename
 
 from fishy.engine.common.event_handler import IEngineHandler
 from fishy.engine.fullautofisher.mode.imode import FullAutoMode
-from fishy.helper import helper
 
 from fishy import web
 from fishy.helper import helper
 from fishy.helper.config import config
 from fishy.helper.popup import PopUp
-
-if typing.TYPE_CHECKING:
-    from fishy.gui import GUI
 
 
 def start_fullfisher_config(gui: 'GUI'):

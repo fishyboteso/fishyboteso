@@ -1,13 +1,10 @@
 import logging
 import math
 import time
-import traceback
 from threading import Thread
 
-import cv2
 from pynput import keyboard, mouse
 
-from fishy.constants import fishyqr, lam2, libgps
 from fishy.engine import SemiFisherEngine
 from fishy.engine.common.IEngine import IEngine
 from fishy.engine.common.window import WindowClient
@@ -17,12 +14,10 @@ from fishy.engine.fullautofisher.mode.player import Player
 from fishy.engine.fullautofisher.mode.recorder import Recorder
 from fishy.engine.common.qr_detection import (get_qr_location,
                                               get_values_from_image, image_pre_process)
-from fishy.engine.semifisher import fishing_event, fishing_mode
+from fishy.engine.semifisher import fishing_mode
 from fishy.engine.semifisher.fishing_mode import FishingMode
-from fishy.helper import helper, hotkey
 from fishy.helper.config import config
-from fishy.helper.helper import log_raise, wait_until, is_eso_active
-from fishy.helper.helper import sign
+from fishy.helper.helper import wait_until, is_eso_active, sign, print_exc
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
@@ -35,6 +30,7 @@ class FullAuto(IEngine):
         from fishy.engine.fullautofisher.test import Test
 
         super().__init__(gui_ref)
+        self.name = "FullAuto"
         self._curr_rotate_y = 0
 
         self.fisher = SemiFisherEngine(None)
@@ -45,9 +41,6 @@ class FullAuto(IEngine):
         self.mode = None
 
     def run(self):
-        self.gui.bot_started(True)
-        self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name="Full auto debug")
-
         self.mode = None
         if config.get("calibrate", False):
             self.mode = Calibrator(self)
@@ -55,7 +48,11 @@ class FullAuto(IEngine):
             self.mode = Player(self)
         elif FullAutoMode(config.get("full_auto_mode", 0)) == FullAutoMode.Recorder:
             self.mode = Recorder(self)
+        else:
+            logging.error("not a valid mode selected")
+            return
 
+        # block thread until game window becomes active
         if not is_eso_active():
             logging.info("Waiting for eso window to be active...")
             wait_until(lambda: is_eso_active() or not self.start)
@@ -63,37 +60,34 @@ class FullAuto(IEngine):
                 logging.info("starting in 2 secs...")
                 time.sleep(2)
 
+        if not self._pre_run_checks():
+            return
+
+        if config.get("tabout_stop", 1):
+            self.stop_on_inactive()
+
         # noinspection PyBroadException
         try:
-            if self.window.get_capture() is None:
-                log_raise("Game window not found")
-
-            self.window.crop = get_qr_location(self.window.get_capture())
-            if self.window.crop is None:
-                log_raise("FishyQR not found, try to drag it around and try again")
-
-            if not (type(self.mode) is Calibrator) and not self.calibrator.all_calibrated():
-                log_raise("you need to calibrate first")
-
-            self.fisher.toggle_start()
-            fishing_event.unsubscribe()
-            if self.show_crop:
-                self.start_show()
-
-            if config.get("tabout_stop", 1):
-                self.stop_on_inactive()
-
             self.mode.run()
-
         except Exception:
-            traceback.print_exc()
-            self.start = False
+            logging.error("exception occurred while running full auto mode")
+            print_exc()
 
-        self.gui.bot_started(False)
-        self.window.show(False)
-        logging.info("Quitting")
-        self.window.destory()
-        self.fisher.toggle_start()
+    def _pre_run_checks(self):
+        if self.window.get_capture() is None:
+            logging.error("Game window not found")
+            return False
+
+        self.window.crop = get_qr_location(self.window.get_capture())
+        if self.window.crop is None:
+            logging.error("FishyQR not found, try to drag it around and try again")
+            return False
+
+        if not (type(self.mode) is Calibrator) and not self.calibrator.all_calibrated():
+            logging.error("you need to calibrate first")
+            return False
+
+        return True
 
     def start_show(self):
         def func():
@@ -103,8 +97,11 @@ class FullAuto(IEngine):
 
     def stop_on_inactive(self):
         def func():
-            wait_until(lambda: not is_eso_active())
-            self.start = False
+            logging.debug("stop on inactive started")
+            wait_until(lambda: not is_eso_active() or not self.start)
+            if self.start and not is_eso_active():
+                self.turn_off()
+            logging.debug("stop on inactive stopped")
         Thread(target=func).start()
 
     def get_coords(self):
@@ -115,20 +112,21 @@ class FullAuto(IEngine):
         todo its waiting for qr which doesn't block the engine when commanded to close
         """
         img = self.window.processed_image(func=image_pre_process)
-        return get_values_from_image(img)[:3]
+        values = get_values_from_image(img)
+        return values[:3] if values else None
 
     def move_to(self, target) -> bool:
         current = self.get_coords()
         if not current:
             return False
 
-        print(f"Moving from {(current[0], current[1])} to {target}")
+        logging.debug(f"Moving from {(current[0], current[1])} to {target}")
         move_vec = target[0] - current[0], target[1] - current[1]
 
         dist = math.sqrt(move_vec[0] ** 2 + move_vec[1] ** 2)
-        print(f"distance: {dist}")
+        logging.debug(f"distance: {dist}")
         if dist < 5e-05:
-            print("distance very small skipping")
+            logging.debug("distance very small skipping")
             return True
 
         target_angle = math.degrees(math.atan2(-move_vec[1], move_vec[0])) + 90
@@ -138,11 +136,12 @@ class FullAuto(IEngine):
             return False
 
         walking_time = dist / self.calibrator.move_factor
-        print(f"walking for {walking_time}")
+        logging.debug(f"walking for {walking_time}")
         kb.press('w')
         time.sleep(walking_time)
         kb.release('w')
-        print("done")
+        logging.debug("done")
+        # todo: maybe check if it reached the destination before returning true?
         return True
 
     def rotate_to(self, target_angle, from_angle=None) -> bool:
@@ -156,7 +155,7 @@ class FullAuto(IEngine):
             target_angle = 360 + target_angle
         while target_angle > 360:
             target_angle -= 360
-        print(f"Rotating from {from_angle} to {target_angle}")
+        logging.debug(f"Rotating from {from_angle} to {target_angle}")
 
         angle_diff = target_angle - from_angle
 
@@ -165,7 +164,7 @@ class FullAuto(IEngine):
 
         rotate_times = int(angle_diff / self.calibrator.rot_factor) * -1
 
-        print(f"rotate_times: {rotate_times}")
+        logging.debug(f"rotate_times: {rotate_times}")
 
         for _ in range(abs(rotate_times)):
             mse.move(sign(rotate_times) * FullAuto.rotate_by * -1, 0)
@@ -177,6 +176,7 @@ class FullAuto(IEngine):
         valid_states = [fishing_mode.State.LOOKING, fishing_mode.State.FISHING]
         _hole_found_flag = FishingMode.CurrentMode in valid_states
 
+        # if vertical movement is disabled
         if not config.get("look_for_hole", 1):
             return _hole_found_flag
 
@@ -197,16 +197,8 @@ class FullAuto(IEngine):
             time.sleep(0.05)
             self._curr_rotate_y -= 0.05
 
-    def toggle_start(self):
-        self.start = not self.start
-        if self.start:
-            self.thread = Thread(target=self.run)
-            self.thread.start()
-
 
 if __name__ == '__main__':
-    logging.getLogger("").setLevel(logging.DEBUG)
-    hotkey.initalize()
     # noinspection PyTypeChecker
     bot = FullAuto(None)
     bot.toggle_start()

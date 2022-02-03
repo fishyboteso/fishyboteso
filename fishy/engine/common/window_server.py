@@ -1,17 +1,15 @@
 import logging
 import math
-import traceback
 from enum import Enum
 from threading import Thread
 
-import cv2
 import d3dshot
 import pywintypes
 import win32api
 import win32gui
 from ctypes import windll
 
-from fishy.helper.config import config
+from fishy.helper.helper import print_exc
 
 
 class Status(Enum):
@@ -28,7 +26,7 @@ class WindowServer:
     windowOffset = None
     hwnd = None
     status = Status.STOPPED
-    d3: d3dshot.D3DShot = None
+    d3: d3dshot.D3DShot = d3dshot.create(capture_output="numpy")
     monitor_top_left = None
 
 
@@ -37,6 +35,7 @@ def init():
     Executed once before the main loop,
     Finds the game window, and calculates the offset to remove the title bar
     """
+    # noinspection PyUnresolvedReferences
     try:
         WindowServer.hwnd = win32gui.FindWindow(None, "Elder Scrolls Online")
 
@@ -48,9 +47,7 @@ def init():
         WindowServer.windowOffset = math.floor(((rect[2] - rect[0]) - client_rect[2]) / 2)
         WindowServer.status = Status.RUNNING
 
-        d3 = d3dshot.create(capture_output="numpy")
-        d3.display = next((m for m in d3.displays if m.hmonitor == monitor_id), None)
-        WindowServer.d3 = d3
+        WindowServer.d3.display = next((m for m in WindowServer.d3.displays if m.hmonitor == monitor_id), None)
 
     except pywintypes.error:
         logging.error("Game window not found")
@@ -84,20 +81,21 @@ def loop():
         WindowServer.status = Status.CRASHED
 
 
-def loop_end():
-    cv2.waitKey(25)
-
-
 # noinspection PyBroadException
 def run():
     # todo use config
+    logging.debug("window server started")
     while WindowServer.status == Status.RUNNING:
         try:
             loop()
         except Exception:
-            traceback.print_exc()
+            print_exc()
             WindowServer.status = Status.CRASHED
-    loop_end()
+
+    if WindowServer.status == Status.CRASHED:
+        logging.debug("window server crashed")
+    elif WindowServer.status == Status.STOPPED:
+        logging.debug("window server stopped")
 
 
 def start():

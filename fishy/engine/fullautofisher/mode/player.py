@@ -2,14 +2,11 @@ import logging
 import math
 import pickle
 import time
-from pprint import pprint
 
 import typing
-from threading import Thread
 
 from fishy.engine.fullautofisher.mode.imode import IMode
 from fishy.engine.semifisher import fishing_event, fishing_mode
-from fishy.helper.helper import log_raise, wait_until, kill_thread
 
 if typing.TYPE_CHECKING:
     from fishy.engine.fullautofisher.engine import FullAuto
@@ -56,23 +53,29 @@ class Player(IMode):
         self.timeline = None
 
     def run(self):
-        self._init()
+        if not self._init():
+            return
+
         while self.engine.start:
             self._loop()
             time.sleep(0.1)
+
         logging.info("player stopped")
 
-    def _init(self):
+    def _init(self) -> bool:
         self.timeline = get_rec_file()
         if not self.timeline:
-            log_raise("data not found, can't start")
-        logging.info("starting player")
+            logging.error("data not found, can't start")
+            return False
 
         coords = self.engine.get_coords()
         if not coords:
-            log_raise("QR not found")
+            logging.error("QR not found")
+            return False
 
         self.i = find_nearest(self.timeline, coords)[0]
+        logging.info("starting player")
+        return True
 
     def _loop(self):
         action = self.timeline[self.i]
@@ -87,21 +90,22 @@ class Player(IMode):
             if not self.engine.rotate_to(action[1][2]):
                 return
 
-            fishing_mode.subscribers.append(self._hole_complete_callback)
-            fishing_event.subscribe()
+            self.engine.fisher.turn_on()
             # scan for fish hole
             logging.info("scanning")
             # if found start fishing and wait for hole to complete
             if self.engine.look_for_hole():
                 logging.info("starting fishing")
+                fishing_mode.subscribers.append(self._hole_complete_callback)
                 self.hole_complete_flag = False
                 helper.wait_until(lambda: self.hole_complete_flag or not self.engine.start)
+                fishing_mode.subscribers.remove(self._hole_complete_callback)
+
                 self.engine.rotate_back()
             else:
                 logging.info("no hole found")
             # continue when hole completes
-            fishing_mode.subscribers.remove(self._hole_complete_callback)
-            fishing_event.unsubscribe()
+            self.engine.fisher.turn_off()
 
         self.next()
 

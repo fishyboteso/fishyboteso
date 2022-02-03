@@ -9,20 +9,18 @@ import typing
 from tkinter.filedialog import asksaveasfile
 
 from fishy.engine.fullautofisher.mode import player
-from fishy.helper import helper
 
-from fishy.helper.helper import empty_function, log_raise
+from fishy.helper.helper import empty_function
 from fishy.helper.hotkey.process import Key
 
 from fishy.helper.popup import PopUp
-from playsound import playsound
 
 from fishy.helper.config import config
 
 if typing.TYPE_CHECKING:
     from fishy.engine.fullautofisher.engine import FullAuto
 from fishy.engine.fullautofisher.mode.imode import IMode
-from fishy.helper.hotkey.hotkey_process import HotKey, hotkey
+from fishy.helper.hotkey.hotkey_process import hotkey
 
 
 class Recorder(IMode):
@@ -49,48 +47,50 @@ class Recorder(IMode):
 
             old_timeline = player.get_rec_file()
             if not old_timeline:
-                log_raise("Edit mode selected, but no fishy file selected")
+                logging.error("Edit mode selected, but no fishy file selected")
+                return
 
             coords = self.engine.get_coords()
             if not coords:
-                log_raise("QR not found")
+                logging.error("QR not found")
+                return
 
             start_from = player.find_nearest(old_timeline, coords)
             if not self.engine.move_to(start_from[2]):
-                log_raise("QR not found")
+                logging.error("QR not found")
+                return
 
         logging.info("starting, press LMB to mark hole")
         hotkey.hook(Key.LMB, self._mark_hole)
 
         self.timeline = []
-
+        last_coord = None
         while self.engine.start:
             start_time = time.time()
-            coods = self.engine.get_coords()
-            if not coods:
+            coords = self.engine.get_coords()
+            if not coords:
+                logging.warning("missed a frame, as qr not be read properly...")
                 time.sleep(0.1)
                 continue
 
-            self.timeline.append(("move_to", (coods[0], coods[1])))
+            self.timeline.append(("move_to", (coords[0], coords[1])))
 
+            # maintaining constant frequency for recording
             time_took = time.time() - start_time
             if time_took <= Recorder.recording_fps:
                 time.sleep(Recorder.recording_fps - time_took)
             else:
                 logging.warning("Took too much time to record")
+            last_coord = coords
 
         hotkey.free(Key.LMB)
 
         if config.get("edit_recorder_mode"):
             logging.info("moving to nearest coord in recording")
-
-            # todo allow the user the chance to wait for qr
-            coords = self.engine.get_coords()
-            if not coords:
-                log_raise("QR not found")
-
-            end = player.find_nearest(old_timeline, coords)
+            end = player.find_nearest(old_timeline, last_coord)
             self.engine.move_to(end[2])
+
+            # recording stitching
             part1 = old_timeline[:start_from[0]]
             part2 = old_timeline[end[0]:]
             self.timeline = part1 + self.timeline + part2

@@ -28,7 +28,7 @@ class WindowClient:
             window_server.start()
         WindowClient.clients.append(self)
 
-    def destory(self):
+    def destroy(self):
         if self in WindowClient.clients:
             WindowClient.clients.remove(self)
         if len(WindowClient.clients) == 0:
@@ -47,9 +47,9 @@ class WindowClient:
             return None
 
         if not window_server.screen_ready():
-            print("waiting for screen...")
+            logging.debug("waiting for screen...")
             helper.wait_until(window_server.screen_ready)
-            print("screen ready, continuing...")
+            logging.debug("screen ready, continuing...")
 
         temp_img = WindowServer.Screen
 
@@ -83,13 +83,13 @@ class WindowClient:
 
         if func is None:
             return img
-        else:
-            return func(img)
+
+        return func(img)
 
     def show(self, to_show, resize=None, func=None):
         """
         Displays the processed image for debugging purposes
-        :param ready_img: send ready image, just show the `ready_img` directly
+        :param to_show: false to destroy the window
         :param resize: scale the image to make small images more visible
         :param func: function to process the image
         """

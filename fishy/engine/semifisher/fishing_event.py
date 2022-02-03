@@ -78,9 +78,6 @@ def subscribe():
     if fisher_callback not in fishing_mode.subscribers:
         fishing_mode.subscribers.append(fisher_callback)
 
-        if FishingMode.CurrentMode == State.LOOKING:
-            fisher_callback(FishingMode.CurrentMode)
-
 
 def fisher_callback(event: State):
     callbacks_map = {
