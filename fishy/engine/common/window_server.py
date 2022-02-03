@@ -26,7 +26,7 @@ class WindowServer:
     windowOffset = None
     hwnd = None
     status = Status.STOPPED
-    d3: d3dshot.D3DShot = None
+    d3: d3dshot.D3DShot = d3dshot.create(capture_output="numpy")
     monitor_top_left = None
 
 
@@ -47,9 +47,7 @@ def init():
         WindowServer.windowOffset = math.floor(((rect[2] - rect[0]) - client_rect[2]) / 2)
         WindowServer.status = Status.RUNNING
 
-        d3 = d3dshot.create(capture_output="numpy")
-        d3.display = next((m for m in d3.displays if m.hmonitor == monitor_id), None)
-        WindowServer.d3 = d3
+        WindowServer.d3.display = next((m for m in WindowServer.d3.displays if m.hmonitor == monitor_id), None)
 
     except pywintypes.error:
         logging.error("Game window not found")
