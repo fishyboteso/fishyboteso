@@ -21,7 +21,7 @@ class IEngineHandler:
     def toggle_fullfisher(self):
         ...
 
-    def check_pixel_val(self):
+    def check_qr_val(self):
         ...
 
     def set_update(self, version):
@@ -56,10 +56,10 @@ class EngineEventHandler(IEngineHandler):
     def toggle_fullfisher(self):
         self.event.append(self.full_fisher_engine.toggle_start)
 
-    def check_pixel_val(self):
+    def check_qr_val(self):
         def func():
             if self.semi_fisher_engine.start:
-                self.semi_fisher_engine.show_pixel_vals()
+                self.semi_fisher_engine.show_qr_vals()
             else:
                 logging.debug("Start the engine first before running this command")
 
