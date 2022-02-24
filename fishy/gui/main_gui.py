@@ -75,8 +75,8 @@ def _create(gui: 'GUI'):
     menubar.add_cascade(label="Options", menu=filemenu)
 
     debug_menu = tk.Menu(menubar, tearoff=0)
-    debug_menu.add_command(label="Check PixelVal",
-                           command=lambda: gui.engine.check_pixel_val())
+    debug_menu.add_command(label="Check QR Value",
+                           command=lambda: gui.engine.check_qr_val())
 
     debug_var = tk.IntVar()
     debug_var.set(int(config.get('debug', False)))

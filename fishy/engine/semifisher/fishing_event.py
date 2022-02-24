@@ -34,7 +34,7 @@ class FishEvent:
     sound = False
 
 
-def _fishing_sleep(waittime, lower_limit_ms=16, upper_limit_ms=2500):
+def _fishing_sleep(waittime, lower_limit_ms=16, upper_limit_ms=1375):
     reaction = 0.0
     if FishEvent.jitter and upper_limit_ms > lower_limit_ms:
         reaction = float(random.randrange(lower_limit_ms, upper_limit_ms)) / 1000.0
