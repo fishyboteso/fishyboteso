@@ -33,6 +33,7 @@ class SemiFisherEngine(IEngine):
             logging.info("Starting the bot engine, look at the fishing hole to start fishing")
             Thread(target=self._wait_and_check).start()
 
+        time.sleep(0.2)
         capture = self.window.get_capture()
         if capture is None:
             logging.error("couldn't get game capture")
@@ -67,10 +68,11 @@ class SemiFisherEngine(IEngine):
             self.values = get_values_from_image(capture)
             # if fishyqr fails to get read multiple times, stop the bot
             if not self.values:
-                skip_count += 1
                 if skip_count >= 5:
                     logging.error("Couldn't read values from FishyQR, Stopping engine...")
                     return
+                skip_count += 1
+                time.sleep(0.1)
             else:
                 skip_count = 0
 
