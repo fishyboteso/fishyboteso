@@ -21,6 +21,7 @@ class SemiFisherEngine(IEngine):
     def __init__(self, gui_ref: Optional['Callable[[], GUI]']):
         super().__init__(gui_ref)
         self.window = None
+        self.values = None
         self.name = "SemiFisher"
 
     def run(self):
@@ -63,9 +64,9 @@ class SemiFisherEngine(IEngine):
                 return
 
             # crop qr and get the values from it
-            values = get_values_from_image(capture)
+            self.values = get_values_from_image(capture)
             # if fishyqr fails to get read multiple times, stop the bot
-            if not values:
+            if not self.values:
                 skip_count += 1
                 if skip_count >= 5:
                     logging.error("Couldn't read values from FishyQR, Stopping engine...")
@@ -73,8 +74,8 @@ class SemiFisherEngine(IEngine):
             else:
                 skip_count = 0
 
-            if values:
-                fishing_mode.loop(values[3])
+            if self.values:
+                fishing_mode.loop(self.values[3])
             time.sleep(0.1)
 
     def _wait_and_check(self):
@@ -84,16 +85,17 @@ class SemiFisherEngine(IEngine):
                             "Check out #faqs on our discord channel to troubleshoot the issue")
 
     # TODO: remove this, no longer needed
-    def show_pixel_vals(self):
+    def show_qr_vals(self):
         def show():
             freq = 0.5
             t = 0
-            while t < 10.0:
+            while t < 25.0:
                 t += freq
-                logging.debug(str(FishingMode.CurrentMode) + ":" + str(self.window.get_capture()[0][0]))
+                logging.info(str(self.values))
                 time.sleep(freq)
+            logging.info("Displaying QR values stopped")
 
-        logging.debug("Will display pixel values for 10 seconds")
+        logging.info("Will display QR values for 25 seconds")
         time.sleep(5)
         Thread(target=show, args=()).start()
 
