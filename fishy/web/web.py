@@ -126,7 +126,8 @@ def get_session(lazy=True):
     # if not, create new id then try creating session again
     else:
         uid = register_user()
-        logging.debug("New User, generated new uid")
+        config.set("uid", uid, True)
+        logging.debug(f"New User, generated new uid: {uid}")
         if uid:
             _session_id, online = _create_new_session(uid)
         else:
@@ -137,8 +138,8 @@ def get_session(lazy=True):
         logging.error("user not found, generating new uid.. contact dev if you don't want to loose data")
         new_uid = register_user()
         _session_id, online = _create_new_session(new_uid)
-        config.set("uid", new_uid)
-        config.set("old_uid", uid)
+        config.set("uid", new_uid, True)
+        config.set("old_uid", uid, True)
 
     return _session_id
 
@@ -152,6 +153,7 @@ def _create_new_session(uid):
         return None, True
 
     return response.json()["session_id"], True
+
 
 @fallback(False)
 def has_beta():
@@ -168,4 +170,5 @@ def has_beta():
 @fallback(None)
 def ping():
     body = {"uid": config.get("uid"), "apiversion": apiversion}
-    requests.post(urls.ping, params=body)
+    response = requests.post(urls.ping, params=body)
+    logging.debug(f"ping response: {response.json()}")
