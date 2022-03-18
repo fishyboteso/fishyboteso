@@ -19,6 +19,7 @@ class active:
 
     @staticmethod
     def start():
+        web.ping()
         active._scheduler.enter_recurring(60, 1, web.ping)
         logging.debug("active scheduler started")
 
