@@ -91,6 +91,7 @@ class Player(IMode):
                 return
 
             self.engine.fisher.turn_on()
+            helper.wait_until(lambda: self.engine.fisher.first_loop_done)
             # scan for fish hole
             logging.info("scanning")
             # if found start fishing and wait for hole to complete
