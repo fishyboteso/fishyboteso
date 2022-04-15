@@ -23,6 +23,7 @@ class SemiFisherEngine(IEngine):
         self.window = None
         self.values = None
         self.name = "SemiFisher"
+        self.first_loop_done = False
 
     def run(self):
         """
@@ -53,6 +54,7 @@ class SemiFisherEngine(IEngine):
             print_exc()
 
         fishing_event.unsubscribe()
+        self.first_loop_done = False
 
     def _engine_loop(self):
         skip_count = 0
@@ -78,6 +80,7 @@ class SemiFisherEngine(IEngine):
 
             if self.values:
                 fishing_mode.loop(self.values[3])
+            self.first_loop_done = True
             time.sleep(0.1)
 
     def _wait_and_check(self):
