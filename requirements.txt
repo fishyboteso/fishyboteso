@@ -13,6 +13,5 @@ pynput
 keyboard
 playsound==1.2.2
 event-scheduler
-pyzbar
 mouse
 d3dshot

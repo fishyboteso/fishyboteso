@@ -1,6 +1,10 @@
+import logging
+import re
+
 import cv2
 import numpy as np
-from pyzbar.pyzbar import decode, ZBarSymbol
+
+detector = cv2.QRCodeDetector()
 
 
 def image_pre_process(img):
@@ -12,36 +16,33 @@ def image_pre_process(img):
     return img
 
 
-def get_qr_location(og_img):
+def get_qr_location(image):
     """
     code from https://stackoverflow.com/a/45770227/4512396
     """
-    gray = cv2.bilateralFilter(og_img, 11, 17, 17)
-    kernel = np.ones((5, 5), np.uint8)
-    erosion = cv2.erode(gray, kernel, iterations=2)
-    kernel = np.ones((4, 4), np.uint8)
-    img = cv2.dilate(erosion, kernel, iterations=2)
+    success, points = detector.detect(image)
+    if not success:
+        return None
 
-    cnt, h = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    valid_crops = []
-    for i in range(len(cnt)):
-        area = cv2.contourArea(cnt[i])
-        if 500 < area < 100000:
-            mask = np.zeros_like(img)
-            cv2.drawContours(mask, cnt, i, 255, -1)
-            x, y, w, h = cv2.boundingRect(cnt[i])
-            qr_result = decode(og_img[y:h + y, x:w + x],
-                               symbols=[ZBarSymbol.QRCODE])
-            if qr_result:
-                valid_crops.append(((x, y, x + w, y + h), area))
-
-    return min(valid_crops, key=lambda c: c[1])[0] if valid_crops else None
+    p = points[0]
+    # (x, y, x + w, y + h)
+    return [int(x) for x in [p[0][0], p[0][1], p[1][0], p[2][1]]]
 
 
 # noinspection PyBroadException
 def get_values_from_image(img):
-    for qr in decode(img, symbols=[ZBarSymbol.QRCODE]):
-        vals = qr.data.decode('utf-8').split(",")
-        return tuple(float(v) for v in vals)
-    return None
+    h, w = img.shape
+    points = np.array([[(0, 0), (w, 0), (w, h), (0, h)]])
+    code = detector.decode(img, points)[0]
+    return parse_qr_code(code)
+
+
+# this needs to be updated each time qr code format is changed
+def parse_qr_code(code):
+    if not code:
+        return None
+    match = re.match(r'^(\d+\.\d+),(\d+\.\d+),(\d+),(\d+)$', code)
+    if not match:
+        logging.warning(f"qr code is not what was expected {code}")
+        return None
+    return [float(match.group(1)), float(match.group(2)), int(match.group(3)), int(match.group(4))]
