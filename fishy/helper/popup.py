@@ -29,6 +29,7 @@ class PopUp(Toplevel):
         self.running = False
 
     def start(self):
+        self.minsize(self.winfo_width(), self.winfo_height())
         self.grab_set()
         center(self)
         while self.running:

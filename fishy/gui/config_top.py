@@ -90,6 +90,8 @@ def start_fullfisher_config(gui: 'GUI'):
     ttk.Label(controls_frame, text="Use semi-fisher config for rest").grid(row=row, column=0, columnspan=2, pady=(20, 0))
 
     controls_frame.pack(padx=(5, 5), pady=(5, 10))
+    controls_frame.update()
+
     top.start()
 
 
@@ -149,6 +151,8 @@ def start_semifisher_config(gui: 'GUI'):
     jitter.grid(row=5, column=1)
 
     controls_frame.pack(padx=(5, 5), pady=(5, 5))
+    controls_frame.update()
+
     top.start()
 
 
