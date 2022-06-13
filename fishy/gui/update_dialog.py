@@ -18,7 +18,6 @@ def _show(gui, currentversion, newversion, returns):
 
     top = PopUp(helper.empty_function, gui._root)
     top.title("A wild fishy update appeared!")
-    top.iconbitmap(helper.manifest_file('icon.ico'))
 
     dialogLabel = tk.Label(top, text="There is a new fishy update available (" +
                            currentversion + "->" + newversion + "). Do you want to update now?")
