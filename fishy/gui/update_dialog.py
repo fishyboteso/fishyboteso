@@ -37,6 +37,7 @@ def _show(gui, currentversion, newversion, returns):
                              width=buttonWidth, compound="c")
     dialogBtnYes.grid(row=2, column=1, padx=5, pady=5)
     dialogBtnYes.focus_set()
+    dialogBtnYes.update()
 
     top.protocol('WM_DELETE_WINDOW', _clickNo)
     top.start()
