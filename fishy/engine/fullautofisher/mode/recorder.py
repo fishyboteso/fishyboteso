@@ -99,7 +99,7 @@ class Recorder(IMode):
 
     def _open_save_popup(self):
         top = PopUp(empty_function, self.engine.get_gui()._root, background=self.engine.get_gui()._root["background"])
-        controls_frame = ttk.Frame(top)
+        recorder_frame = ttk.Frame(top)
         top.title("Save Recording?")
 
         button = [-1]
@@ -109,14 +109,15 @@ class Recorder(IMode):
             top.quit_top()
 
         selected_text = f"\n\nSelected: {os.path.basename(config.get('full_auto_rec_file'))}" if config.get('edit_recorder_mode') else ""
-        ttk.Label(controls_frame, text=f"Do you want to save the recording?{selected_text}").grid(row=0, column=0, columnspan=3, pady=(0, 5))
+        ttk.Label(recorder_frame, text=f"Do you want to save the recording?{selected_text}").grid(row=0, column=0, columnspan=3, pady=(0, 5))
 
         _overwrite = tk.NORMAL if config.get("edit_recorder_mode") else tk.DISABLED
-        ttk.Button(controls_frame, text="Overwrite", command=lambda: button_pressed(0), state=_overwrite).grid(row=1, column=0, pady=(5, 0))
-        ttk.Button(controls_frame, text="Save As", command=lambda: button_pressed(1)).grid(row=1, column=1)
-        ttk.Button(controls_frame, text="Cancel", command=lambda: button_pressed(2)).grid(row=1, column=2)
+        ttk.Button(recorder_frame, text="Overwrite", command=lambda: button_pressed(0), state=_overwrite).grid(row=1, column=0, pady=(5, 0))
+        ttk.Button(recorder_frame, text="Save As", command=lambda: button_pressed(1)).grid(row=1, column=1)
+        ttk.Button(recorder_frame, text="Cancel", command=lambda: button_pressed(2)).grid(row=1, column=2)
 
-        controls_frame.pack(padx=(5, 5), pady=(5, 5))
+        recorder_frame.pack(padx=(5, 5), pady=(5, 5))
+        recorder_frame.update()
         top.start()
 
         return button[0]

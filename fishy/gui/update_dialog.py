@@ -18,7 +18,6 @@ def _show(gui, currentversion, newversion, returns):
 
     top = PopUp(helper.empty_function, gui._root)
     top.title("A wild fishy update appeared!")
-    top.iconbitmap(helper.manifest_file('icon.ico'))
 
     dialogLabel = tk.Label(top, text="There is a new fishy update available (" +
                            currentversion + "->" + newversion + "). Do you want to update now?")
@@ -38,6 +37,7 @@ def _show(gui, currentversion, newversion, returns):
                              width=buttonWidth, compound="c")
     dialogBtnYes.grid(row=2, column=1, padx=5, pady=5)
     dialogBtnYes.focus_set()
+    dialogBtnYes.update()
 
     top.protocol('WM_DELETE_WINDOW', _clickNo)
     top.start()
