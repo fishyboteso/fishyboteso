@@ -34,7 +34,7 @@ class HTML:
     List of supported HTML tags and attrs 
     """
 
-    class Tag():
+    class Tag:
         BR = 'br'
         UL = 'ul'
         OL = 'ol'
@@ -59,7 +59,7 @@ class HTML:
         H5 = 'h5'
         H6 = 'h6'
 
-    class Attrs():
+    class Attrs:
         STYLE = 'style'
         HREF = 'href'
         SRC = 'src'
@@ -67,12 +67,12 @@ class HTML:
         HEIGHT = 'height'
         TYPE = 'type'
 
-    class TypeOrderedList():
+    class TypeOrderedList:
         _1 = '1'
         a = 'a'
         A = 'A'
 
-    class Style():
+    class Style:
         COLOR = 'color'
         BACKGROUND_COLOR = 'background-color'
         FONT_FAMILY = 'font-family'
@@ -80,7 +80,7 @@ class HTML:
         TEXT_ALIGN = 'text-align'
         TEXT_DECORATION = 'text-decoration'
 
-    class StyleTextDecoration():
+    class StyleTextDecoration:
         UNDERLINE = 'underline'
         LINE_THROUGH = 'line-through'
 
@@ -127,7 +127,7 @@ class HTML:
 # --------------------------------------------------------------------------------------------------
 # Text widget defs
 
-class WCfg():
+class WCfg:
     KEY = "config"
     BACKGROUND = "background"
     FOREGROUND = "foreground"
@@ -135,7 +135,7 @@ class WCfg():
     TABS = "tabs"
 
 
-class Fnt():
+class Fnt:
     KEY = "font"
     FAMILY = "family"
     SIZE = "size"
@@ -145,13 +145,13 @@ class Fnt():
     OVERSTRIKE = "overstrike"
 
 
-class Bind():
+class Bind:
     KEY = "bind"
     LINK = "link"
     IMAGE = "image"
 
 
-class WTag():
+class WTag:
     START_INDEX = "start_index"
     END_INDEX = "end_index"
 
@@ -189,7 +189,7 @@ def get_existing_font(font_families):
 
 # __________________________________________________________________________________________________
 # classes
-class HLinkSlot():
+class HLinkSlot:
     # ----------------------------------------------------------------------------------------------
 
     def __init__(self, w, tag_name, url):
@@ -212,7 +212,7 @@ class HLinkSlot():
         self._w.config(cursor="")
 
 
-class ListTag():
+class ListTag:
     # ----------------------------------------------------------------------------------------------
     def __init__(self, ordered: bool, list_type=None):
         # ------------------------------------------------------------------------------------------
