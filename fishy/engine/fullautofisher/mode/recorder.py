@@ -32,11 +32,11 @@ class Recorder(IMode):
         self.timeline = []
 
     def _mark_hole(self):
-        coods = self.engine.get_coords()
-        if not coods:
+        coords = self.engine.get_coords()
+        if not coords:
             logging.warning("QR not found, couldn't record hole")
             return
-        self.timeline.append(("check_fish", coods))
+        self.timeline.append(("check_fish", coords))
         logging.info("check_fish")
 
     def run(self):

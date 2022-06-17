@@ -52,7 +52,7 @@ def _get_factor(key):
 
 class Calibrator(IMode):
     def __init__(self, engine: 'FullAuto'):
-        self._callibrate_state = -1
+        self._calibrate_state = -1
         self.engine = engine
 
     @property
@@ -102,19 +102,19 @@ class Calibrator(IMode):
 
         rotate_times = 50
 
-        coods = self.engine.get_coords()
-        if coods is None:
+        coords = self.engine.get_coords()
+        if coords is None:
             return
-        _, _, rot2 = coods
+        _, _, rot2 = coords
 
         for _ in range(rotate_times):
             mse.move(FullAuto.rotate_by, 0)
             time.sleep(0.05)
 
-        coods = self.engine.get_coords()
-        if coods is None:
+        coords = self.engine.get_coords()
+        if coords is None:
             return
-        x3, y3, rot3 = coods
+        x3, y3, rot3 = coords
 
         if rot3 > rot2:
             rot3 -= 360

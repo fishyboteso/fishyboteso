@@ -24,7 +24,6 @@ class Migration:
             config.set("prev_version", version)
 
 
-
 migration_code = [
     # version, upgrade_code
     ("0.5.3", Migration.up_to_0_5_3)

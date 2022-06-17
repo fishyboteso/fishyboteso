@@ -26,8 +26,8 @@ def is_logged_in():
 @fallback(False)
 def login(uid, login_code):
     body = {"uid": uid, "login_code": login_code, "apiversion": apiversion}
-    reponse = requests.post(urls.discord, json=body)
-    result = reponse.json()
+    response = requests.post(urls.discord, json=body)
+    result = response.json()
 
     if "new_id" in result:
         config.set("uid", result["new_id"])
@@ -38,8 +38,8 @@ def login(uid, login_code):
 @fallback(False)
 def logout():
     body = {"uid": config.get("uid"), "apiversion": apiversion}
-    reponse = requests.delete(urls.discord, json=body)
-    result = reponse.json()
+    response = requests.delete(urls.discord, json=body)
+    result = response.json()
     return result["success"]
 
 

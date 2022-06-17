@@ -18,7 +18,7 @@ def _hr_version(v):
 
 def _normalize_version(v):
     """
-    converts version string into an "normalized" of versions which is a list of version codes,
+    converts version string into a "normalized" of versions which is a list of version codes,
     eg, input: '0.3.0', output: [0,3,0]
     this is done so that, versions can be compared easily
     :param v: string
@@ -40,7 +40,7 @@ def _normalize_version(v):
 
 def _get_highest_version(_index, _pkg):
     """
-    Crawls web for latest version name then returns latest version
+    Crawls web for latest version name then returns the latest version
     :param _index: website to check
     :param _pkg: package name
     :return: latest version normalized

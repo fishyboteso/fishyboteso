@@ -53,7 +53,7 @@ class IEngine:
     def turn_off(self):
         """
         this method only signals the thread to close using start flag,
-        its the responsibility of the thread to shut turn itself off
+        it's the responsibility of the thread to shut turn itself off
         """
         if self.state == 1:
             logging.debug(f"sending turn off signal to {self.name} engine")

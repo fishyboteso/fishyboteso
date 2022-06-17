@@ -4,6 +4,7 @@ from time import time, sleep
 subscribers = []
 checkpoint = 0
 
+
 class State(Enum):
     IDLE     =  0
     LOOKAWAY =  1

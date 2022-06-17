@@ -124,7 +124,7 @@ class config:
         saves the configuration is cache (and saves it in file if needed)
         :param key: key to save
         :param value: value to save
-        :param save: False if don't want to save right away
+        :param save: False if it won't want to save right away
         """
         if config._instance is None:
             return

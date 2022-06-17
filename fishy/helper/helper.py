@@ -58,7 +58,7 @@ def sign(x):
 def open_web(website):
     """
     Opens a website on browser,
-    uses multi-threading so that current thread doesnt get blocked
+    uses multi-threading so that current thread doesn't get blocked
     :param website: url
     """
     logging.debug("opening web, please wait...")

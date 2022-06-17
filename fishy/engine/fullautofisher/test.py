@@ -14,7 +14,7 @@ class Test:
 
     def set_target(self):
         self.target = self.engine.get_coords()
-        logging.info(f"target_coods are {self.target}")
+        logging.info(f"target_coords are {self.target}")
 
     def move_to_target(self):
         if not self.target:

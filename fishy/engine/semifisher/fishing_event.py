@@ -146,7 +146,7 @@ def on_fishing():
 @if_eso_is_focused
 def on_reelin():
     """
-    called when the fish hook is detected
+    called when the fishhook is detected
     increases the `fishCaught`  and `totalFishCaught`, calculates the time it took to catch
     presses e to catch the fish
     """

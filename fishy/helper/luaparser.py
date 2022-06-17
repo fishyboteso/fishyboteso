@@ -11,7 +11,7 @@ def _sv_parser(path):
             lua = f.read()
 
         """
-        bring lua saved-var file into a useable format:
+        bring lua saved-var file into a usable format:
         - one line per expression (add \n where needed)
         - remove all redundant characters
         - make lowercase, split into list of expressions
@@ -53,14 +53,14 @@ def _sv_parser(path):
         return root[0]
 
     except Exception as ex:
-        logging.error("Error: '" + str(ex) + "' occured, while parsing ESO variables.")
+        logging.error("Error: '" + str(ex) + "' occurred, while parsing ESO variables.")
         return None
 
 
-def sv_color_extract(Colors):
+def sv_color_extract(colors):
     root = _sv_parser(os.path.join(get_savedvarsdir(), "Chalutier.lua"))
     if root is None:
-        return Colors
+        return colors
 
     for i in range(4):
         name, root = root.popitem()
@@ -76,6 +76,6 @@ def sv_color_extract(Colors):
             floor(float(root["colors"][i]["b"]) * 255)
         ]
         colors.append(rgb)
-    for i, c in enumerate(Colors):
-        Colors[c] = colors[i]
-    return Colors
+    for i, c in enumerate(colors):
+        colors[c] = colors[i]
+    return colors

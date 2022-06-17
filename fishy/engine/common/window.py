@@ -14,7 +14,7 @@ class WindowClient:
 
     def __init__(self, crop=None, color=None, scale=None, show_name=None):
         """
-        create a window instance with these pre process
+        create a window instance with these preprocess
         :param crop: [x1,y1,x2,y2] array defining the boundaries to crop
         :param color: color to use example cv2.COLOR_RGB2HSV
         :param scale: scaling the window
@@ -40,7 +40,7 @@ class WindowClient:
 
     def get_capture(self):
         """
-        copies the recorded screen and then pre processes its
+        copies the recorded screen and then preprocesses its
         :return: game window image
         """
         if WindowServer.status == Status.CRASHED:
