@@ -4,8 +4,6 @@ import typing
 from threading import Thread
 from typing import Callable, Optional
 
-from fishy.engine.semifisher.fishing_mode import FishingMode
-
 from fishy.engine.common.IEngine import IEngine
 from fishy.engine.common.qr_detection import get_qr_location, get_values_from_image, image_pre_process
 from fishy.engine.common.window import WindowClient

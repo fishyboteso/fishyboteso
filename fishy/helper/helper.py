@@ -149,14 +149,12 @@ def create_shortcut(anti_ghosting: bool):
 
 def get_savedvarsdir():
     # noinspection PyUnresolvedReferences
-    from win32com.shell import shell, shellcon
     documents = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
     return os.path.join(documents, "Elder Scrolls Online", "live", "SavedVariables")
 
 
 def get_addondir():
     # noinspection PyUnresolvedReferences
-    from win32com.shell import shell, shellcon
     documents = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
     return os.path.join(documents, "Elder Scrolls Online", "live", "Addons")
 

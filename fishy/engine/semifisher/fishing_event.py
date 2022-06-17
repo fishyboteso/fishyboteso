@@ -12,7 +12,7 @@ from playsound import playsound
 
 from fishy import web
 from fishy.engine.semifisher import fishing_mode
-from fishy.engine.semifisher.fishing_mode import FishingMode, State
+from fishy.engine.semifisher.fishing_mode import State
 from fishy.helper import helper
 from fishy.helper.config import config
 from fishy.helper.helper import is_eso_active
