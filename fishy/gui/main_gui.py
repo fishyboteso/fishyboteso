@@ -125,9 +125,13 @@ def _create(gui: 'GUI'):
 
     _apply_theme(gui)
     gui._root.update()
+
     gui._root.minsize(gui._root.winfo_width() + 10, gui._root.winfo_height() + 10)
     if config.get("win_loc") is not None:
-        gui._root.geometry(config.get("win_loc"))
+        gui._root.geometry(config.get("win_loc").split(":")[-1])
+        if config.get("win_loc").split(":")[0] == "zoomed":
+            gui._root.update()
+            gui._root.state("zoomed")
 
     hotkey.hook(Key.F9, gui.funcs.start_engine)
 
@@ -137,7 +141,13 @@ def _create(gui: 'GUI'):
             if not tk.messagebox.askyesno(title="Quit?", message="Bot engine running. Quit Anyway?"):
                 return
 
-        config.set("win_loc", gui._root.geometry())
+        if gui._root.state() == "zoomed":
+            # setting it to normal first is done to keep user-changed geometry values
+            gui._root.state("normal")
+            config.set("win_loc", "zoomed" + ":" + gui._root.geometry())
+        else:
+            config.set("win_loc", gui._root.state() + ":" + gui._root.geometry())
+
         gui._destroyed = True
 
     gui._root.protocol("WM_DELETE_WINDOW", set_destroy)
