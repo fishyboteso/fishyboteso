@@ -4,10 +4,11 @@ import typing
 from threading import Thread
 from typing import Callable, Optional
 
+from fishy.engine.common import qr_detection
+
 from fishy.engine.semifisher.fishing_mode import FishingMode
 
 from fishy.engine.common.IEngine import IEngine
-from fishy.engine.common.qr_detection import get_qr_location, get_values_from_image, image_pre_process
 from fishy.engine.common.window import WindowClient
 from fishy.engine.semifisher import fishing_event, fishing_mode
 from fishy.engine.semifisher.fishing_event import FishEvent
@@ -35,15 +36,6 @@ class SemiFisherEngine(IEngine):
             Thread(target=self._wait_and_check).start()
 
         time.sleep(0.2)
-        capture = self.window.get_capture()
-        if capture is None:
-            logging.error("couldn't get game capture")
-            return
-
-        self.window.crop = get_qr_location(capture)
-        if not self.window.crop:
-            logging.error("FishyQR not found, try to drag it around and try again")
-            return
 
         fishing_event.init()
         # noinspection PyBroadException
@@ -59,15 +51,9 @@ class SemiFisherEngine(IEngine):
     def _engine_loop(self):
         skip_count = 0
         while self.state == 1 and WindowClient.running():
-            capture = self.window.processed_image(func=image_pre_process)
-
-            # if window server crashed
-            if capture is None:
-                logging.error("Couldn't capture window stopping engine")
-                return
-
             # crop qr and get the values from it
-            self.values = get_values_from_image(capture)
+            self.values = qr_detection.get_values(self.window)
+
             # if fishyqr fails to get read multiple times, stop the bot
             if not self.values:
                 if skip_count >= 5:
