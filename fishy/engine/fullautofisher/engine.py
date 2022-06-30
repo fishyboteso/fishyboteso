@@ -3,6 +3,7 @@ import math
 import time
 from threading import Thread
 
+from fishy.engine.common import qr_detection
 from pynput import keyboard, mouse
 
 from fishy.engine import SemiFisherEngine
@@ -12,8 +13,6 @@ from fishy.engine.fullautofisher.mode.calibrator import Calibrator
 from fishy.engine.fullautofisher.mode.imode import FullAutoMode
 from fishy.engine.fullautofisher.mode.player import Player
 from fishy.engine.fullautofisher.mode.recorder import Recorder
-from fishy.engine.common.qr_detection import (get_qr_location,
-                                              get_values_from_image, image_pre_process)
 from fishy.engine.semifisher import fishing_mode
 from fishy.engine.semifisher.fishing_mode import FishingMode
 from fishy.helper.config import config
@@ -60,7 +59,13 @@ class FullAuto(IEngine):
                 logging.info("starting in 2 secs...")
                 time.sleep(2)
 
-        if not self._pre_run_checks():
+        if not (type(self.mode) is Calibrator) and not self.calibrator.all_calibrated():
+            logging.error("you need to calibrate first")
+            return
+
+        if not qr_detection.get_values(self.window):
+            logging.error("FishyQR not found, if its not hidden, try to drag it around, "
+                          "or increase/decrease its size and try again\nStopping engine...")
             return
 
         if config.get("tabout_stop", 1):
@@ -73,26 +78,10 @@ class FullAuto(IEngine):
             logging.error("exception occurred while running full auto mode")
             print_exc()
 
-    def _pre_run_checks(self):
-        if self.window.get_capture() is None:
-            logging.error("Game window not found")
-            return False
-
-        self.window.crop = get_qr_location(self.window.get_capture())
-        if self.window.crop is None:
-            logging.error("FishyQR not found, try to drag it around and try again")
-            return False
-
-        if not (type(self.mode) is Calibrator) and not self.calibrator.all_calibrated():
-            logging.error("you need to calibrate first")
-            return False
-
-        return True
-
     def start_show(self):
         def func():
             while self.start and WindowClient.running():
-                self.window.show(self.show_crop, func=image_pre_process)
+                self.window.show(self.show_crop)
         Thread(target=func).start()
 
     def stop_on_inactive(self):
@@ -111,8 +100,7 @@ class FullAuto(IEngine):
         todo find a better way of handling None: switch from start bool to state which knows
         todo its waiting for qr which doesn't block the engine when commanded to close
         """
-        img = self.window.processed_image(func=image_pre_process)
-        values = get_values_from_image(img)
+        values = qr_detection.get_values(self.window)
         return values[:3] if values else None
 
     def move_to(self, target) -> bool:
