@@ -18,7 +18,7 @@ def get_values(window: WindowClient):
             continue
 
         if not window.crop:
-            window.crop = _get_values_from_image(img)
+            window.crop = _get_qr_location(img)
             if not window.crop:
                 logging.debug("FishyQR not found.")
                 continue
