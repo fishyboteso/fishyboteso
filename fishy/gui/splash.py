@@ -32,8 +32,7 @@ def show(win_loc, q):
     # Position splash at the center of the main window
 
     default_loc = (str(top.winfo_reqwidth()) + "+" + str(top.winfo_reqheight()) + "+" + "0" + "0")
-    win_loc = win_loc.split(":")[-1]
-    loc = (win_loc or default_loc).split("+")[1:]
+    loc = (win_loc or default_loc).split(":")[-1].split("+")[1:]
     top.geometry("{}x{}+{}+{}".format(dim[0], dim[1], int(loc[0]) + int(dim[0] / 2), int(loc[1]) + int(dim[1] / 2)))
 
     def waiting():
