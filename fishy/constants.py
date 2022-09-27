@@ -12,4 +12,4 @@ libdl = ("LibDebugLogger", "https://cdn.esoui.com/downloads/file2275/LibDebugLog
 libchatmsg = ("LibChatMessage", "https://cdn.esoui.com/downloads/file2382/LibChatMessage_1_2_0.zip", 120)
 
 
-version = "0.5.13"
+version = "0.5.14"
