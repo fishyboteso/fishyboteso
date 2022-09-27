@@ -21,7 +21,7 @@ from win32comext.shell import shell, shellcon
 from win32gui import GetForegroundWindow, GetWindowText
 
 import fishy
-from fishy.constants import libgps, lam2, fishyqr
+from fishy.constants import libgps, lam2, fishyqr, libmapping, libdl, libchatmsg
 from fishy.helper.config import config
 
 
@@ -180,7 +180,7 @@ def get_addonversion(name, url=None, v=None):
 
 
 def install_required_addons(force=False):
-    addons_req = [libgps, lam2, fishyqr]
+    addons_req = [libgps, lam2, fishyqr, libmapping, libdl, libchatmsg]
     addon_version = config.get("addon_version", {})
     installed = False
     for addon in addons_req:
