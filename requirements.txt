@@ -1,7 +1,7 @@
 urllib3
 winshell
 imutils
-numpy!=1.19.4
+numpy>1.19.4
 opencv_python==4.5.2.54
 Pillow
 pypiwin32
