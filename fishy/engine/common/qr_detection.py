@@ -12,7 +12,7 @@ detector = cv2.QRCodeDetector()
 def get_values(window: WindowClient):
     values = None
     for _ in range(5):
-        img = window.processed_image(func=_image_pre_process)
+        img = window.processed_image()
         if img is None:
             logging.debug("Couldn't capture window.")
             continue
@@ -22,7 +22,7 @@ def get_values(window: WindowClient):
             if not window.crop:
                 logging.debug("FishyQR not found.")
                 continue
-            img = window.processed_image(func=_image_pre_process)
+            img = window.processed_image()
 
         values = _get_values_from_image(img)
         if not values:
@@ -32,15 +32,6 @@ def get_values(window: WindowClient):
         break
 
     return values
-
-
-def _image_pre_process(img):
-    scale_percent = 100  # percent of original size
-    width = int(img.shape[1] * scale_percent / 100)
-    height = int(img.shape[0] * scale_percent / 100)
-    dim = (width, height)
-    img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
-    return img
 
 
 def _get_qr_location(image):
