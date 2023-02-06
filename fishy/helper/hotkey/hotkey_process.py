@@ -57,13 +57,14 @@ class HotKey:
         while True:
             key = self.outq.get()
 
+            if key == "stop":
+                break
+
             if key in Key:
                 callback = self._hotkeys[key]
                 if callback:
                     playsound(helper.manifest_file("beep.wav"), False)
                     callback()
-            elif key == "stop":
-                break
 
             time.sleep(0.1)
 

@@ -121,7 +121,7 @@ def start_semifisher_config(gui: 'GUI'):
 
     ttk.Label(controls_frame, text="Notification:").grid(row=0, column=0)
 
-    gui._notify = tk.IntVar(0)
+    gui._notify = tk.IntVar()
     gui._notify_check = ttk.Checkbutton(controls_frame, command=toggle_sub, variable=gui._notify)
     gui._notify_check.grid(row=0, column=1)
     gui._notify_check['state'] = tk.DISABLED

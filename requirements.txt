@@ -1,8 +1,8 @@
 urllib3
 winshell
 imutils
-numpy>1.19.4
-opencv_python==4.5.2.54
+numpy
+opencv_python
 Pillow
 pypiwin32
 ttkthemes
@@ -11,7 +11,7 @@ beautifulsoup4
 whatsmyip
 pynput
 keyboard
-playsound==1.2.2
+playsound
 event-scheduler
 mouse
-d3dshot
+d3dshot @ git+https://github.com/fauskanger/D3DShot#egg=D3DShot
