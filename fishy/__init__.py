@@ -1,4 +1,5 @@
-from fishy import constants
+import os
+from pathlib import Path
 
 
 # this prevents importing from package while setup
@@ -7,4 +8,4 @@ def main():
     actual_main()
 
 
-__version__ = constants.version
+__version__ = (Path(os.path.dirname(__file__)) / "version.txt").read_text()

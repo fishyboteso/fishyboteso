@@ -1,8 +1,8 @@
 import logging
 
+import fishy
 from fishy.helper.auto_update import _normalize_version
 
-from fishy.constants import version
 from .config import config
 
 
@@ -14,14 +14,14 @@ class Migration:
     @staticmethod
     def migrate():
         prev_version = _normalize_version(config.get("prev_version", "0.0.0"))
-        current_version = _normalize_version(version)
+        current_version = _normalize_version(fishy.__version__)
 
         if current_version > prev_version:
             for v, f in migration_code:
                 if prev_version < _normalize_version(v) <= current_version:
                     logging.info(f"running migration for {v}")
                     f()
-            config.set("prev_version", version)
+            config.set("prev_version", fishy.__version__)
 
 
 

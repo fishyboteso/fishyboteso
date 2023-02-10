@@ -1,6 +1,7 @@
 include LICENSE
 include README.md
 include requirements.txt
+include fishy/version.txt
 include fishy/icon.ico
 include fishy/fishybot_logo.png
 include fishy/sound.mp3
