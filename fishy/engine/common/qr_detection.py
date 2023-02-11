@@ -11,7 +11,7 @@ detector = cv2.QRCodeDetector()
 # noinspection PyBroadException
 def get_values(window: WindowClient):
     values = None
-    for _ in range(5):
+    for _ in range(6):
         img = window.processed_image()
         if img is None:
             logging.debug("Couldn't capture window.")
@@ -21,8 +21,7 @@ def get_values(window: WindowClient):
             window.crop = _get_qr_location(img)
             if not window.crop:
                 logging.debug("FishyQR not found.")
-                continue
-            img = window.processed_image()
+            continue
 
         values = _get_values_from_image(img)
         if not values:

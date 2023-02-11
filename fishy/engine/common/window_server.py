@@ -25,7 +25,7 @@ class WindowServer:
     """
     Records the game window, and allows to create instance to process it
     """
-    Screen = None
+    Screen: np.ndarray = None
     windowOffset = None
     hwnd = None
     status = Status.STOPPED

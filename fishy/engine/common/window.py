@@ -65,6 +65,10 @@ class WindowClient:
         if self.scale is not None:
             temp_img = cv2.resize(temp_img, (self.scale[0], self.scale[1]), interpolation=cv2.INTER_AREA)
 
+        # need ot check again after crop/resize
+        if temp_img.size == 0:
+            return None
+
         return temp_img
 
     def processed_image(self, func=None):
