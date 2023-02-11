@@ -40,7 +40,7 @@ def _run_terms_window():
     root.image = ImageTk.PhotoImage(root.image)
     canvas.create_image(0, 0, anchor=tk.NW, image=root.image)
 
-    check_value = tk.IntVar(0)
+    check_value = tk.IntVar()
 
     g1 = ttk.Frame(f)
     ttk.Checkbutton(g1, command=disable_enable_button, variable=check_value).pack(side=tk.LEFT)
