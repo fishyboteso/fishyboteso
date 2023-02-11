@@ -14,4 +14,4 @@ keyboard
 playsound
 event-scheduler
 mouse
-d3dshot @ git+https://github.com/fauskanger/D3DShot#egg=D3DShot
+mss

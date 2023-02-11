@@ -3,11 +3,14 @@ import math
 from enum import Enum
 from threading import Thread
 
-import d3dshot
+import numpy as np
 import pywintypes
 import win32api
 import win32gui
 from ctypes import windll
+
+from mss import mss
+from mss.base import MSSBase
 
 from fishy.helper.helper import print_exc
 
@@ -26,7 +29,7 @@ class WindowServer:
     windowOffset = None
     hwnd = None
     status = Status.STOPPED
-    d3: d3dshot.D3DShot = d3dshot.create(capture_output="numpy")
+    sct: MSSBase = None
     monitor_top_left = None
 
 
@@ -46,8 +49,7 @@ def init():
         client_rect = win32gui.GetClientRect(WindowServer.hwnd)
         WindowServer.windowOffset = math.floor(((rect[2] - rect[0]) - client_rect[2]) / 2)
         WindowServer.status = Status.RUNNING
-
-        WindowServer.d3.display = next((m for m in WindowServer.d3.displays if m.hmonitor == monitor_id), None)
+        WindowServer.sct = mss()
 
     except pywintypes.error:
         logging.error("Game window not found")
@@ -60,12 +62,14 @@ def loop():
     finds the game window location and captures it
     """
 
-    temp_screen = WindowServer.d3.screenshot()
+    sct_img = WindowServer.sct.grab(WindowServer.sct.monitors[1])
+    # noinspection PyTypeChecker
+    temp_screen = np.array(sct_img)
 
     rect = win32gui.GetWindowRect(WindowServer.hwnd)
     client_rect = win32gui.GetClientRect(WindowServer.hwnd)
 
-    fullscreen = WindowServer.d3.display.resolution[1] == (rect[3] - rect[1])
+    fullscreen = sct_img.size.height == (rect[3] - rect[1])
     title_offset = ((rect[3] - rect[1]) - client_rect[3]) - WindowServer.windowOffset if not fullscreen else 0
     crop = (
         rect[0] + WindowServer.windowOffset - WindowServer.monitor_top_left[0],
