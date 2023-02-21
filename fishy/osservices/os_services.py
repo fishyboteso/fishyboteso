@@ -55,12 +55,12 @@ class IOSServices(ABC):
         """
 
 
-class MyMetaclass(type):
+class ClassInstance(type):
     def __getattr__(cls, name):
-        return getattr(os_services._instance, name)
+        return getattr(cls._instance, name)
 
 
-class os_services(metaclass=MyMetaclass):
+class os_services(metaclass=ClassInstance):
     _instance: Optional[IOSServices] = None
 
     @staticmethod
