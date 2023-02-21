@@ -14,15 +14,13 @@ from uuid import uuid1
 from zipfile import ZipFile
 
 import requests
-import winshell
 from playsound import playsound
-from win32com.client import Dispatch
-from win32comext.shell import shell, shellcon
-from win32gui import GetForegroundWindow, GetWindowText
+
 
 import fishy
 from fishy.constants import libgps, lam2, fishyqr, libmapping, libdl, libchatmsg
 from fishy.helper.config import config
+from fishy.osservices.os_services import os_services
 
 
 def playsound_multiple(path, count=2):
@@ -110,55 +108,14 @@ def manifest_file(rel_path):
     return os.path.join(os.path.dirname(fishy.__file__), rel_path)
 
 
-def create_shortcut_first():
-    from .config import config
-
-    if not config.get("shortcut_created", False):
-        create_shortcut(False)
-        config.set("shortcut_created", True)
-
-
-# noinspection PyBroadException
-def create_shortcut(anti_ghosting: bool):
-    """
-    creates a new shortcut on desktop
-    """
-    try:
-        desktop = winshell.desktop()
-        path = os.path.join(desktop, "Fishybot ESO.lnk")
-
-        _shell = Dispatch('WScript.Shell')
-        shortcut = _shell.CreateShortCut(path)
-
-        if anti_ghosting:
-            shortcut.TargetPath = r"C:\Windows\System32\cmd.exe"
-            python_dir = os.path.join(os.path.dirname(sys.executable), "pythonw.exe")
-            shortcut.Arguments = f"/C start /affinity 1 /low {python_dir} -m fishy"
-        else:
-            shortcut.TargetPath = os.path.join(os.path.dirname(sys.executable), "python.exe")
-            shortcut.Arguments = "-m fishy"
-
-        shortcut.IconLocation = manifest_file("icon.ico")
-        shortcut.save()
-
-        logging.info("Shortcut created")
-    except Exception:
-        print_exc()
-        logging.error("Couldn't create shortcut")
-
-
 def get_savedvarsdir():
-    # noinspection PyUnresolvedReferences
-    from win32com.shell import shell, shellcon
-    documents = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
-    return os.path.join(documents, "Elder Scrolls Online", "live", "SavedVariables")
+    eso_path = os_services.get_eso_config_path()
+    return os.path.join(eso_path, "live", "SavedVariables")
 
 
 def get_addondir():
-    # noinspection PyUnresolvedReferences
-    from win32com.shell import shell, shellcon
-    documents = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
-    return os.path.join(documents, "Elder Scrolls Online", "live", "Addons")
+    eso_path = os_services.get_eso_config_path()
+    return os.path.join(eso_path, "live", "Addons")
 
 
 def addon_exists(name, url=None, v=None):
@@ -222,18 +179,9 @@ def remove_addon(name, url=None, v=None):
     return 0
 
 
-def get_documents():
-    return shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
-
-
 def log_raise(msg):
     logging.error(msg)
     raise Exception(msg)
-
-
-def is_eso_active():
-    return GetWindowText(GetForegroundWindow()) == "Elder Scrolls Online"
-
 
 # noinspection PyProtectedMember,PyUnresolvedReferences
 def _get_id(thread):
@@ -252,8 +200,8 @@ def kill_thread(thread):
     if res > 1:
         ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
         print('Exception raise failure')
-        
-        
+
+
 def print_exc():
     logging.error(traceback.format_exc())
     traceback.print_exc()

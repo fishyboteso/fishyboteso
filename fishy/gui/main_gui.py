@@ -15,6 +15,7 @@ from ..helper.config import config
 from .discord_login import discord_login
 from ..helper.hotkey.hotkey_process import hotkey
 from ..helper.hotkey.process import Key
+from ..osservices.os_services import os_services
 
 if typing.TYPE_CHECKING:
     from . import GUI
@@ -46,7 +47,7 @@ def _create(gui: 'GUI'):
     gui.login.set(1 if login > 0 else 0)
     state = tk.DISABLED if login == -1 else tk.ACTIVE
     filemenu.add_checkbutton(label="Login", command=lambda: discord_login(gui), variable=gui.login, state=state)
-    filemenu.add_command(label="Create Shortcut", command=lambda: helper.create_shortcut(False))
+    filemenu.add_command(label="Create Shortcut", command=lambda: os_services.create_shortcut(False))
     # filemenu.add_command(label="Create Anti-Ghost Shortcut", command=lambda: helper.create_shortcut(True))
 
     def _toggle_mode():

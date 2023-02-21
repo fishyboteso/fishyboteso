@@ -1,18 +1,14 @@
 import logging
-import math
 from enum import Enum
 from threading import Thread
 
 import numpy as np
-import pywintypes
-import win32api
-import win32gui
-from ctypes import windll
 
 from mss import mss
 from mss.base import MSSBase
 
 from fishy.helper.helper import print_exc
+from fishy.osservices.os_services import os_services
 
 
 class Status(Enum):
@@ -27,10 +23,11 @@ class WindowServer:
     """
     Screen: np.ndarray = None
     windowOffset = None
-    hwnd = None
     status = Status.STOPPED
     sct: MSSBase = None
-    monitor_top_left = None
+
+    crop = None
+    monitor_id = -1
 
 
 def init():
@@ -38,22 +35,25 @@ def init():
     Executed once before the main loop,
     Finds the game window, and calculates the offset to remove the title bar
     """
-    # noinspection PyUnresolvedReferences
-    try:
-        WindowServer.hwnd = win32gui.FindWindow(None, "Elder Scrolls Online")
+    WindowServer.status = Status.RUNNING
+    WindowServer.sct = mss()
 
-        monitor_id = windll.user32.MonitorFromWindow(WindowServer.hwnd, 2)
-        WindowServer.monitor_top_left = win32api.GetMonitorInfo(monitor_id)["Monitor"][:2]
+    WindowServer.crop = os_services.get_game_window_rect()
 
-        rect = win32gui.GetWindowRect(WindowServer.hwnd)
-        client_rect = win32gui.GetClientRect(WindowServer.hwnd)
-        WindowServer.windowOffset = math.floor(((rect[2] - rect[0]) - client_rect[2]) / 2)
-        WindowServer.status = Status.RUNNING
-        WindowServer.sct = mss()
-
-    except pywintypes.error:
+    monitor_rect = os_services.get_monitor_rect()
+    if monitor_rect is None:
         logging.error("Game window not found")
         WindowServer.status = Status.CRASHED
+
+    for i, m in enumerate(WindowServer.sct.monitors):
+        if m["top"] == monitor_rect[0] and m["left"] == monitor_rect[1]:
+            WindowServer.monitor_id = i
+
+
+def get_screenshot():
+    sct_img = WindowServer.sct.grab(WindowServer.sct.monitors[WindowServer.monitor_id])
+    # noinspection PyTypeChecker
+    return np.array(sct_img)
 
 
 def loop():
@@ -61,24 +61,9 @@ def loop():
     Executed in the start of the main loop
     finds the game window location and captures it
     """
-
-    sct_img = WindowServer.sct.grab(WindowServer.sct.monitors[1])
-    # noinspection PyTypeChecker
-    temp_screen = np.array(sct_img)
-
-    rect = win32gui.GetWindowRect(WindowServer.hwnd)
-    client_rect = win32gui.GetClientRect(WindowServer.hwnd)
-
-    fullscreen = sct_img.size.height == (rect[3] - rect[1])
-    title_offset = ((rect[3] - rect[1]) - client_rect[3]) - WindowServer.windowOffset if not fullscreen else 0
-    crop = (
-        rect[0] + WindowServer.windowOffset - WindowServer.monitor_top_left[0],
-        rect[1] + title_offset - WindowServer.monitor_top_left[1],
-        rect[2] - WindowServer.windowOffset - WindowServer.monitor_top_left[0],
-        rect[3] - WindowServer.windowOffset - WindowServer.monitor_top_left[1]
-    )
-
-    WindowServer.Screen = temp_screen[crop[1]:crop[3], crop[0]:crop[2]] if not fullscreen else temp_screen
+    ss = get_screenshot()
+    crop = WindowServer.crop
+    WindowServer.Screen = ss[crop[1]:crop[3], crop[0]:crop[2]]
 
     if WindowServer.Screen.size == 0:
         logging.error("Don't minimize or drag game window outside the screen")
