@@ -16,6 +16,7 @@ from fishy.helper.active_poll import active
 from fishy.helper.config import config
 from fishy.helper.hotkey.hotkey_process import hotkey
 from fishy.helper.migration import Migration
+from fishy.osservices.os_services import os_services
 
 
 def check_window_name(title):
@@ -56,6 +57,7 @@ def initialize(window_to_hide):
 def main():
     print("launching please wait...")
 
+    os_services.init()
     config.init()
     if not check_eula():
         return
