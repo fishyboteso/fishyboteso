@@ -1,4 +1,7 @@
+import inspect
 import logging
+import re
+import sys
 from abc import ABC, abstractmethod
 from typing import Tuple, Optional
 import platform
@@ -55,12 +58,28 @@ class IOSServices(ABC):
         """
 
 
-class ClassInstance(type):
-    def __getattr__(cls, name):
-        return getattr(cls._instance, name)
+# todo move this into helper and use for config and similar places
+# but make sure other fishy stuff is not imported while importing helper
+# to do that, move everything which uses fishy stuff into a different helper script
+def singleton_proxy(instance_name):
+    def decorator(root_cls):
+        if not hasattr(root_cls, instance_name):
+            raise AttributeError(f"{instance_name} not found in {root_cls}")
+
+        class SingletonProxy(type):
+            def __getattr__(cls, name):
+                return getattr(getattr(cls, instance_name), name)
+
+        class NewClass(root_cls, metaclass=SingletonProxy):
+            ...
+
+        return NewClass
+
+    return decorator
 
 
-class os_services(metaclass=ClassInstance):
+@singleton_proxy("_instance")
+class os_services:
     _instance: Optional[IOSServices] = None
 
     @staticmethod
