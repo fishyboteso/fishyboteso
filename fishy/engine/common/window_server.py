@@ -44,6 +44,7 @@ def init():
     if monitor_rect is None or WindowServer.crop is None:
         logging.error("Game window not found")
         WindowServer.status = Status.CRASHED
+        return
 
     for i, m in enumerate(WindowServer.sct.monitors):
         if m["top"] == monitor_rect[0] and m["left"] == monitor_rect[1]:

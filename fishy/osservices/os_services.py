@@ -7,6 +7,7 @@ from typing import Tuple, Optional
 import platform
 
 
+
 class IOSServices(ABC):
 
     @abstractmethod
@@ -46,7 +47,7 @@ class IOSServices(ABC):
         """
 
     @abstractmethod
-    def get_monitor_rect(self):
+    def get_monitor_rect(self) -> Optional[Tuple[int, int]]:
         """
         :return: [top, left, height, width] of monitor which has game running in it
         """
@@ -83,13 +84,17 @@ class os_services:
     _instance: Optional[IOSServices] = None
 
     @staticmethod
-    def init():
+    def init() -> bool:
         os_name = platform.system()
         if os_name == "Windows":
             from fishy.osservices.windows import Windows
             os_services._instance = Windows()
-        elif os_name == "Linux":
-            from fishy.osservices.linux import Linux
-            os_services._instance = Linux()
-        else:
-            logging.error("Platform not supported")
+            return True
+
+        # todo uncomment after linux.py is implemented
+        # if os_name == "Linux":
+        #     from fishy.osservices.linux import Linux
+        #     os_services._instance = Linux()
+        #     return True
+
+        return False

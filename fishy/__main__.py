@@ -42,7 +42,10 @@ def initialize():
 def main():
     print("launching please wait...")
 
-    os_services.init()
+    if not os_services.init():
+        print("platform not supported")
+        return
+
     config.init()
     if not check_eula():
         return
