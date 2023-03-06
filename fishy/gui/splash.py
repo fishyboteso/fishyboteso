@@ -20,7 +20,6 @@ class Splash:
 
     def start(self):
         self.process.start()
-        return self
 
     def show(self, win_loc, q):
         logging.debug("started splash process")

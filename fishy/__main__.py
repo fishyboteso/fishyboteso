@@ -57,6 +57,7 @@ def main():
     if not check_eula():
         return
 
+    splash = Splash()
     bot = EngineEventHandler(lambda: gui)
     gui = GUI(lambda: bot, lambda: on_gui_load(gui, splash, logger))
     logger = GuiLogger()
@@ -70,7 +71,7 @@ def main():
 
         logging.info(f"Fishybot v{fishy.__version__}")
 
-        splash = Splash().start()
+        splash.start()
         config.start_backup_scheduler()
 
         initialize()
