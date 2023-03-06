@@ -39,9 +39,9 @@ def init():
     WindowServer.sct = mss()
 
     WindowServer.crop = os_services.get_game_window_rect()
-
     monitor_rect = os_services.get_monitor_rect()
-    if monitor_rect is None:
+
+    if monitor_rect is None or WindowServer.crop is None:
         logging.error("Game window not found")
         WindowServer.status = Status.CRASHED
 
@@ -50,10 +50,15 @@ def init():
             WindowServer.monitor_id = i
 
 
-def get_screenshot():
+def get_cropped_screenshot():
     sct_img = WindowServer.sct.grab(WindowServer.sct.monitors[WindowServer.monitor_id])
     # noinspection PyTypeChecker
-    return np.array(sct_img)
+    ss = np.array(sct_img)
+    crop = WindowServer.crop
+    cropped_ss = ss[crop[1]:crop[3], crop[0]:crop[2]]
+    if cropped_ss.size == 0:
+        return None
+    return cropped_ss
 
 
 def loop():
@@ -61,12 +66,10 @@ def loop():
     Executed in the start of the main loop
     finds the game window location and captures it
     """
-    ss = get_screenshot()
-    crop = WindowServer.crop
-    WindowServer.Screen = ss[crop[1]:crop[3], crop[0]:crop[2]]
+    WindowServer.Screen = get_cropped_screenshot()
 
-    if WindowServer.Screen.size == 0:
-        logging.error("Don't minimize or drag game window outside the screen")
+    if WindowServer.Screen is None:
+        logging.error("Couldn't find the game window")
         WindowServer.status = Status.CRASHED
 
 

@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 from fishy.osservices.os_services import IOSServices
 
@@ -25,5 +25,5 @@ class Linux(IOSServices):
     def get_monitor_rect(self):
         pass
 
-    def get_game_window_rect(self) -> Tuple[int, int, int, int]:
+    def get_game_window_rect(self) -> Optional[Tuple[int, int, int, int]]:
         pass

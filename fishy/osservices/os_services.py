@@ -52,7 +52,7 @@ class IOSServices(ABC):
         """
 
     @abstractmethod
-    def get_game_window_rect(self) -> Tuple[int, int, int, int]:
+    def get_game_window_rect(self) -> Optional[Tuple[int, int, int, int]]:
         """
         :return: location of the game window without any frame
         """

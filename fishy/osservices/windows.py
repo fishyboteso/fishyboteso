@@ -3,7 +3,7 @@ import logging
 import math
 import os
 import sys
-from typing import Tuple
+from typing import Tuple, Optional
 
 import pywintypes
 import win32api
@@ -89,20 +89,24 @@ class Windows(IOSServices):
         except pywintypes.error:
             return None
 
-    def get_game_window_rect(self) -> Tuple[int, int, int, int]:
+    def get_game_window_rect(self) -> Optional[Tuple[int, int, int, int]]:
         hwnd = win32gui.FindWindow(None, "Elder Scrolls Online")
         monitor_rect = self.get_monitor_rect()
 
-        rect = win32gui.GetWindowRect(hwnd)
-        client_rect = win32gui.GetClientRect(hwnd)
-        windowOffset = math.floor(((rect[2] - rect[0]) - client_rect[2]) / 2)
-        fullscreen = monitor_rect[3] == (rect[3] - rect[1])
-        title_offset = ((rect[3] - rect[1]) - client_rect[3]) - windowOffset if not fullscreen else 0
+        # noinspection PyUnresolvedReferences
+        try:
+            rect = win32gui.GetWindowRect(hwnd)
+            client_rect = win32gui.GetClientRect(hwnd)
+            windowOffset = math.floor(((rect[2] - rect[0]) - client_rect[2]) / 2)
+            fullscreen = monitor_rect[3] == (rect[3] - rect[1])
+            title_offset = ((rect[3] - rect[1]) - client_rect[3]) - windowOffset if not fullscreen else 0
 
-        game_rect = (
-            rect[0] + windowOffset - monitor_rect[0],
-            rect[1] + title_offset - monitor_rect[1],
-            rect[2] - windowOffset - monitor_rect[0],
-            rect[3] - windowOffset - monitor_rect[1]
-        )
-        return game_rect
+            game_rect = (
+                rect[0] + windowOffset - monitor_rect[0],
+                rect[1] + title_offset - monitor_rect[1],
+                rect[2] - windowOffset - monitor_rect[0],
+                rect[3] - windowOffset - monitor_rect[1]
+            )
+            return game_rect
+        except pywintypes.error:
+            return None
