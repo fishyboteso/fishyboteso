@@ -14,12 +14,12 @@ class active:
             return
 
         active._scheduler = EventScheduler()
-        active._scheduler.start()
         logging.debug("active scheduler initialized")
 
     @staticmethod
     def start():
         web.ping()
+        active._scheduler.start()
         active._scheduler.enter_recurring(60, 1, web.ping)
         logging.debug("active scheduler started")
 

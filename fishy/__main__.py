@@ -2,10 +2,11 @@ import logging
 import sys
 
 import fishy
-from fishy.gui import GUI, splash, update_dialog, check_eula
+from fishy.gui import GUI, update_dialog, check_eula
 from fishy import helper, web
 from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui.log_config import GuiLogger
+from fishy.gui.splash import Splash
 from fishy.helper import hotkey
 from fishy.helper.active_poll import active
 from fishy.helper.config import config
@@ -39,6 +40,12 @@ def initialize():
     helper.install_required_addons()
 
 
+def on_gui_load(gui, splash, logger):
+    splash.finish()
+    update_dialog.check_update(gui)
+    logger.connect(gui)
+
+
 def main():
     print("launching please wait...")
 
@@ -50,34 +57,37 @@ def main():
     if not check_eula():
         return
 
-    finish_splash = splash.start()
-    logger = GuiLogger()
-    config.start_backup_scheduler()
-    active.init()
-    hotkey.init()
-
-    def on_gui_load():
-        finish_splash()
-        update_dialog.check_update(gui)
-        logger.connect(gui)
-
     bot = EngineEventHandler(lambda: gui)
-    gui = GUI(lambda: bot, on_gui_load)
+    gui = GUI(lambda: bot, lambda: on_gui_load(gui, splash, logger))
+    logger = GuiLogger()
+    hotkey.init()
+    active.init()
 
-    hotkey.start()
+    try:
+        config.init()
+        if not check_eula():
+            return
 
-    logging.info(f"Fishybot v{fishy.__version__}")
-    initialize()
+        logging.info(f"Fishybot v{fishy.__version__}")
 
-    gui.start()
-    active.start()
+        splash = Splash().start()
+        config.start_backup_scheduler()
 
-    bot.start_event_handler()  # main thread loop
+        initialize()
 
-    hotkey.stop()
-    active.stop()
-    config.stop()
-    bot.stop()
+        hotkey.start()
+        gui.start()
+        active.start()
+
+        bot.start_event_handler()  # main thread loop
+    except KeyboardInterrupt:
+        print("caught KeyboardInterrupt, Stopping main thread")
+    finally:
+        gui.stop()
+        hotkey.stop()
+        active.stop()
+        config.stop()
+        bot.stop()
 
 
 if __name__ == "__main__":
