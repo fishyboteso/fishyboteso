@@ -16,7 +16,8 @@ from fishy.engine.fullautofisher.mode.recorder import Recorder
 from fishy.engine.semifisher import fishing_mode
 from fishy.engine.semifisher.fishing_mode import FishingMode
 from fishy.helper.config import config
-from fishy.helper.helper import wait_until, is_eso_active, sign, print_exc
+from fishy.helper.helper import wait_until, sign, print_exc
+from fishy.osservices.os_services import os_services
 
 mse = mouse.Controller()
 kb = keyboard.Controller()
@@ -52,9 +53,9 @@ class FullAuto(IEngine):
             return
 
         # block thread until game window becomes active
-        if not is_eso_active():
+        if not os_services.is_eso_active():
             logging.info("Waiting for eso window to be active...")
-            wait_until(lambda: is_eso_active() or not self.start)
+            wait_until(lambda: os_services.is_eso_active() or not self.start)
             if self.start:
                 logging.info("starting in 2 secs...")
                 time.sleep(2)
@@ -87,8 +88,8 @@ class FullAuto(IEngine):
     def stop_on_inactive(self):
         def func():
             logging.debug("stop on inactive started")
-            wait_until(lambda: not is_eso_active() or not self.start)
-            if self.start and not is_eso_active():
+            wait_until(lambda: not os_services.is_eso_active() or not self.start)
+            if self.start and not os_services.is_eso_active():
                 self.turn_off()
             logging.debug("stop on inactive stopped")
         Thread(target=func).start()

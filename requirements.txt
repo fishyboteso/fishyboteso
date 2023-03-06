@@ -1,10 +1,10 @@
 urllib3
-winshell
 imutils
 numpy
 opencv_python
 Pillow
-pypiwin32
+pypiwin32 ; platform_system=="Windows"
+winshell ; platform_system=="Windows"
 ttkthemes
 requests
 beautifulsoup4

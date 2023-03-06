@@ -10,15 +10,17 @@ from typing import Optional
 
 from event_scheduler import EventScheduler
 
+from fishy.osservices.os_services import os_services
+
 
 def filename():
-    from fishy.helper.helper import get_documents
     name = "fishy_config.json"
     _filename = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"], "Documents", name)
     if os.path.exists(_filename):
         return _filename
 
-    return os.path.join(get_documents(), name)
+    # fallback for onedrive documents
+    return os.path.join(os_services.get_documents(), name)
 
 
 temp_file = os.path.join(os.environ["TEMP"], "fishy_config.BAK")
