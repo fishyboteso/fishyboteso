@@ -1,5 +1,5 @@
 from .config import Config
-from .helper import (addon_exists, create_shortcut, create_shortcut_first,
+from .helper import (addon_exists,
                      get_addonversion, get_savedvarsdir,
                      install_addon, install_thread_excepthook, manifest_file,
                      not_implemented, open_web, playsound_multiple,

@@ -12,10 +12,10 @@ from playsound import playsound
 
 from fishy import web
 from fishy.engine.semifisher import fishing_mode
-from fishy.engine.semifisher.fishing_mode import FishingMode, State
+from fishy.engine.semifisher.fishing_mode import State
 from fishy.helper import helper
 from fishy.helper.config import config
-from fishy.helper.helper import is_eso_active
+from fishy.osservices.os_services import os_services
 
 
 class FishEvent:
@@ -44,7 +44,7 @@ def _fishing_sleep(waittime, lower_limit_ms=16, upper_limit_ms=1375):
 
 def if_eso_is_focused(func):
     def wrapper():
-        if not is_eso_active():
+        if not os_services.is_eso_active():
             logging.warning("ESO window is not focused")
             return
         func()

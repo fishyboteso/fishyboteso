@@ -1,10 +1,5 @@
-import ctypes
 import logging
-import os
 import sys
-
-import win32con
-import win32gui
 
 import fishy
 from fishy.gui import GUI, update_dialog, check_eula
@@ -17,21 +12,16 @@ from fishy.helper.active_poll import active
 from fishy.helper.config import config
 from fishy.helper.hotkey.hotkey_process import hotkey
 from fishy.helper.migration import Migration
-
-
-def check_window_name(title):
-    titles = ["Command Prompt", "PowerShell", "Fishy"]
-    for t in titles:
-        if t in title:
-            return True
-    return False
+from fishy.osservices.os_services import os_services
 
 
 # noinspection PyBroadException
-def initialize(window_to_hide):
+def initialize():
     Migration.migrate()
 
-    helper.create_shortcut_first()
+    if not config.get("shortcut_created", False):
+        os_services.create_shortcut(False)
+        config.set("shortcut_created", True)
 
     new_session = web.get_session()
 
@@ -39,15 +29,11 @@ def initialize(window_to_hide):
         logging.error("Couldn't create a session, some features might not work")
     logging.debug(f"created session {new_session}")
 
-    try:
-        is_admin = os.getuid() == 0
-    except AttributeError:
-        is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
-    if is_admin:
+    if os_services.is_admin():
         logging.info("Running with admin privileges")
 
-    if not config.get("debug", False) and check_window_name(win32gui.GetWindowText(window_to_hide)):
-        win32gui.ShowWindow(window_to_hide, win32con.SW_HIDE)
+    if not config.get("debug", False):
+        os_services.hide_terminal()
         helper.install_thread_excepthook()
         sys.excepthook = helper.unhandled_exception_logging
 
@@ -62,9 +48,17 @@ def on_gui_load(gui, splash, logger):
 
 def main():
     print("launching please wait...")
+
+    if not os_services.init():
+        print("platform not supported")
+        return
+
+    config.init()
+    if not check_eula():
+        return
+
     bot = EngineEventHandler(lambda: gui)
     gui = GUI(lambda: bot, lambda: on_gui_load(gui, splash, logger))
-    window_to_hide = win32gui.GetForegroundWindow()
     logger = GuiLogger()
     hotkey.init()
     active.init()
@@ -79,7 +73,7 @@ def main():
         splash = Splash().start()
         config.start_backup_scheduler()
 
-        initialize(window_to_hide)
+        initialize()
 
         hotkey.start()
         gui.start()
