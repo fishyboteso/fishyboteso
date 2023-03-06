@@ -1,6 +1,5 @@
 import logging
 import subprocess
-import sys
 from abc import ABC, abstractmethod
 from typing import Optional
 
@@ -9,7 +8,6 @@ from numpy import ndarray
 
 from fishy import constants
 from fishy.helper.config import config
-from fishy.helper.depless import singleton_proxy, install_and_import
 from fishy.osservices.os_services import os_services
 
 
@@ -66,13 +64,17 @@ class PyAutoGUI(IScreenShot):
 class D3DShot(IScreenShot):
     # noinspection PyPackageRequirements
     def __init__(self):
-        for i in range(2):
-            install_and_import("d3dshot", constants.d3dshot_git)
-            # noinspection PyUnresolvedReferences
-            self.d3 = d3dshot.create(capture_output="numpy")
+        try:
+            import d3dshot
+        except ImportError:
+            logging.info("Installing d3dshot please wait...")
+            subprocess.call(["python", "-m", "pip", "install", constants.d3dshot_git])
+            import d3dshot
+
+        self.d3 = d3dshot.create(capture_output="numpy")
 
     def setup(self) -> bool:
-        monitor_id = get_monitor_id(self.d3.display, lambda m: (m.top, m.left))
+        monitor_id = get_monitor_id(self.d3.displays, lambda m: (m.position["top"], m.position["left"]))
         if monitor_id is None:
             return False
 
