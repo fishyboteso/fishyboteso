@@ -3,6 +3,7 @@ import time
 import tkinter as tk
 import tkinter.ttk as ttk
 import typing
+from functools import partial
 
 from fishy.gui import update_dialog
 from ttkthemes import ThemedTk
@@ -11,6 +12,7 @@ from fishy import helper
 from fishy.web import web
 
 from ..constants import fishyqr
+from ..engine.common import screenshot
 from ..helper.config import config
 from .discord_login import discord_login
 from ..helper.hotkey.hotkey_process import hotkey
@@ -62,6 +64,7 @@ def _create(gui: 'GUI'):
     def update():
         config.delete("dont_ask_update")
         update_dialog.check_update(gui, True)
+
     filemenu.add_command(label="Update", command=update)
 
     def installer():
@@ -71,6 +74,7 @@ def _create(gui: 'GUI'):
         else:
             helper.install_required_addons(True)
             filemenu.entryconfigure(4, label="Remove FishyQR")
+
     chaEntry = "Remove FishyQR" if helper.addon_exists(fishyqr[0]) else "Install FishyQR"
     filemenu.add_command(label=chaEntry, command=installer)
     menubar.add_cascade(label="Options", menu=filemenu)
@@ -78,6 +82,18 @@ def _create(gui: 'GUI'):
     debug_menu = tk.Menu(menubar, tearoff=0)
     debug_menu.add_command(label="Check QR Value",
                            command=lambda: gui.engine.check_qr_val())
+
+    def select_sslib(selected_i):
+        config.set("sslib", selected_i)
+        sslib_var.set(selected_i)
+
+    sslib = tk.Menu(debug_menu, tearoff=False)
+    sslib_var = tk.IntVar()
+    sslib_var.set(config.get("sslib", 0))
+    for i, lib in enumerate(screenshot.LIBS):
+        sslib.add_checkbutton(label=lib.__name__, variable=sslib_var,
+                              command=partial(select_sslib, i), onvalue=i)
+    debug_menu.add_cascade(label="ScreenshotLib", menu=sslib)
 
     debug_var = tk.IntVar()
     debug_var.set(int(config.get('debug', False)))
@@ -90,7 +106,8 @@ def _create(gui: 'GUI'):
     menubar.add_cascade(label="Debug", menu=debug_menu)
 
     help_menu = tk.Menu(menubar, tearoff=0)
-    help_menu.add_command(label="Need Help?", command=lambda: helper.open_web("https://github.com/fishyboteso/fishyboteso/wiki"))
+    help_menu.add_command(label="Need Help?",
+                          command=lambda: helper.open_web("https://github.com/fishyboteso/fishyboteso/wiki"))
     help_menu.add_command(label="Donate", command=lambda: helper.open_web("https://paypal.me/AdamSaudagar"))
     menubar.add_cascade(label="Help", menu=help_menu)
 
