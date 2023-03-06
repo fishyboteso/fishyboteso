@@ -3,10 +3,9 @@ from enum import Enum
 from threading import Thread
 
 import numpy as np
-
-from mss import mss
 from mss.base import MSSBase
 
+from fishy.engine.common import screenshot
 from fishy.helper.helper import print_exc
 from fishy.osservices.os_services import os_services
 
@@ -24,10 +23,8 @@ class WindowServer:
     Screen: np.ndarray = None
     windowOffset = None
     status = Status.STOPPED
-    sct: MSSBase = None
-
+    sslib = None
     crop = None
-    monitor_id = -1
 
 
 def init():
@@ -35,26 +32,18 @@ def init():
     Executed once before the main loop,
     Finds the game window, and calculates the offset to remove the title bar
     """
+    WindowServer.sslib = screenshot.create()
     WindowServer.status = Status.RUNNING
-    WindowServer.sct = mss()
-
     WindowServer.crop = os_services.get_game_window_rect()
-    monitor_rect = os_services.get_monitor_rect()
 
-    if monitor_rect is None or WindowServer.crop is None:
+    if WindowServer.crop is None or not WindowServer.sslib.setup():
         logging.error("Game window not found")
         WindowServer.status = Status.CRASHED
         return
 
-    for i, m in enumerate(WindowServer.sct.monitors):
-        if m["top"] == monitor_rect[0] and m["left"] == monitor_rect[1]:
-            WindowServer.monitor_id = i
-
 
 def get_cropped_screenshot():
-    sct_img = WindowServer.sct.grab(WindowServer.sct.monitors[WindowServer.monitor_id])
-    # noinspection PyTypeChecker
-    ss = np.array(sct_img)
+    ss = WindowServer.sslib.grab()
     crop = WindowServer.crop
     cropped_ss = ss[crop[1]:crop[3], crop[0]:crop[2]]
     if cropped_ss.size == 0:

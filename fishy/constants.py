@@ -10,3 +10,5 @@ libgps = ("LibGPS", "https://cdn.esoui.com/downloads/file601/LibGPS_3_2_0.zip", 
 libmapping = ("LibMapPing", "https://cdn.esoui.com/downloads/file1302/LibMapPing_2_0_0.zip", 200)
 libdl = ("LibDebugLogger", "https://cdn.esoui.com/downloads/file2275/LibDebugLogger_2_4_1.zip", 241)
 libchatmsg = ("LibChatMessage", "https://cdn.esoui.com/downloads/file2382/LibChatMessage_1_2_0.zip", 120)
+
+d3dshot_git = "git+https://github.com/fauskanger/D3DShot.git#egg=D3DShot"
