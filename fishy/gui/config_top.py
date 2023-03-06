@@ -48,7 +48,7 @@ def start_fullfisher_config(gui: 'GUI'):
     mode_var = tk.IntVar(value=config.get("full_auto_mode", 0))
     edit_var = tk.IntVar(value=config.get("edit_recorder_mode", 0))
     tabout_var = tk.IntVar(value=config.get("tabout_stop", 1))
-    look_for_hole = tk.IntVar(value=config.get("look_for_hole", 1))
+    look_for_hole = tk.IntVar(value=config.get("look_for_hole", 0))
     row = 0
 
     ttk.Label(controls_frame, text="Calibration: ").grid(row=row, column=0, pady=(5, 0))

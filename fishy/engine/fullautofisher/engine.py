@@ -166,7 +166,7 @@ class FullAuto(IEngine):
         _hole_found_flag = FishingMode.CurrentMode in valid_states
 
         # if vertical movement is disabled
-        if not config.get("look_for_hole", 1):
+        if not config.get("look_for_hole", 0):
             return _hole_found_flag
 
         t = 0
