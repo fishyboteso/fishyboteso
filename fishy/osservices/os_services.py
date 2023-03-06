@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from typing import Tuple, Optional
 import platform
 
+from fishy.helper.depless import singleton_proxy
 
 
 class IOSServices(ABC):
@@ -57,26 +58,6 @@ class IOSServices(ABC):
         """
         :return: location of the game window without any frame
         """
-
-
-# todo move this into helper and use for config and similar places
-# but make sure other fishy stuff is not imported while importing helper
-# to do that, move everything which uses fishy stuff into a different helper script
-def singleton_proxy(instance_name):
-    def decorator(root_cls):
-        if not hasattr(root_cls, instance_name):
-            raise AttributeError(f"{instance_name} not found in {root_cls}")
-
-        class SingletonProxy(type):
-            def __getattr__(cls, name):
-                return getattr(getattr(cls, instance_name), name)
-
-        class NewClass(root_cls, metaclass=SingletonProxy):
-            ...
-
-        return NewClass
-
-    return decorator
 
 
 @singleton_proxy("_instance")
