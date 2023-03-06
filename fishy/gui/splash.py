@@ -10,54 +10,54 @@ from fishy.helper import helper
 from fishy.helper.config import config
 
 
-def show(win_loc, q):
-    logging.debug("started splash process")
-    dim = (300, 200)
-    top = tk.Tk()
+class Splash:
+    def __init__(self):
+        self.q = Queue()
+        self.process = Process(name=Splash.__name__, target=self.show, args=(config.get("win_loc"), self.q,))
 
-    top.overrideredirect(True)
-    top.lift()
-    top.attributes('-topmost', True)
+    def finish(self):
+        self.q.put("stop")
 
-    top.title("Loading...")
-    top.resizable(False, False)
-    top.iconbitmap(helper.manifest_file('icon.ico'))
+    def start(self):
+        self.process.start()
+        return self
 
-    canvas = tk.Canvas(top, width=dim[0], height=dim[1], bg='white')
-    canvas.pack()
-    top.image = Image.open(helper.manifest_file('fishybot_logo.png')).resize(dim)
-    top.image = ImageTk.PhotoImage(top.image)
-    canvas.create_image(0, 0, anchor=tk.NW, image=top.image)
+    def show(self, win_loc, q):
+        logging.debug("started splash process")
+        dim = (300, 200)
+        top = tk.Tk()
 
-    # Position splash at the center of the main window
+        top.overrideredirect(True)
+        top.lift()
+        top.attributes('-topmost', True)
 
-    default_loc = (str(top.winfo_reqwidth()) + "+" + str(top.winfo_reqheight()) + "+" + "0" + "0")
-    loc = (win_loc or default_loc).split(":")[-1].split("+")[1:]
-    top.geometry("{}x{}+{}+{}".format(dim[0], dim[1], int(loc[0]) + int(dim[0] / 2), int(loc[1]) + int(dim[1] / 2)))
+        top.title("Loading...")
+        top.resizable(False, False)
+        top.iconbitmap(helper.manifest_file('icon.ico'))
 
-    def waiting():
-        q.get()
-        time.sleep(0.2)
-        running[0] = False
-    Thread(target=waiting).start()
+        canvas = tk.Canvas(top, width=dim[0], height=dim[1], bg='white')
+        canvas.pack()
+        top.image = Image.open(helper.manifest_file('fishybot_logo.png')).resize(dim)
+        top.image = ImageTk.PhotoImage(top.image)
+        canvas.create_image(0, 0, anchor=tk.NW, image=top.image)
 
-    running = [True]
-    while running[0]:
-        top.update()
-        time.sleep(0.1)
+        # Position splash at the center of the main window
 
-    top.destroy()
-    logging.debug("ended splash process")
+        default_loc = (str(top.winfo_reqwidth()) + "+" + str(top.winfo_reqheight()) + "+" + "0" + "0")
+        loc = (win_loc or default_loc).split(":")[-1].split("+")[1:]
+        top.geometry("{}x{}+{}+{}".format(dim[0], dim[1], int(loc[0]) + int(dim[0] / 2), int(loc[1]) + int(dim[1] / 2)))
 
+        def waiting():
+            q.get()
+            time.sleep(0.2)
+            running[0] = False
 
-def create_finish(q):
-    def finish():
-        q.put("stop")
+        Thread(target=waiting).start()
 
-    return finish
+        running = [True]
+        while running[0]:
+            top.update()
+            time.sleep(0.1)
 
-
-def start():
-    q = Queue()
-    Process(target=show, args=(config.get("win_loc"), q,)).start()
-    return create_finish(q)
+        top.destroy()
+        logging.debug("ended splash process")

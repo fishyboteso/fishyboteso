@@ -7,10 +7,11 @@ import win32con
 import win32gui
 
 import fishy
-from fishy.gui import GUI, splash, update_dialog, check_eula
+from fishy.gui import GUI, update_dialog, check_eula
 from fishy import helper, web
 from fishy.engine.common.event_handler import EngineEventHandler
 from fishy.gui.log_config import GuiLogger
+from fishy.gui.splash import Splash
 from fishy.helper import hotkey
 from fishy.helper.active_poll import active
 from fishy.helper.config import config
@@ -53,8 +54,8 @@ def initialize(window_to_hide):
     helper.install_required_addons()
 
 
-def on_gui_load(gui, finish_splash, logger):
-    finish_splash()
+def on_gui_load(gui, splash, logger):
+    splash.finish()
     update_dialog.check_update(gui)
     logger.connect(gui)
 
@@ -62,7 +63,7 @@ def on_gui_load(gui, finish_splash, logger):
 def main():
     print("launching please wait...")
     bot = EngineEventHandler(lambda: gui)
-    gui = GUI(lambda: bot, lambda: on_gui_load(gui, finish_splash, logger))
+    gui = GUI(lambda: bot, lambda: on_gui_load(gui, splash, logger))
     window_to_hide = win32gui.GetForegroundWindow()
     logger = GuiLogger()
     hotkey.init()
@@ -75,7 +76,7 @@ def main():
 
         logging.info(f"Fishybot v{fishy.__version__}")
 
-        finish_splash = splash.start()
+        splash = Splash().start()
         config.start_backup_scheduler()
 
         initialize(window_to_hide)
@@ -85,10 +86,10 @@ def main():
         active.start()
 
         bot.start_event_handler()  # main thread loop
-    except KeyboardInterrupt as e:
-        ...
+    except KeyboardInterrupt:
+        print("caught KeyboardInterrupt, Stopping main thread")
     finally:
-        gui._destroyed = True
+        gui.stop()
         hotkey.stop()
         active.stop()
         config.stop()

@@ -69,6 +69,9 @@ class GUI:
     def create(self):
         main_gui._create(self)
 
+    def stop(self):
+        self._destroyed = True
+
     def start(self):
         self._thread.start()
 
