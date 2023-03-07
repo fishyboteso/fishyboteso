@@ -20,26 +20,6 @@ kb = keyboard.Controller()
 offset = 0
 
 
-def get_crop_coords(window):
-    img = window.get_capture()
-    img = cv2.inRange(img, 0, 1)
-
-    cnt, h = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    """
-    code from https://stackoverflow.com/a/45770227/4512396
-    """
-    for i in range(len(cnt)):
-        area = cv2.contourArea(cnt[i])
-        if 5000 < area < 100000:
-            mask = np.zeros_like(img)
-            cv2.drawContours(mask, cnt, i, 255, -1)
-            x, y, w, h = cv2.boundingRect(cnt[i])
-            return x, y + offset, x + w, y + h - offset
-
-    return None
-
-
 def _update_factor(key, value):
     full_auto_factors = config.get("full_auto_factors", {})
     full_auto_factors[key] = value

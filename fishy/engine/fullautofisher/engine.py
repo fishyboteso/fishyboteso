@@ -79,12 +79,6 @@ class FullAuto(IEngine):
             logging.error("exception occurred while running full auto mode")
             print_exc()
 
-    def start_show(self):
-        def func():
-            while self.start and WindowClient.running():
-                self.window.show(self.show_crop)
-        Thread(target=func).start()
-
     def stop_on_inactive(self):
         def func():
             logging.debug("stop on inactive started")
