@@ -29,7 +29,7 @@ def get_monitor_id(monitors_iterator, get_top_left) -> Optional[int]:
 
     for i, m in enumerate(monitors_iterator):
         top, left = get_top_left(m)
-        if top == monitor_rect[0] and left == monitor_rect[1]:
+        if top == monitor_rect[1] and left == monitor_rect[0]:
             return i
 
     return None
@@ -57,7 +57,7 @@ class PyAutoGUI(IScreenShot):
 
     def grab(self) -> ndarray:
         import pyautogui
-        image = pyautogui.screenshot(all_screens=True)
+        image = pyautogui.screenshot()
         return np.array(image)
 
 
