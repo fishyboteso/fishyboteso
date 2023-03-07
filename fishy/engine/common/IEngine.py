@@ -65,7 +65,7 @@ class IEngine:
     # noinspection PyBroadException
     def _crash_safe(self):
         logging.debug(f"starting {self.name} engine thread")
-        self.window = WindowClient(color=cv2.COLOR_RGB2GRAY, show_name=f"{self.name} debug")
+        self.window = WindowClient()
         self.gui.bot_started(True)
         try:
             self.run()

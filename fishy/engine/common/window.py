@@ -14,16 +14,15 @@ from fishy.helper.config import config
 class WindowClient:
     clients: List['WindowClient'] = []
 
-    def __init__(self, crop=None, color=None, scale=None, show_name=None):
+    def __init__(self):
         """
         create a window instance with these pre process
         :param crop: [x1,y1,x2,y2] array defining the boundaries to crop
         :param color: color to use example cv2.COLOR_RGB2HSV
         :param scale: scaling the window
         """
-        self.color = color
-        self.crop = crop
-        self.scale = scale
+        self.crop = None
+        self.scale = None
         self.show_name = f"window client {len(WindowClient.clients)}"
 
         WindowClient.clients.append(self)
@@ -80,8 +79,7 @@ class WindowClient:
         if temp_img is None or temp_img.size == 0:
             return None
 
-        if self.color is not None:
-            temp_img = cv2.cvtColor(temp_img, self.color)
+        temp_img = cv2.cvtColor(temp_img, cv2.COLOR_RGB2GRAY)
 
         if self.crop is not None:
             temp_img = temp_img[self.crop[1]:self.crop[3], self.crop[0]:self.crop[2]]
