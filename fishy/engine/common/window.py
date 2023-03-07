@@ -1,4 +1,5 @@
 import logging
+import uuid
 from typing import List
 
 import cv2
@@ -7,26 +8,52 @@ import imutils
 from fishy.engine.common import window_server
 from fishy.engine.common.window_server import Status, WindowServer
 from fishy.helper import helper
+from fishy.helper.config import config
 
 
 class WindowClient:
     clients: List['WindowClient'] = []
 
-    def __init__(self, crop=None, color=None, scale=None, show_name=None):
+    def __init__(self):
         """
         create a window instance with these pre process
         :param crop: [x1,y1,x2,y2] array defining the boundaries to crop
         :param color: color to use example cv2.COLOR_RGB2HSV
         :param scale: scaling the window
         """
-        self.color = color
-        self.crop = crop
-        self.scale = scale
-        self.show_name = show_name
+        self.crop = None
+        self.scale = None
+        self.show_name = f"window client {len(WindowClient.clients)}"
 
-        if len(WindowClient.clients) == 0:
-            window_server.start()
         WindowClient.clients.append(self)
+        if len(WindowClient.clients) > 0 and WindowServer.status != Status.RUNNING:
+            window_server.start()
+
+    @staticmethod
+    def running():
+        return WindowServer.status == Status.RUNNING
+
+    def processed_image(self, func=None):
+        """
+        processes the image using the function provided
+        :param func: function to process image
+        :return: processed image
+        """
+        if WindowServer.status == Status.CRASHED:
+            return None
+
+        img = self._get_capture()
+
+        if img is None:
+            return None
+
+        if func:
+            img = func(img)
+
+        if config.get("show_grab", 0):
+            self._show(img)
+
+        return img
 
     def destroy(self):
         if self in WindowClient.clients:
@@ -34,11 +61,7 @@ class WindowClient:
         if len(WindowClient.clients) == 0:
             window_server.stop()
 
-    @staticmethod
-    def running():
-        return WindowServer.status == Status.RUNNING
-
-    def get_capture(self):
+    def _get_capture(self):
         """
         copies the recorded screen and then pre processes its
         :return: game window image
@@ -56,8 +79,7 @@ class WindowClient:
         if temp_img is None or temp_img.size == 0:
             return None
 
-        if self.color is not None:
-            temp_img = cv2.cvtColor(temp_img, self.color)
+        temp_img = cv2.cvtColor(temp_img, cv2.COLOR_RGB2GRAY)
 
         if self.crop is not None:
             temp_img = temp_img[self.crop[1]:self.crop[3], self.crop[0]:self.crop[2]]
@@ -71,49 +93,12 @@ class WindowClient:
 
         return temp_img
 
-    def processed_image(self, func=None):
-        """
-        processes the image using the function provided
-        :param func: function to process image
-        :return: processed image
-        """
-        if WindowServer.status == Status.CRASHED:
-            return None
-
-        img = self.get_capture()
-
-        if img is None:
-            return None
-
-        if func is None:
-            return img
-
-        return func(img)
-
-    def show(self, to_show, resize=None, func=None):
+    # noinspection PyUnresolvedReferences
+    def _show(self, img):
         """
         Displays the processed image for debugging purposes
-        :param to_show: false to destroy the window
-        :param resize: scale the image to make small images more visible
-        :param func: function to process the image
         """
         if WindowServer.status == Status.CRASHED:
             return
 
-        if not self.show_name:
-            logging.warning("You need to assign a name first")
-            return
-
-        if not to_show:
-            cv2.destroyWindow(self.show_name)
-            return
-
-        img = self.processed_image(func)
-
-        if img is None:
-            return
-
-        if resize is not None:
-            img = imutils.resize(img, width=resize)
-        cv2.imshow(self.show_name, img)
-        cv2.waitKey(25)
+        helper.save_img(self.show_name, img)

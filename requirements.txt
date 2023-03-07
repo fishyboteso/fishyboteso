@@ -14,4 +14,5 @@ keyboard
 playsound
 event-scheduler
 mouse
+pyautogui
 mss

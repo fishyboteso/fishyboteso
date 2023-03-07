@@ -1,8 +1,6 @@
 """
 no imports from fishy itself here, or anything which depends on fishy
 """
-
-
 def singleton_proxy(instance_name):
     def decorator(root_cls):
         if not hasattr(root_cls, instance_name):
