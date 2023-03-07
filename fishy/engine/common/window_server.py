@@ -2,10 +2,13 @@ import logging
 from enum import Enum
 from threading import Thread
 
+import cv2
 import numpy as np
 from mss.base import MSSBase
 
 from fishy.engine.common import screenshot
+from fishy.helper import helper
+from fishy.helper.config import config
 from fishy.helper.helper import print_exc
 from fishy.osservices.os_services import os_services
 
@@ -37,17 +40,26 @@ def init():
     WindowServer.crop = os_services.get_game_window_rect()
 
     if WindowServer.crop is None or not WindowServer.sslib.setup():
-        logging.error("Game window not found")
+        logging.error("Game window not found by window_server")
         WindowServer.status = Status.CRASHED
         return
 
 
 def get_cropped_screenshot():
     ss = WindowServer.sslib.grab()
+
+    if config.get("show_grab", 0):
+        helper.save_img("full screen", ss)
+
     crop = WindowServer.crop
     cropped_ss = ss[crop[1]:crop[3], crop[0]:crop[2]]
+
     if cropped_ss.size == 0:
         return None
+
+    if config.get("show_grab", 0):
+        helper.save_img("Game window", cropped_ss)
+
     return cropped_ss
 
 

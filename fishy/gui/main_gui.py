@@ -83,6 +83,14 @@ def _create(gui: 'GUI'):
     debug_menu.add_command(label="Check QR Value",
                            command=lambda: gui.engine.check_qr_val())
 
+    def toggle_show_grab():
+        new_val = 1 - config.get("show_grab", 0)
+        show_grab_var.set(new_val)
+        config.set("show_grab", new_val)
+    show_grab_var = tk.IntVar()
+    show_grab_var.set(config.get("show_grab", 0))
+    debug_menu.add_checkbutton(label="Show Grab Window", variable=show_grab_var, command=lambda: toggle_show_grab(), onvalue=1)
+
     def select_sslib(selected_i):
         config.set("sslib", selected_i)
         sslib_var.set(selected_i)
@@ -93,7 +101,7 @@ def _create(gui: 'GUI'):
     for i, lib in enumerate(screenshot.LIBS):
         sslib.add_checkbutton(label=lib.__name__, variable=sslib_var,
                               command=partial(select_sslib, i), onvalue=i)
-    debug_menu.add_cascade(label="ScreenshotLib", menu=sslib)
+    debug_menu.add_cascade(label="Screenshot Lib", menu=sslib)
 
     debug_var = tk.IntVar()
     debug_var.set(int(config.get('debug', False)))

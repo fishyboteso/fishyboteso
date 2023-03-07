@@ -7,12 +7,14 @@ import threading
 import time
 import traceback
 import webbrowser
+from datetime import datetime
 from hashlib import md5
 from io import BytesIO
 from threading import Thread
 from uuid import uuid1
 from zipfile import ZipFile
 
+import cv2
 import requests
 from playsound import playsound
 
@@ -205,3 +207,14 @@ def kill_thread(thread):
 def print_exc():
     logging.error(traceback.format_exc())
     traceback.print_exc()
+
+
+def save_img(show_name, img):
+    img_path = os.path.join(os_services.get_documents_path(), "fishy_debug", "imgs", show_name)
+    if not os.path.exists(img_path):
+        os.makedirs(img_path)
+
+    t = time.strftime("%Y.%m.%d.%H.%M.%S")
+    cv2.imwrite(
+        os.path.join(img_path, f"{t}.png"),
+        img)
