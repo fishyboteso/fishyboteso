@@ -1,6 +1,7 @@
 import logging
 import subprocess
 from abc import ABC, abstractmethod
+from functools import partial
 from typing import Optional
 
 import numpy as np
@@ -52,13 +53,22 @@ class MSS(IScreenShot):
 
 
 class PyAutoGUI(IScreenShot):
+    def __init__(self):
+        self.monitor_rect = None
+
     def setup(self) -> bool:
+        from PIL import ImageGrab
+        ImageGrab.grab = partial(ImageGrab.grab, all_screens=True)
+        self.monitor_rect = os_services.get_monitor_rect()
         return True
 
     def grab(self) -> ndarray:
         import pyautogui
         image = pyautogui.screenshot()
-        return np.array(image)
+        img = np.array(image)
+        crop = self.monitor_rect
+        img = img[crop[1]:crop[3], crop[0]:crop[2]]
+        return img
 
 
 class D3DShot(IScreenShot):
@@ -89,4 +99,6 @@ LIBS = [MSS, PyAutoGUI, D3DShot]
 
 
 def create() -> IScreenShot:
-    return LIBS[config.get("sslib", 0)]()
+    lib = LIBS[config.get("sslib", 0)]
+    logging.debug(f"Using {lib.__name__} screenshot lib")
+    return lib()
