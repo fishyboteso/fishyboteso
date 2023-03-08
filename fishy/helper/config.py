@@ -20,7 +20,7 @@ def filename():
         return _filename
 
     # fallback for onedrive documents
-    return os.path.join(os_services.get_documents(), name)
+    return os.path.join(os_services.get_documents_path(), name)
 
 
 temp_file = os.path.join(os.environ["TEMP"], "fishy_config.BAK")
