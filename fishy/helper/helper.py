@@ -209,12 +209,15 @@ def print_exc():
     traceback.print_exc()
 
 
-def save_img(show_name, img):
+def save_img(show_name, img, half=False):
     img_path = os.path.join(os_services.get_documents_path(), "fishy_debug", "imgs", show_name)
     if not os.path.exists(img_path):
         os.makedirs(img_path)
 
+    if half:
+        img = cv2.resize(img, (0, 0), fx=0.5, fy=0.5)
+
     t = time.strftime("%Y.%m.%d.%H.%M.%S")
     cv2.imwrite(
-        os.path.join(img_path, f"{t}.png"),
+        os.path.join(img_path, f"{t}.jpg"),
         img)

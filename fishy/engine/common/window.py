@@ -101,4 +101,4 @@ class WindowClient:
         if WindowServer.status == Status.CRASHED:
             return
 
-        helper.save_img(self.show_name, img)
+        helper.save_img(self.show_name, img, True)
