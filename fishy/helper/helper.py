@@ -18,7 +18,6 @@ import cv2
 import requests
 from playsound import playsound
 
-
 import fishy
 from fishy.constants import libgps, lam2, fishyqr, libmapping, libdl, libchatmsg
 from fishy.helper.config import config
@@ -185,6 +184,7 @@ def log_raise(msg):
     logging.error(msg)
     raise Exception(msg)
 
+
 # noinspection PyProtectedMember,PyUnresolvedReferences
 def _get_id(thread):
     # returns id of the respective thread
@@ -209,8 +209,12 @@ def print_exc():
     traceback.print_exc()
 
 
+def save_img_path():
+    return os.path.join(os_services.get_documents_path(), "fishy_debug", "imgs")
+
+
 def save_img(show_name, img, half=False):
-    img_path = os.path.join(os_services.get_documents_path(), "fishy_debug", "imgs", show_name)
+    img_path = os.path.join(save_img_path(), show_name)
     if not os.path.exists(img_path):
         os.makedirs(img_path)
 

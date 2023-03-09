@@ -8,7 +8,7 @@ from functools import partial
 from fishy.gui import update_dialog
 from ttkthemes import ThemedTk
 
-from fishy import helper
+from fishy.helper import helper
 from fishy.web import web
 
 from ..constants import fishyqr
@@ -87,9 +87,13 @@ def _create(gui: 'GUI'):
         new_val = 1 - config.get("show_grab", 0)
         show_grab_var.set(new_val)
         config.set("show_grab", new_val)
+        if new_val:
+            logging.info(f"Screenshots taken by fishy will be saved in {helper.save_img_path()}")
     show_grab_var = tk.IntVar()
     show_grab_var.set(config.get("show_grab", 0))
     debug_menu.add_checkbutton(label="Save Screenshots", variable=show_grab_var, command=lambda: toggle_show_grab(), onvalue=1)
+    if config.get("show_grab", 0):
+        logging.info(f"Save Screenshots is On, images will be saved in {helper.save_img_path()}")
 
     def select_sslib(selected_i):
         config.set("sslib", selected_i)
