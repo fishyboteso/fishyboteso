@@ -89,7 +89,7 @@ def _create(gui: 'GUI'):
         config.set("show_grab", new_val)
     show_grab_var = tk.IntVar()
     show_grab_var.set(config.get("show_grab", 0))
-    debug_menu.add_checkbutton(label="Show Grab Window", variable=show_grab_var, command=lambda: toggle_show_grab(), onvalue=1)
+    debug_menu.add_checkbutton(label="Save Screenshots", variable=show_grab_var, command=lambda: toggle_show_grab(), onvalue=1)
 
     def select_sslib(selected_i):
         config.set("sslib", selected_i)
