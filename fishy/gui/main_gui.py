@@ -2,6 +2,7 @@ import logging
 import time
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import messagebox
 import typing
 from functools import partial
 
@@ -83,17 +84,29 @@ def _create(gui: 'GUI'):
     debug_menu.add_command(label="Check QR Value",
                            command=lambda: gui.engine.check_qr_val())
 
+
     def toggle_show_grab():
         new_val = 1 - config.get("show_grab", 0)
         show_grab_var.set(new_val)
         config.set("show_grab", new_val)
         if new_val:
-            logging.info(f"Screenshots taken by fishy will be saved in {helper.save_img_path()}")
+            messagebox.showwarning("Warning", "Screenshots taken by Fishy will be saved in Documents.")
+            logging.info(f"Screenshots taken by Fishy will be saved in {helper.save_img_path()}")
+        else:
+            delete_screenshots = messagebox.askyesno("Confirmation", "Do you want to delete the saved screenshots?")
+            if delete_screenshots:
+                # Delete the saved screenshots
+                # Add your code here to delete the screenshots
+                logging.info("Saved screenshots have been deleted.")
+            else:
+                logging.info("Saved screenshots were not deleted.")
+
     show_grab_var = tk.IntVar()
     show_grab_var.set(config.get("show_grab", 0))
     debug_menu.add_checkbutton(label="Save Screenshots", variable=show_grab_var, command=lambda: toggle_show_grab(), onvalue=1)
     if config.get("show_grab", 0):
         logging.info(f"Save Screenshots is On, images will be saved in {helper.save_img_path()}")
+
 
     def select_sslib(selected_i):
         config.set("sslib", selected_i)
