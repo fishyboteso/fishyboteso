@@ -2,8 +2,10 @@ import logging
 import time
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import messagebox
 import typing
 from functools import partial
+import os
 
 from fishy.gui import update_dialog
 from ttkthemes import ThemedTk
@@ -89,11 +91,28 @@ def _create(gui: 'GUI'):
         config.set("show_grab", new_val)
         if new_val:
             logging.info(f"Screenshots taken by fishy will be saved in {helper.save_img_path()}")
+            messagebox.showwarning("Warning", "Screenshots taken by Fishy will be saved in Documents.")
+            logging.info(f"Screenshots taken by Fishy will be saved in {helper.save_img_path()}")
+        else:
+            delete_screenshots = messagebox.askyesno("Confirmation", "Do you want to delete the saved screenshots?")
+            if delete_screenshots:
+                # Delete the saved screenshots
+                folder_path = helper.save_img_path()
+                try:
+                    os.rmdir(folder_path)  # Deletes the folder
+                    logging.info("Saved screenshots folder has been deleted.")
+                except OSError as e:
+                    logging.error(f"Error occurred while deleting the folder: {e}")
+            else:
+                logging.info("Saved screenshots will be preserved.")
+
+
     show_grab_var = tk.IntVar()
     show_grab_var.set(config.get("show_grab", 0))
     debug_menu.add_checkbutton(label="Save Screenshots", variable=show_grab_var, command=lambda: toggle_show_grab(), onvalue=1)
     if config.get("show_grab", 0):
         logging.info(f"Save Screenshots is On, images will be saved in {helper.save_img_path()}")
+
 
     def select_sslib(selected_i):
         config.set("sslib", selected_i)
