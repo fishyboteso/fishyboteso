@@ -57,8 +57,13 @@ def _get_values_from_image(img):
 def _parse_qr_code(code):
     if not code:
         return None
-    match = re.match(r'^(-?\d+\.\d+),(-?\d+\.\d+),(-?\d+),(\d+)(,(-?\d+\.\d+),(-?\d+))*$', code)
+    match = re.match(r'^(-?\d+\.\d+),(-?\d+\.\d+),(-?\d+),(\d+)(?:,(.*))?$', code)
     if not match:
-        logging.warning(f"qr code is not what was expected {code}")
+        logging.warning(f"QR code is not what was expected: {code}")
         return None
-    return [float(match.group(1)), float(match.group(2)), int(match.group(3)), int(match.group(4))]
+    values = [float(match.group(1)), float(match.group(2)), int(match.group(3)), int(match.group(4))]
+    unknown_value = match.group(5)
+    if unknown_value:
+        values.append(unknown_value)
+    return values
+
