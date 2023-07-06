@@ -18,7 +18,7 @@ def is_logged_in():
         return -1
 
     body = {"uid": config.get("uid"), "apiversion": apiversion}
-    response = requests.get(urls.discord, params=body)
+    response = requests.get(urls.discord, json=body)
     logged_in = response.json()["discord_login"]
     return 1 if logged_in else 0
 
@@ -93,7 +93,7 @@ def is_subbed():
         return False, False
 
     body = {"uid": config.get("uid"), "apiversion": apiversion}
-    response = requests.get(urls.subscription, params=body)
+    response = requests.get(urls.subscription, json=body)
 
     if response.status_code != 200:
         return False, False
@@ -147,7 +147,7 @@ def get_session(lazy=True):
 @fallback((None, False))
 def _create_new_session(uid):
     body = {"uid": uid, "apiversion": apiversion}
-    response = requests.post(urls.session, params=body)
+    response = requests.post(urls.session, json=body)
 
     if response.status_code == 405:
         return None, True
@@ -158,7 +158,7 @@ def _create_new_session(uid):
 @fallback(False)
 def has_beta():
     body = {"uid": config.get("uid"), "apiversion": apiversion}
-    response = requests.get(urls.beta, params=body)
+    response = requests.get(urls.beta, json=body)
     result = response.json()
 
     if not result["success"]:
@@ -170,5 +170,5 @@ def has_beta():
 @fallback(None)
 def ping():
     body = {"uid": config.get("uid"), "apiversion": apiversion}
-    response = requests.post(urls.ping, params=body)
+    response = requests.post(urls.ping, json=body)
     logging.debug(f"ping response: {response.json()}")
