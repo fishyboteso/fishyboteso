@@ -1,3 +1,4 @@
+import os
 from typing import Tuple, Optional
 
 from fishy.osservices.os_services import IOSServices
@@ -14,7 +15,11 @@ class Linux(IOSServices):
         pass
 
     def is_admin(self) -> bool:
-        pass
+        if os.geteuid() == 0:
+            return "The program is running as root"
+        else:
+            return "The program is not running as root"
+
 
     def get_eso_config_path(self) -> str:
         pass
