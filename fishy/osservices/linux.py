@@ -1,3 +1,5 @@
+import subprocess
+import re
 import os
 from Xlib import *
 from typing import Tuple, Optional
@@ -29,7 +31,7 @@ class Linux(IOSServices):
             print("Couldn't create shortcut")
 
     def get_documents_path(self) -> str:
-        pass
+        return os .path.join(os.path.expanduser('~'), "Documents")
 
     def is_admin(self) -> bool:
         if os.geteuid() == 0:
@@ -50,8 +52,46 @@ class Linux(IOSServices):
         window_name = window.get_wm_name()
         return window_name == "Elder Scrolls Online"
 
-    def get_monitor_rect(self):
-        pass
+    def get_monitor_rect():
+        try:
+            output = subprocess.check_output(["xrandr"]).decode("utf-8")
+            matches = re.findall(r"(\d+)x(\d+)\+(\d+)\+(\d+)", output)
+            if matches:
+                width, height, x, y = matches[0]
+                return {
+                    "width": int(width),
+                    "height": int(height),
+                    "x": int(x),
+                    "y": int(y)
+                }
+            else:
+                return None
+        except subprocess.CalledProcessError:
+            return None
 
-    def get_game_window_rect(self) -> Optional[Tuple[int, int, int, int]]:
-        pass
+    def get_game_window_rect() -> Optional[Tuple[int, int, int, int]]:
+        d = display.Display()
+        root = d.screen().root
+        window_id = None
+
+        # Find the window with the specified name
+        window_attributes = root.query_tree().children
+        for window in window_attributes:
+            window_name = window.get_wm_name()
+            if window_name == "Elder Scrolls Online":
+                window_id = window.id
+                break
+
+        if window_id is None:
+            return None
+
+        window_geometry = root.get_geometry()
+        window_rect = window.get_geometry()
+        game_rect = (
+            window_rect.x,
+            window_rect.y,
+            window_rect.x + window_geometry.width,
+            window_rect.y + window_geometry.height
+        )
+
+        return game_rect
