@@ -11,7 +11,7 @@ from fishy.osservices.os_services import IOSServices
 class Linux(IOSServices):
 
     def hide_terminal():
-        window_title = ""
+        window_title = "" # Window title
         command = f'gsettings set org.gnome.shell.extensions.dash-to-dock intellihide-on-maximize false; \
                 wmctrl -r "{window_title}" -b add,hidden'
         subprocess.run(command, shell=True)
