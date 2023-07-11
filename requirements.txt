@@ -17,3 +17,5 @@ mouse
 pyautogui
 mss
 typing
+pyxdg
+Xlib

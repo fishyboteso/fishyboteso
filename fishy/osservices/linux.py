@@ -1,6 +1,7 @@
 import os
 from Xlib import *
 from typing import Tuple, Optional
+from xdg.DesktopEntry import DesktopEntry
 
 from fishy.osservices.os_services import IOSServices
 
@@ -9,8 +10,23 @@ class Linux(IOSServices):
     def hide_terminal(self):
         pass
 
-    def create_shortcut(self):
-        pass
+    def create_shortcut(anti_ghosting=False):
+        try:
+            desktop_file = os.path.expanduser("~/Desktop/Fishybot ESO.desktop")
+            shortcut = DesktopEntry(desktop_file)
+            shortcut.set("Type", "Application")
+
+            if anti_ghosting:
+                shortcut.set("Exec", "/usr/bin/python3 -m fishy")
+            else:
+                shortcut.set("Exec", "/usr/bin/python3 -m fishy")
+
+            shortcut.set("Icon", "/path/to/icon.ico")
+            shortcut.write()
+
+            print("Shortcut created")
+        except Exception:
+            print("Couldn't create shortcut")
 
     def get_documents_path(self) -> str:
         pass
