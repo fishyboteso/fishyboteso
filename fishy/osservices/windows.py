@@ -73,10 +73,8 @@ class Windows(IOSServices):
     def get_documents_path(self) -> str:
         return shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
 
-    def get_eso_config_path(self) -> str:
-        # noinspection PyUnresolvedReferences
-        from win32com.shell import shell, shellcon
-        documents = shell.SHGetFolderPath(0, shellcon.CSIDL_PERSONAL, None, 0)
+    def get_eso_config_path() -> str:
+        documents = os.path.expanduser("~/Documents")
         return os.path.join(documents, "Elder Scrolls Online")
 
     def get_monitor_rect(self):
