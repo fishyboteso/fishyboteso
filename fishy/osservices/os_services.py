@@ -8,7 +8,6 @@ import platform
 
 from fishy.helper.depless import singleton_proxy
 
-
 class IOSServices(ABC):
 
     @abstractmethod
