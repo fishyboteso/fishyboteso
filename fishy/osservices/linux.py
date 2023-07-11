@@ -38,8 +38,9 @@ class Linux(IOSServices):
             return "The program is not running as root"
 
 
-    def get_eso_config_path(self) -> str:
-        pass
+    def get_eso_config_path() -> str:
+        documents = os.path.expanduser("~/Documents")
+        return os.path.join(documents, "Elder Scrolls Online")
 
     def is_eso_active(self) -> bool:
         d = display.Display()
