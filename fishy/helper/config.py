@@ -22,8 +22,10 @@ def filename():
     # fallback for onedrive documents
     return os.path.join(os_services.get_documents_path(), name)
 
-
-temp_file = os.path.join(os.getenv("TMPDIR", "/tmp"), "fishy_config.BAK")
+try:
+    temp_file = os.path.join(os.environ["TEMP"], "fishy_config.BAK")
+except KeyError:
+    temp_file = os.path.join(os.getenv("TMPDIR", "/tmp"), "fishy_config.BAK")
 
 
 class Config:
