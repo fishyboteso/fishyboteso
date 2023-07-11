@@ -3,8 +3,8 @@ imutils
 numpy
 opencv_python
 Pillow
-pypiwin32 ; platform_system=="Linux"
-winshell ; platform_system=="Linux"
+pypiwin32
+winshell
 ttkthemes
 requests
 beautifulsoup4
@@ -16,3 +16,4 @@ event-scheduler
 mouse
 pyautogui
 mss
+typing
