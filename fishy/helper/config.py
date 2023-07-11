@@ -23,7 +23,7 @@ def filename():
     return os.path.join(os_services.get_documents_path(), name)
 
 
-temp_file = os.path.join(os.environ["TEMP"], "fishy_config.BAK")
+temp_file = os.path.join(os.environb("TMPDIR"), "fishy_config.BAK")
 
 
 class Config:
