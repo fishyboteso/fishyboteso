@@ -3,8 +3,8 @@ imutils
 numpy
 opencv_python
 Pillow
-pypiwin32 ; platform_system=="Windows"
-winshell ; platform_system=="Windows"
+pypiwin32 ; platform_system=="Linux"
+winshell ; platform_system=="Linux"
 ttkthemes
 requests
 beautifulsoup4
