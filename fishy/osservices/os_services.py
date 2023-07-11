@@ -72,10 +72,9 @@ class os_services:
             os_services._instance = Windows()
             return True
 
-        # todo uncomment after linux.py is implemented
-        # if os_name == "Linux":
-        #     from fishy.osservices.linux import Linux
-        #     os_services._instance = Linux()
-        #     return True
+        if os_name == "Linux":
+            from fishy.osservices.linux import Linux
+            os_services._instance = Linux()
+            return True
 
         return False
