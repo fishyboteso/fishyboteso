@@ -10,6 +10,11 @@ from . import urls
 from .decorators import fallback, uses_session
 
 _session_id = None
+_online = True
+
+
+def is_online():
+    return _online
 
 
 @fallback(-1)
@@ -44,7 +49,7 @@ def logout():
 
 
 @fallback(None)
-def register_user():
+def _register_user():
     ip = get_ip(GoogleDnsProvider)
     body = {"ip": ip, "apiversion": apiversion}
     response = requests.post(urls.user, json=body)
@@ -111,7 +116,12 @@ def unsub():
 
 
 def get_session(lazy=True):
-    global _session_id
+    """
+    this doesn't have @fallback as this doesn't actually make any web calls directly
+    this web call needs to be the first thing to be called, as it sets the online status
+    todo maybe shift this to web.init() or something to signify that
+    """
+    global _session_id, _online
 
     # lazy loading logic
     if lazy and _session_id is not None:
@@ -122,22 +132,22 @@ def get_session(lazy=True):
 
     # then create session
     if uid:
-        _session_id, online = _create_new_session(uid)
+        _session_id, _online = _create_new_session(uid)
     # if not, create new id then try creating session again
     else:
-        uid = register_user()
+        uid = _register_user()
         config.set("uid", uid, True)
         logging.debug(f"New User, generated new uid: {uid}")
         if uid:
-            _session_id, online = _create_new_session(uid)
+            _session_id, _online = _create_new_session(uid)
         else:
-            online = False
+            _online = False
 
-    # when the user is already registered but session is not created as uid is not found
-    if online and not _session_id:
+    # when the user is already registered but session is not created as uid is not found by the server
+    if _online and not _session_id:
         logging.error("user not found, generating new uid.. contact dev if you don't want to loose data")
-        new_uid = register_user()
-        _session_id, online = _create_new_session(new_uid)
+        new_uid = _register_user()
+        _session_id, _online = _create_new_session(new_uid)
         config.set("uid", new_uid, True)
         config.set("old_uid", uid, True)
 
@@ -147,7 +157,7 @@ def get_session(lazy=True):
 @fallback((None, False))
 def _create_new_session(uid):
     body = {"uid": uid, "apiversion": apiversion}
-    response = requests.post(urls.session, json=body)
+    response = requests.post(urls.session, json=body, timeout=10)
 
     if response.status_code == 405:
         return None, True

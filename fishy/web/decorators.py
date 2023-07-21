@@ -2,8 +2,11 @@ import logging
 import traceback
 from functools import wraps
 
+from fishy.web import web
+
 
 def uses_session(f):
+    """directly returns none if it couldn't get session, instead of running the function"""
     @wraps(f)
     def wrapper(*args, **kwargs):
         from .web import get_session
@@ -21,6 +24,9 @@ def fallback(default):
         # noinspection PyBroadException
         @wraps(f)
         def wrapper(*args, **kwargs):
+            if not web.is_online():
+                return default
+
             try:
                 return f(*args, **kwargs)
             except Exception:
