@@ -52,7 +52,7 @@ def logout():
 def _register_user():
     ip = get_ip(GoogleDnsProvider)
     body = {"ip": ip, "apiversion": apiversion}
-    response = requests.post(urls.user, json=body)
+    response = requests.post(urls.user, json=body, timeout=10)
     result = response.json()
     return result["uid"]
 
