@@ -15,10 +15,15 @@ from fishy.osservices.os_services import os_services
 
 def filename():
     name = "fishy_config.json"
-    _filename = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"], "Documents", name)
+    if "HOME" in os.environ:
+        _filename = os.path.join(os.environ["HOME"], "Documents", name)
+    else:
+        # fallback for systems without 'HOME' variable
+        _filename = os.path.join(os.path.expanduser("~"), "Documents", name)
+        
     if os.path.exists(_filename):
         return _filename
-
+    
     # fallback for onedrive documents
     return os.path.join(os_services.get_documents_path(), name)
 
