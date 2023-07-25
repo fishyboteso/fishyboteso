@@ -10,13 +10,13 @@ from fishy.osservices.os_services import IOSServices
 
 class Linux(IOSServices):
 
-    def hide_terminal():
+    def hide_terminal(self):
         window_title = "" # Window title
         command = f'gsettings set org.gnome.shell.extensions.dash-to-dock intellihide-on-maximize false; \
                 wmctrl -r "{window_title}" -b add,hidden'
         subprocess.run(command, shell=True)
 
-    def create_shortcut(anti_ghosting=False):
+    def create_shortcut(self, anti_ghosting=False):
         try:
             desktop_file = os.path.expanduser("~/Desktop/Fishybot ESO.desktop")
             shortcut = DesktopEntry(desktop_file)
@@ -27,7 +27,7 @@ class Linux(IOSServices):
             else:
                 shortcut.set("Exec", "/usr/bin/python3 -m fishy")
 
-            shortcut.set("Icon", "/path/to/icon.ico")
+            shortcut.set("Icon", "fishy/icon.png")
             shortcut.write()
 
             print("Shortcut created")

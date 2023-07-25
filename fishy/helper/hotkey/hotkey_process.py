@@ -40,12 +40,12 @@ class hotkey:
 
 class HotKey:
     def __init__(self):
-        self.inq = Queue()
-        self.outq = Queue()
+        self.inq = queue.Queue()
+        self.outq = queue.Queue()
 
         self._hotkeys: Dict[Key, Optional[Callable]] = dict([(k, None) for k in Key])
 
-        self.process = Process(target=process.run, args=(self.inq, self.outq))
+        self.process = Thread(target=process.run, args=(self.inq, self.outq))
         self.event = Thread(target=self._event_loop)
 
     def hook(self, key: Key, func: Callable):
@@ -77,6 +77,6 @@ class HotKey:
     def stop(self):
         self.inq.put("stop")
         self.outq.put("stop")
-        self.process.join()
-        self.event.join()
+        # self.process.join()
+        # self.event.join()
         logging.debug("hotkey process ended")
