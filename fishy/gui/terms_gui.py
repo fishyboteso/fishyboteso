@@ -31,8 +31,8 @@ def _run_terms_window():
     message = f'I agree to the [Terms of Service and Privacy Policy]({web.get_terms_page()})'
     root.title("EULA")
     root.resizable(False, False)
-    root.iconphoto(True, tk.PhotoImage(file=icon_png_path))
-    
+    root.iconphoto(True, tk.PhotoImage(file='icon.png'))
+
     f = ttk.Frame(root)
     canvas = tk.Canvas(f, width=300, height=200)
     canvas.pack()
