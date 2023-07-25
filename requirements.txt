@@ -2,7 +2,7 @@ urllib3
 imutils
 numpy
 opencv_python
-Pillow
+pillow
 pypiwin32 ; platform_system=="Windows"
 winshell ; platform_system=="Windows"
 ttkthemes
