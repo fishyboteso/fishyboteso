@@ -19,7 +19,7 @@ import requests
 from playsound import playsound
 
 import fishy
-from fishy.constants import libgps, lam2, fishyqr, libmapping, libdl, libchatmsg
+from fishy.constants import libgps, lam2, fishyqr, fishyfsm, libmapping, libdl, libchatmsg
 from fishy.helper.config import config
 from fishy.osservices.os_services import os_services
 
@@ -138,7 +138,7 @@ def get_addonversion(name, url=None, v=None):
 
 
 def install_required_addons(force=False):
-    addons_req = [libgps, lam2, fishyqr, libmapping, libdl, libchatmsg]
+    addons_req = [libgps, lam2, fishyqr, fishyfsm, libmapping, libdl, libchatmsg]
     addon_version = config.get("addon_version", {})
     installed = False
     for addon in addons_req:
