@@ -35,7 +35,7 @@ class Linux(IOSServices):
             print("Couldn't create shortcut")
 
     def get_documents_path(self) -> str:
-        return os .path.join(os.path.expanduser('~'), "Documents")
+        return os.path.join(os.path.expanduser('~'), "Documents")
 
     def is_admin(self) -> bool:
         if os.geteuid() == 0:
@@ -43,10 +43,10 @@ class Linux(IOSServices):
         else:
             return "The program is not running as root"
 
-
-    def get_eso_config_path() -> str:
+    def get_eso_config_path(self) -> str:
         documents = os.path.expanduser("~/Documents")
         return os.path.join(documents, "Elder Scrolls Online")
+
 
     def is_eso_active(self) -> bool:
         d = display.Display()

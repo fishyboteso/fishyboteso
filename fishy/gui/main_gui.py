@@ -39,7 +39,7 @@ def _create(gui: 'GUI'):
     gui._root = ThemedTk(theme="equilux", background=True)
     gui._root.attributes('-alpha', 0.0)
     gui._root.title("Fishybot for Elder Scrolls Online")
-    gui._root.iconbitmap(helper.manifest_file('icon.ico'))
+    gui._root.iconphoto(True, tk.PhotoImage(file='fishy/icon.png'))
 
     # region menu
     menubar = tk.Menu(gui._root)
