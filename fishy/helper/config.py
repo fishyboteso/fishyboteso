@@ -19,7 +19,7 @@ def filename():
         _filename = os.path.join(os.environ["HOME"], "Documents", name)
     else:
         # fallback for systems without 'HOME' variable
-        _filename = os.path.join(os.path.expanduser("~"), "Documents", name)
+        _filename = os.path.join(os.path.expanduser("/root/"), "Documents", name)
         
     if os.path.exists(_filename):
         return _filename

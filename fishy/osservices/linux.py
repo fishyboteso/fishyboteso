@@ -73,7 +73,7 @@ class Linux(IOSServices):
         except subprocess.CalledProcessError:
             return None
 
-    def get_game_window_rect() -> Optional[Tuple[int, int, int, int]]:
+    def get_game_window_rect(self) -> Optional[Tuple[int, int, int, int]]: # TODO: add self 
         d = display.Display()
         root = d.screen().root
         window_id = None

@@ -64,7 +64,7 @@ class HotKey:
             if key in Key:
                 callback = self._hotkeys[key]
                 if callback:
-                    playsound(helper.manifest_file("beep.wav"), False)
+                    playsound(helper.manifest_file("https://raw.githubusercontent.com/fishyboteso/fishyboteso/main/fishy/beep.wav"), False)  # Added comma here
                     callback()
 
             time.sleep(0.1)
