@@ -1,6 +1,6 @@
 import logging
 import time
-import queue
+# import queue
 from multiprocessing import Process, Queue
 from threading import Thread
 from typing import Dict, Optional, Callable
@@ -40,8 +40,8 @@ class hotkey:
 
 class HotKey:
     def __init__(self):
-        self.inq = queue.Queue()
-        self.outq = queue.Queue()
+        self.inq = Queue()
+        self.outq = Queue()
 
         self._hotkeys: Dict[Key, Optional[Callable]] = dict([(k, None) for k in Key])
 

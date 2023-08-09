@@ -32,7 +32,9 @@ class Splash:
 
         top.title("Loading...")
         top.resizable(False, False)
-        top.iconphoto(True, tk.PhotoImage(file='fishy/icon.png'))
+
+        top.iconphoto(True, tk.PhotoImage(helper.manifest_file('icon.png')))
+        # top.iconbitmap(helper.manifest_file('icon.ico'))
 
         canvas = tk.Canvas(top, width=dim[0], height=dim[1], bg='white')
         canvas.pack()
