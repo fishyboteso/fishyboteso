@@ -26,7 +26,7 @@ class Linux(IOSServices):
             else:
                 shortcut.set("Exec", "/usr/bin/python3 -m fishy")
 
-            shortcut.set("Icon", "icon.png")
+            shortcut.set("Icon", "icon.png") # TODO : Fix icon address
             shortcut.write()
 
             print("Shortcut created")
