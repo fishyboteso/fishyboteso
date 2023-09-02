@@ -36,9 +36,9 @@ class Splash:
         top.resizable(False, False)
         
         if os_name == 'Linux':
-            top.iconbitmap(helper.manifest_file('icon.ico'))
-        else:
             top.iconphoto(True, tk.PhotoImage(helper.manifest_file('icon.png')))
+        else:
+            top.iconbitmap(helper.manifest_file('icon.ico'))
 
         canvas = tk.Canvas(top, width=dim[0], height=dim[1], bg='white')
         canvas.pack()

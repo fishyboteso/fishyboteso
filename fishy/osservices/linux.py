@@ -10,9 +10,8 @@ from fishy.osservices.os_services import IOSServices
 class Linux(IOSServices):
 
     def hide_terminal(self):
-        window_title = "" # عنوان پنجره
-        command = f'gsettings set org.gnome.shell.extensions.dash-to-dock intellihide-on-maximize false; \
-                wmctrl -r "{window_title}" -b add,hidden'
+        window_title = 'Terminal'
+        command = f'wmctrl -r "{window_title}" -b add,hidden'
         subprocess.run(command, shell=True, check=True)
 
     def create_shortcut(self, anti_ghosting=False):
