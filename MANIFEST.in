@@ -3,9 +3,12 @@ include README.md
 include requirements.txt
 include fishy/version.txt
 include fishy/icon.ico
+include fishy/icon.png
 include fishy/fishybot_logo.png
 include fishy/sound.mp3
 include fishy/beep.wav
+include install.sh
+
 
 recursive-include tests *
 recursive-exclude * __pycache__
