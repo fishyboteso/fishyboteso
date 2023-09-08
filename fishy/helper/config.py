@@ -5,6 +5,7 @@ Saves configuration in file as json file
 import json
 import logging
 import os
+from subprocess import run
 # path to save the configuration file
 from typing import Optional
 
@@ -79,6 +80,7 @@ class Config:
         logging.debug("config stopped")
 
     def _create_backup(self):
+        chmod = run(['sudo', 'chmod', '+w', '/tmp'])
         with open(temp_file, 'w') as f:
             f.write(json.dumps(self._config_dict))
         logging.debug("created backup")

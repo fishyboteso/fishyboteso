@@ -3,7 +3,7 @@
 if [ -e /etc/os-release ]; then
     distro_info=$(cat /etc/os-release)
     
-    if [[ $distro_info == *"Manjaro"* ]]; then
+    if [[ $distro_info == *"arch"* ]]; then
         echo "OS Manjaro: installing tk, python, python-pip, wmctrl"
         sudo pacman -Sy
         
@@ -11,7 +11,7 @@ if [ -e /etc/os-release ]; then
         sudo pacman -S python
         sudo pacman -S python-pip
         sudo pacman -S wmctrl
-    elif [[ $distro_info == *"Ubuntu"* ]]; then
+    elif [[ $distro_info == *"debian"* ]]; then
         echo "OS Ubuntu: installing tk, python, python-pip, wmctrl"
         sudo apt update
 
@@ -20,7 +20,7 @@ if [ -e /etc/os-release ]; then
         sudo apt-get install python-pip
         sudo apt install wmctrl
 
-    elif [[ $distro_info == *"Fedora"* ]]; then
+    elif [[ $distro_info == *"red hat"* ]]; then
         echo "OS Fedora: installing tk, python, python-pip, wmctrl"
         sudo dnf update
 

@@ -16,3 +16,4 @@ event-scheduler
 mouse
 pyautogui
 mss
+pyxdg
