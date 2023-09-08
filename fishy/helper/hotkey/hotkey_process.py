@@ -1,5 +1,6 @@
 import logging
 import time
+# import queue
 from multiprocessing import Process, Queue
 from threading import Thread
 from typing import Dict, Optional, Callable
@@ -44,7 +45,7 @@ class HotKey:
 
         self._hotkeys: Dict[Key, Optional[Callable]] = dict([(k, None) for k in Key])
 
-        self.process = Process(target=process.run, args=(self.inq, self.outq))
+        self.process = Thread(target=process.run, args=(self.inq, self.outq))
         self.event = Thread(target=self._event_loop)
 
     def hook(self, key: Key, func: Callable):
@@ -63,7 +64,7 @@ class HotKey:
             if key in Key:
                 callback = self._hotkeys[key]
                 if callback:
-                    playsound(helper.manifest_file("beep.wav"), False)
+                    playsound(helper.manifest_file("https://raw.githubusercontent.com/fishyboteso/fishyboteso/main/fishy/beep.wav"), False)  # Added comma here
                     callback()
 
             time.sleep(0.1)
@@ -76,6 +77,6 @@ class HotKey:
     def stop(self):
         self.inq.put("stop")
         self.outq.put("stop")
-        self.process.join()
-        self.event.join()
+        # self.process.join()
+        # self.event.join()
         logging.debug("hotkey process ended")

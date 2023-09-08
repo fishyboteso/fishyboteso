@@ -1,7 +1,7 @@
 import time
 from tkinter import Toplevel
 from fishy import helper
-
+from tkinter import *
 
 def center(win):
     win.update_idletasks()
@@ -21,7 +21,7 @@ class PopUp(Toplevel):
         self.running = True
         self.quit_callback = quit_callback
         self.protocol("WM_DELETE_WINDOW", self.quit_top)
-        self.iconbitmap(helper.manifest_file('icon.ico'))
+        self.iconphoto(True, PhotoImage(file='fishy/icon.png'))
 
     def quit_top(self):
         self.quit_callback()

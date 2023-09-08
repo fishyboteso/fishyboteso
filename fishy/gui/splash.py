@@ -3,12 +3,14 @@ import time
 import tkinter as tk
 from multiprocessing import Process, Queue
 from threading import Thread
+import platform
 
 from PIL import Image, ImageTk
 
 from fishy.helper import helper
 from fishy.helper.config import config
 
+os_name = platform.system()
 
 class Splash:
     def __init__(self):
@@ -32,7 +34,11 @@ class Splash:
 
         top.title("Loading...")
         top.resizable(False, False)
-        top.iconbitmap(helper.manifest_file('icon.ico'))
+        
+        if os_name == 'Linux':
+            top.iconphoto(True, tk.PhotoImage(helper.manifest_file('icon.png')))
+        else:
+            top.iconbitmap(helper.manifest_file('icon.ico'))
 
         canvas = tk.Canvas(top, width=dim[0], height=dim[1], bg='white')
         canvas.pack()

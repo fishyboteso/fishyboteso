@@ -31,7 +31,7 @@ def _run_terms_window():
     message = f'I agree to the [Terms of Service and Privacy Policy]({web.get_terms_page()})'
     root.title("EULA")
     root.resizable(False, False)
-    root.iconbitmap(helper.manifest_file('icon.ico'))
+    root.iconphoto(True, tk.PhotoImage(file='fishy/icon.png'))
 
     f = ttk.Frame(root)
     canvas = tk.Canvas(f, width=300, height=200)
@@ -41,7 +41,6 @@ def _run_terms_window():
     canvas.create_image(0, 0, anchor=tk.NW, image=root.image)
 
     check_value = tk.IntVar()
-
     g1 = ttk.Frame(f)
     ttk.Checkbutton(g1, command=disable_enable_button, variable=check_value).pack(side=tk.LEFT)
     text = tk.Text(g1, width=len(hyperlinkPattern.sub(r'\g<title>', message)),

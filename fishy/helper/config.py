@@ -5,6 +5,7 @@ Saves configuration in file as json file
 import json
 import logging
 import os
+from subprocess import run
 # path to save the configuration file
 from typing import Optional
 
@@ -15,15 +16,22 @@ from fishy.osservices.os_services import os_services
 
 def filename():
     name = "fishy_config.json"
-    _filename = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"], "Documents", name)
+    if "HOME" in os.environ:
+        _filename = os.path.join(os.environ["HOME"], "Documents", name)
+    else:
+        # fallback for systems without 'HOME' variable
+        _filename = os.path.join(os.path.expanduser("/root/"), "Documents", name)
+        
     if os.path.exists(_filename):
         return _filename
-
+    
     # fallback for onedrive documents
     return os.path.join(os_services.get_documents_path(), name)
 
-
-temp_file = os.path.join(os.environ["TEMP"], "fishy_config.BAK")
+try:
+    temp_file = os.path.join(os.environ["TEMP"], "fishy_config.BAK")
+except KeyError:
+    temp_file = os.path.join(os.getenv("TMPDIR", "/tmp"), "fishy_config.BAK")
 
 
 class Config:
@@ -72,6 +80,7 @@ class Config:
         logging.debug("config stopped")
 
     def _create_backup(self):
+        chmod = run(['sudo', 'chmod', '+w', '/tmp'])
         with open(temp_file, 'w') as f:
             f.write(json.dumps(self._config_dict))
         logging.debug("created backup")
