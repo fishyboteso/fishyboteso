@@ -7,6 +7,8 @@ import logging
 import os
 # path to save the configuration file
 from typing import Optional
+import sys
+
 
 from event_scheduler import EventScheduler
 
@@ -14,12 +16,18 @@ from fishy.osservices.os_services import os_services
 
 
 def filename():
-    name = "fishy_config.json"
+
+    if "--test-server" in sys.argv:
+        name = "fishy_config_test.json"
+    else:
+        name = "fishy_config.json"
+
     _filename = os.path.join(os.environ["HOMEDRIVE"], os.environ["HOMEPATH"], "Documents", name)
+
     if os.path.exists(_filename):
         return _filename
 
-    # fallback for onedrive documents
+    # fallback for OneDrive documents
     return os.path.join(os_services.get_documents_path(), name)
 
 
