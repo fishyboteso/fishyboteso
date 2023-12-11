@@ -120,9 +120,9 @@ class FullAuto(IEngine):
 
         walking_time = dist / self.calibrator.move_factor
         logging.debug(f"walking for {walking_time}")
-        kb.press('w')
+        kb.press(config.get("forward_key"))
         time.sleep(walking_time)
-        kb.release('w')
+        kb.release(config.get("forward_key"))
         logging.debug("done")
         # todo: maybe check if it reached the destination before returning true?
         return True

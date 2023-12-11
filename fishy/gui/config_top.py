@@ -13,10 +13,19 @@ from fishy.helper.config import config
 from fishy.helper.popup import PopUp
 
 
-def start_fullfisher_config(gui: 'GUI'):
-    top = PopUp(helper.empty_function, gui._root, background=gui._root["background"])
+def del_entry_key(event):
+    event.widget.delete(0, "end")
+    event.widget.insert(0, str(event.char))
+
+
+def start_fullfisher_config(gui: 'GUI' ):
+    def save():
+        gui.config.set("forward_key", forward_key_entry.get())
+
+    top = PopUp(save, gui._root, background=gui._root["background"])
     controls_frame = ttk.Frame(top)
     top.title("Config")
+
 
     def file_name():
         file = config.get("full_auto_rec_file", None)
@@ -60,6 +69,14 @@ def start_fullfisher_config(gui: 'GUI'):
     ttk.Radiobutton(controls_frame, text="Player", variable=mode_var, value=FullAutoMode.Player.value, command=mode_command).grid(row=row, column=1, sticky="w", pady=(5, 0))
     row += 1
     ttk.Radiobutton(controls_frame, text="Recorder", variable=mode_var, value=FullAutoMode.Recorder.value, command=mode_command).grid(row=2, column=1, sticky="w")
+
+    row += 1
+
+    ttk.Label(controls_frame, text="Forward key:").grid(row=row, column=0)
+    forward_key_entry = ttk.Entry(controls_frame, justify=tk.CENTER)
+    forward_key_entry.grid(row=row, column=1)
+    forward_key_entry.insert(0, config.get("forward_key", "w"))
+    forward_key_entry.bind("<KeyRelease>", del_entry_key)
 
     row += 1
 
@@ -111,9 +128,7 @@ def start_semifisher_config(gui: 'GUI'):
             if web.sub():
                 gui._notify.set(1)
 
-    def del_entry_key(event):
-        event.widget.delete(0, "end")
-        event.widget.insert(0, str(event.char))
+    
 
     top = PopUp(save, gui._root, background=gui._root["background"])
     controls_frame = ttk.Frame(top)
@@ -130,7 +145,7 @@ def start_semifisher_config(gui: 'GUI'):
         gui._notify_check['state'] = tk.NORMAL
         gui._notify.set(is_subbed[0])
 
-    ttk.Label(controls_frame, text="Action Key:").grid(row=1, column=0)
+    ttk.Label(controls_frame, text="action Key:").grid(row=1, column=0)
     action_key_entry = ttk.Entry(controls_frame, justify=tk.CENTER)
     action_key_entry.grid(row=1, column=1)
     action_key_entry.insert(0, config.get("action_key", "e"))
@@ -160,4 +175,5 @@ if __name__ == '__main__':
     from fishy.gui import GUI
     gui = GUI(lambda: IEngineHandler())
     gui.call_in_thread(lambda: start_semifisher_config(gui))
+    gui.call_in_thread(lambda: start_fullfisher_config(gui))
     gui.create()

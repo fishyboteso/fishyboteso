@@ -63,9 +63,9 @@ class Calibrator(IMode):
 
         x1, y1, rot1 = coords
 
-        kb.press('w')
+        kb.press(config.get("forward_key"))
         time.sleep(walking_time)
-        kb.release('w')
+        kb.release(config.get("forward_key"))
         time.sleep(0.5)
 
         coords = self.engine.get_coords()
