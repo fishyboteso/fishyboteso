@@ -7,7 +7,6 @@ pypiwin32 ; platform_system=="Windows"
 winshell ; platform_system=="Windows"
 ttkthemes
 requests
-beautifulsoup4
 whatsmyip
 pynput
 keyboard

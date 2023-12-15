@@ -6,14 +6,8 @@ import logging
 import re
 import subprocess
 import sys
-import urllib.request
 from os import execl
-
-from bs4 import BeautifulSoup
-
-
-def _hr_version(v):
-    return '.'.join([str(x) for x in v])
+from fishy.web import web
 
 
 def _normalize_version(v):
@@ -38,46 +32,16 @@ def _normalize_version(v):
     return rv
 
 
-def _get_highest_version(_index, _pkg):
-    """
-    Crawls web for latest version name then returns latest version
-    :param _index: website to check
-    :param _pkg: package name
-    :return: latest version normalized
-    """
-    url = "{}/{}/".format(_index, _pkg)
-    html = urllib.request.urlopen(url)
-    if html.getcode() != 200:
-        raise Exception  # not found
-    soup = BeautifulSoup(html.read(), "html.parser")
-    _versions = []
-    for link in soup.find_all('a'):
-        text = link.get_text()
-        try:
-            version = re.search(_pkg + r'-(.*)\.tar\.gz', text).group(1)
-            _versions.append(_normalize_version(version))
-        except AttributeError:
-            pass
-    if len(_versions) == 0:
-        raise Exception  # no version
-    return max(_versions)
-
-
 def _get_current_version():
     """
     Gets the current version of the package installed
-    :return: version normalized
     """
     import fishy
-    return _normalize_version(fishy.__version__)
-
-
-index = "https://pypi.python.org/simple"
-pkg = "fishy"
+    return fishy.__version__
 
 
 def versions():
-    return _hr_version(_get_current_version()), _hr_version(_get_highest_version(index, pkg))
+    return _get_current_version(), web.get_highest_version()
 
 
 def upgrade_avail():
@@ -85,14 +49,18 @@ def upgrade_avail():
     Checks if update is available
     :return: boolean
     """
-    return _get_current_version() < _get_highest_version(index, pkg)
+
+    highest_version_normalized = _normalize_version(web.get_highest_version())
+    current_version_normalized = _normalize_version(_get_current_version())
+
+    return current_version_normalized < highest_version_normalized
 
 
 def update_now(version):
     """
-    public function,
-    compares current version with the latest version (from web),
-    if current version is older, then it updates and restarts the script
+    calling this function updates fishy,
+    should be the last thing to be executed as this function will restart fishy
+    the flaw is handed by `EngineEventHandler.update_flag` which is the last thing to be stopped
     """
     logging.info(f"Updating to v{version}, Please Wait...")
     subprocess.call(["python", '-m', 'pip', 'install', '--upgrade', 'fishy', '--user'])

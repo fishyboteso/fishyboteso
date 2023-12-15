@@ -1,6 +1,7 @@
 import logging
 
 import requests
+from fishy import constants
 from whatsmyip.ip import get_ip
 from whatsmyip.providers import GoogleDnsProvider
 
@@ -182,3 +183,9 @@ def ping():
     body = {"uid": config.get("uid"), "apiversion": apiversion}
     response = requests.post(urls.ping, json=body)
     logging.debug(f"ping response: {response.json()}")
+
+
+@fallback(None)
+def get_highest_version():
+    response = requests.get(constants.current_version_url)
+    return response.content.decode()

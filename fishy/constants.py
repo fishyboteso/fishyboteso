@@ -1,5 +1,7 @@
 apiversion = 2
 
+current_version_url = "https://raw.githubusercontent.com/fishyboteso/fishyboteso/main/fishy/version.txt"
+
 # removed since 0.5.3
 chalutier = ("Chalutier", "https://cdn.esoui.com/downloads/file2934/Chalutier_1.3.zip", 130)
 
