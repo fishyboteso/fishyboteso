@@ -145,7 +145,7 @@ def start_semifisher_config(gui: 'GUI'):
         gui._notify_check['state'] = tk.NORMAL
         gui._notify.set(is_subbed[0])
 
-    ttk.Label(controls_frame, text="action Key:").grid(row=1, column=0)
+    ttk.Label(controls_frame, text="Action Key:").grid(row=1, column=0)
     action_key_entry = ttk.Entry(controls_frame, justify=tk.CENTER)
     action_key_entry.grid(row=1, column=1)
     action_key_entry.insert(0, config.get("action_key", "e"))
