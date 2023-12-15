@@ -185,7 +185,7 @@ def ping():
     logging.debug(f"ping response: {response.json()}")
 
 
-@fallback(None)
+@fallback("0.5.21")
 def get_highest_version():
     response = requests.get(constants.current_version_url)
     return response.content.decode()
