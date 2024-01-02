@@ -19,7 +19,7 @@ jobs:
         fetch-depth: 0  # OR "2" -> To retrieve the preceding commit.
     - name: Get changed files in the docs folder
       id: changed-files-specific
-      uses: tj-actions/changed-files@v35
+      uses: tj-actions/changed-files@v41
       with:
         files: fishy/version.txt  # Alternatively using: `docs/**` or `docs`
 
