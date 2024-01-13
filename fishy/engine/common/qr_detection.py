@@ -53,12 +53,25 @@ def _get_values_from_image(img):
     return _parse_qr_code(code)
 
 
-# this needs to be updated each time qr code format is changed
+def _brute_cast(value):
+    try:
+        return int(value)
+    except ValueError:
+        try:
+            return float(value)
+        except ValueError:
+            return None
+
+
 def _parse_qr_code(code):
     if not code:
         return None
-    match = re.match(r'^(-?\d+\.\d+),(-?\d+\.\d+),(-?\d+),(\d+)$', code)
-    if not match:
+    strings = code.split(",")
+    # this needs to be updated if qr code contains additional data
+    values = [_brute_cast(value) for value in strings][0:4]
+    
+    if None in values
         logging.warning(f"qr code is not what was expected {code}")
         return None
-    return [float(match.group(1)), float(match.group(2)), int(match.group(3)), int(match.group(4))]
+
+    return values
