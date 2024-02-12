@@ -94,11 +94,25 @@ class D3DShot(IScreenShot):
     def grab(self) -> ndarray:
         return self.d3.screenshot()
 
-
-LIBS = [MSS, PyAutoGUI, D3DShot]
-
+LIBS = [PyAutoGUI, MSS, D3DShot]
 
 def create() -> IScreenShot:
-    lib = LIBS[config.get("sslib", 0)]
-    logging.debug(f"Using {lib.__name__} screenshot lib")
-    return lib()
+    # Attempt to use D3DShot if performance is critical and it's specified in the config
+    preferred_lib = config.get("sslib", None)
+    if preferred_lib == "d3dshot":
+        logging.debug("Attempting to use D3DShot (fast) as the screenshot library...")
+        d3dshot_instance = D3DShot()
+        if d3dshot_instance.setup():
+            return d3dshot_instance
+        else:
+            logging.warning("D3DShot setup failed. Falling back to default method...")
+
+    # Default to PyAutoGUI if D3DShot is not explicitly chosen or fails to set up
+    for lib in LIBS:
+        lib_instance = lib()
+        if lib_instance.setup():
+            logging.debug(f"Using {lib.__name__} as the screenshot library.")
+            return lib_instance
+
+    logging.error("No suitable screenshot library found. Please check your configuration.")
+    raise Exception("Failed to initialize a screenshot library.")
