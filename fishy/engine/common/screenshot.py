@@ -1,5 +1,6 @@
 import logging
 import subprocess
+import traceback
 from abc import ABC, abstractmethod
 from functools import partial
 from typing import Optional
@@ -98,7 +99,24 @@ class D3DShot(IScreenShot):
 LIBS = [PyAutoGUI, MSS, D3DShot]
 
 
-def create() -> IScreenShot:
-    lib = LIBS[config.get("sslib", 0)]
-    logging.debug(f"Using {lib.__name__} screenshot lib")
-    return lib()
+# noinspection PyBroadException
+def create() -> Optional[IScreenShot]:
+    # Initialize a variable to hold the preferred library index
+    preferred_lib_index = config.get("sslib", 0)
+    # Create a list of library indices to try, starting with the preferred one
+    lib_indices = [preferred_lib_index] + [i for i in range(len(LIBS)) if i != preferred_lib_index]
+
+    for index in lib_indices:
+        lib = LIBS[index]
+        try:
+            lib_instance = lib()
+            if lib_instance.setup():
+                # testing grab once
+                ss = lib_instance.grab()
+                if ss.shape:
+                    logging.debug(f"Using {lib.__name__} as the screenshot library.")
+                    return lib_instance
+        except Exception:
+            logging.warning(f"Setup failed for {lib.__name__} with error: {traceback.format_exc()}. Trying next library...")
+
+    return None

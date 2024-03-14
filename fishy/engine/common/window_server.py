@@ -42,13 +42,14 @@ def init():
         WindowServer.status = Status.CRASHED
         return
 
-    WindowServer.status = Status.RUNNING
-    WindowServer.crop = os_services.get_game_window_rect()
-
-    if WindowServer.crop is None or not WindowServer.sslib.setup():
+    crop = os_services.get_game_window_rect()
+    if crop is None or not WindowServer.sslib.setup():
         logging.error("Game window not found by window_server")
         WindowServer.status = Status.CRASHED
         return
+
+    WindowServer.crop = crop
+    WindowServer.status = Status.RUNNING
 
 
 def get_cropped_screenshot():
